@@ -7,6 +7,8 @@ import ThinkForgePage from "./pages/ThinkForgePage";
 import ViorMartPage from "./pages/ViorMartPage";
 import ViorXPage from "./pages/ViorXPage";
 import AboutPage from "./pages/AboutPage";
+import ScholarPage from "./pages/ScholarPage";
+import ContactPage from "./pages/ContactPage";
 
 const App = () => {
   return (
@@ -19,6 +21,8 @@ const App = () => {
         <Route path="/viormart" element={<ViorMartPage />} />
         <Route path="/viorx" element={<ViorXPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/scholar" element={<ScholarPage />} />
+        <Route path="/contact" element={<ContactPage />} />
       </Routes>
 
       <ButtonGradient />

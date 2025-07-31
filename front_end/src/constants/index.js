@@ -44,38 +44,33 @@ export const navigation = [
   },
   {
     id: "1",
-    title: "Blog",
-    url: "/blog",
-  },
-  {
-    id: "2",
-    title: "Archive",
-    url: "/archive",
-  },
-  {
-    id: "3",
-    title: "ThinkForge",
-    url: "/thinkforge",
-  },
-  {
-    id: "4",
-    title: "ViorMart",
-    url: "/viormart",
-  },
-  {
-    id: "5",
-    title: "Vior X",
-    url: "/viorx",
-  },
-  {
-    id: "6",
     title: "About",
     url: "/about",
   },
   {
-    id: "7",
+    id: "2",
+    title: "E-Learning",
+    url: "/thinkforge",
+  },
+  {
+    id: "3",
+    title: "Projects",
+    url: "/viorx",
+  },
+  {
+    id: "4",
+    title: "Shop",
+    url: "/viormart",
+  },
+  {
+    id: "5",
+    title: "Scholar",
+    url: "/scholar",
+  },
+  {
+    id: "6",
     title: "Contact",
-    url: "/#contact",
+    url: "/contact",
   },
 ];
 

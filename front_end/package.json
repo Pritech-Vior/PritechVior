@@ -1,7 +1,9 @@
 {
-  "name": "brainwave",
-  "private": true,
-  "version": "0.0.0",
+  "name": "pritechvior-frontend",
+  "private": false,
+  "version": "1.0.0",
+  "description": "PRITECH VIOR - Empowering Africa Through Technology Innovation. Frontend application for Tanzania's leading IT innovation company.",
+  "homepage": "https://pritechvior.co.tz",
   "type": "module",
   "scripts": {
     "dev": "vite",

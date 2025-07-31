@@ -1,0 +1,41 @@
+User-agent: *
+Allow: /
+
+# Important pages for sitelinks
+Allow: /about
+Allow: /projects
+Allow: /elearning
+Allow: /shop
+Allow: /scholar
+Allow: /contact
+
+# Allow search engines to crawl API endpoints for content
+Allow: /api/public/
+
+# Block admin areas and private content
+Disallow: /admin/private/
+Disallow: /api/private/
+Disallow: /dashboard/private/
+Disallow: /user/private/
+
+# Block temporary or development files
+Disallow: /temp/
+Disallow: /dev/
+Disallow: /*.tmp$
+Disallow: /*.log$
+
+# Allow access to static assets
+Allow: /assets/
+Allow: /images/
+Allow: /css/
+Allow: /js/
+
+# Sitemap location
+Sitemap: https://pritechvior.co.tz/sitemap.xml
+
+# Crawl delay to be respectful
+Crawl-delay: 1
+
+# Block specific bots if needed (uncomment if required)
+# User-agent: BadBot
+# Disallow: /
