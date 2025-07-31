@@ -6,6 +6,7 @@ import ArchivePage from "./pages/ArchivePage";
 import ThinkForgePage from "./pages/ThinkForgePage";
 import ViorMartPage from "./pages/ViorMartPage";
 import ViorXPage from "./pages/ViorXPage";
+import AboutPage from "./pages/AboutPage";
 
 const App = () => {
   return (
@@ -17,6 +18,7 @@ const App = () => {
         <Route path="/thinkforge" element={<ThinkForgePage />} />
         <Route path="/viormart" element={<ViorMartPage />} />
         <Route path="/viorx" element={<ViorXPage />} />
+        <Route path="/about" element={<AboutPage />} />
       </Routes>
 
       <ButtonGradient />
