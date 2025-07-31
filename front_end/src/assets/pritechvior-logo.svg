@@ -1,0 +1,23 @@
+<svg width="190" height="40" viewBox="0 0 190 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#06B6D4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#10B981;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Icon/Symbol -->
+  <circle cx="20" cy="20" r="18" fill="url(#gradient)" opacity="0.2"/>
+  <circle cx="20" cy="20" r="12" fill="url(#gradient)"/>
+  <path d="M16 16l8 8M24 16l-8 8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="20" cy="20" r="2" fill="white"/>
+  
+  <!-- Text -->
+  <text x="45" y="16" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="url(#gradient)">PRITECH</text>
+  <text x="45" y="30" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="url(#gradient)">VIOR</text>
+  
+  <!-- Tagline -->
+  <text x="120" y="20" font-family="Arial, sans-serif" font-size="8" fill="#6B7280">IT Innovation & Solutions</text>
+  <text x="120" y="30" font-family="Arial, sans-serif" font-size="8" fill="#6B7280">Tanzania</text>
+</svg>
