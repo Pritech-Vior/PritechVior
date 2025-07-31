@@ -1,5 +1,6 @@
 import React from "react";
 import { Users, Target, Eye, Heart, Building, User, Briefcase, DollarSign, Code, ShoppingBag, GraduationCap, HeadphonesIcon } from "lucide-react";
+import { check } from "../assets";
 import Section from "../components/Section";
 import Heading from "../components/Heading";
 import Button from "../components/Button";
@@ -295,111 +296,163 @@ const AboutPage = () => {
           </div>
 
           {/* Organizational Structure */}
-          <div className="mb-20">
-            <h2 className="text-3xl font-bold text-n-1 text-center mb-12">
+          <div className="mb-16">
+            <h2 className="text-2xl font-bold text-n-1 text-center mb-8">
               PRITECH VIOR Organizational Structure
             </h2>
             
-            <div className="bg-n-8 rounded-3xl p-6 lg:p-8 border border-n-6 overflow-x-auto">
+            <div className="bg-n-8 rounded-2xl p-4 border border-n-6 overflow-x-auto relative">
               {/* CEO Level */}
-              <div className="flex justify-center mb-16">
-                <OrganizationNode
-                  icon={<User className="w-6 h-6 text-white" />}
-                  title="CEO / Founder"
-                  subtitle="Oversees vision, mission & operations"
-                  level={0}
-                >
-                  {/* Management Level */}
-                  <OrganizationNode
-                    icon={<Briefcase className="w-4 h-4 text-white" />}
-                    title="Operations Manager"
-                    subtitle="Day-to-day coordination"
-                    level={1}
-                  >
-                    <OrganizationNode
-                      icon={<Users className="w-3 h-3 text-white" />}
-                      title="Project Manager"
-                      subtitle="Student project officers"
-                      level={2}
-                    />
-                  </OrganizationNode>
-                  
-                  <OrganizationNode
-                    icon={<Code className="w-4 h-4 text-white" />}
-                    title="Technical Director"
-                    subtitle="Software & systems lead"
-                    level={1}
-                  >
-                    <OrganizationNode
-                      icon={<Code className="w-3 h-3 text-white" />}
-                      title="Software Engineers"
-                      subtitle="System & app developers"
-                      level={2}
-                    />
-                  </OrganizationNode>
-                  
-                  <OrganizationNode
-                    icon={<Target className="w-4 h-4 text-white" />}
-                    title="Business Dev. Lead"
-                    subtitle="Partnerships & marketing"
-                    level={1}
-                  >
-                    <OrganizationNode
-                      icon={<Target className="w-3 h-3 text-white" />}
-                      title="Marketing Team"
-                      subtitle="UI/UX & branding"
-                      level={2}
-                    />
-                  </OrganizationNode>
-                  
-                  <OrganizationNode
-                    icon={<DollarSign className="w-4 h-4 text-white" />}
-                    title="Finance & Admin Lead"
-                    subtitle="Treasury & procurement"
-                    level={1}
-                  >
-                    <OrganizationNode
-                      icon={<DollarSign className="w-3 h-3 text-white" />}
-                      title="Treasury Officer"
-                      subtitle="Procurement officer"
-                      level={2}
-                    />
-                  </OrganizationNode>
-                </OrganizationNode>
+              <div className="flex justify-center mb-4">
+                <div className="bg-n-6 border-2 border-color-1 rounded-xl p-3 w-48 text-center">
+                  <div className="flex flex-col items-center gap-1">
+                    <User className="w-5 h-5 text-color-1" />
+                    <div>
+                      <h3 className="font-bold text-white text-xs mb-0.5">CEO / Founder</h3>
+                      <p className="text-n-3 text-[10px]">Oversees vision, mission & operations</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Special Divisions */}
-              <div className="border-t-2 border-color-1 pt-12">
-                <h3 className="text-xl font-bold text-color-1 text-center mb-8">Special Divisions / Units</h3>
-                <div className="flex justify-center gap-6 lg:gap-8 flex-wrap">
-                  <OrganizationNode
-                    icon={<GraduationCap className="w-4 h-4 text-white" />}
-                    title="E-Learning Unit"
-                    subtitle="Education platform"
-                    level={2}
-                    isSpecial={true}
-                  />
-                  <OrganizationNode
-                    icon={<ShoppingBag className="w-4 h-4 text-white" />}
-                    title="PritechShop"
-                    subtitle="E-commerce platform"
-                    level={2}
-                    isSpecial={true}
-                  />
-                  <OrganizationNode
-                    icon={<GraduationCap className="w-4 h-4 text-white" />}
-                    title="ViorScholar"
-                    subtitle="Academic resources"
-                    level={2}
-                    isSpecial={true}
-                  />
-                  <OrganizationNode
-                    icon={<HeadphonesIcon className="w-4 h-4 text-white" />}
-                    title="Customer Support"
-                    subtitle="Support services"
-                    level={2}
-                    isSpecial={true}
-                  />
+              {/* Management Level */}
+              <div className="mb-4">
+                <div className="flex justify-center gap-3 flex-wrap">
+                  <div className="bg-n-7 border border-n-6 rounded-xl p-2 w-36 text-center hover:border-color-1 transition-all">
+                    <div className="flex flex-col items-center gap-1">
+                      <Briefcase className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">Operations Manager</h4>
+                        <p className="text-n-3 text-[9px]">Day-to-day coordination</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-n-7 border border-n-6 rounded-xl p-2 w-36 text-center hover:border-color-1 transition-all">
+                    <div className="flex flex-col items-center gap-1">
+                      <Code className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">Technical Director</h4>
+                        <p className="text-n-3 text-[9px]">Software & systems lead</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-n-7 border border-n-6 rounded-xl p-2 w-36 text-center hover:border-color-1 transition-all">
+                    <div className="flex flex-col items-center gap-1">
+                      <Target className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">Business Dev. Lead</h4>
+                        <p className="text-n-3 text-[9px]">Partnerships & marketing</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-n-7 border border-n-6 rounded-xl p-2 w-36 text-center hover:border-color-1 transition-all">
+                    <div className="flex flex-col items-center gap-1">
+                      <DollarSign className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">Finance & Admin Lead</h4>
+                        <p className="text-n-3 text-[9px]">Treasury & procurement</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Department Level */}
+              <div className="mb-4">
+                <div className="flex justify-center gap-3 flex-wrap">
+                  <div className="bg-n-7 border border-n-6 rounded-xl p-2 w-32 text-center hover:border-color-1 transition-all">
+                    <div className="flex flex-col items-center gap-1">
+                      <Users className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">Project Manager</h4>
+                        <p className="text-n-3 text-[8px]">Student project officers</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-n-7 border border-n-6 rounded-xl p-2 w-32 text-center hover:border-color-1 transition-all">
+                    <div className="flex flex-col items-center gap-1">
+                      <Code className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">Software Engineers</h4>
+                        <p className="text-n-3 text-[8px]">System & app developers</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-n-7 border border-n-6 rounded-xl p-2 w-32 text-center hover:border-color-1 transition-all">
+                    <div className="flex flex-col items-center gap-1">
+                      <Target className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">Marketing Team</h4>
+                        <p className="text-n-3 text-[8px]">UI/UX & branding</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-n-7 border border-n-6 rounded-xl p-2 w-32 text-center hover:border-color-1 transition-all">
+                    <div className="flex flex-col items-center gap-1">
+                      <DollarSign className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">Treasury Officer</h4>
+                        <p className="text-n-3 text-[8px]">Procurement officer</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Special Divisions - Connected separately */}
+              <div className="border-t-2 border-color-1 pt-3">
+                <h3 className="text-sm font-bold text-color-1 text-center mb-3">Special Divisions / Units</h3>
+                
+                <div className="flex justify-center gap-3 flex-wrap">
+                  <div className="bg-n-6 border-2 border-color-1 rounded-xl p-2 w-32 text-center hover:shadow-lg transition-all relative">
+                    <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-color-1 rounded-bl-lg"></div>
+                    <div className="flex flex-col items-center gap-1">
+                      <GraduationCap className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">E-Learning Unit</h4>
+                        <p className="text-n-3 text-[8px]">Education platform</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-n-6 border-2 border-color-1 rounded-xl p-2 w-32 text-center hover:shadow-lg transition-all relative">
+                    <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-color-1 rounded-bl-lg"></div>
+                    <div className="flex flex-col items-center gap-1">
+                      <ShoppingBag className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">PritechShop</h4>
+                        <p className="text-n-3 text-[8px]">E-commerce platform</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-n-6 border-2 border-color-1 rounded-xl p-2 w-32 text-center hover:shadow-lg transition-all relative">
+                    <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-color-1 rounded-bl-lg"></div>
+                    <div className="flex flex-col items-center gap-1">
+                      <GraduationCap className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">ViorScholar</h4>
+                        <p className="text-n-3 text-[8px]">Academic resources</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-n-6 border-2 border-color-1 rounded-xl p-2 w-32 text-center hover:shadow-lg transition-all relative">
+                    <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-color-1 rounded-bl-lg"></div>
+                    <div className="flex flex-col items-center gap-1">
+                      <HeadphonesIcon className="w-3 h-3 text-color-1" />
+                      <div>
+                        <h4 className="font-bold text-white text-[10px] mb-0.5">Customer Support</h4>
+                        <p className="text-n-3 text-[8px]">Support services</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
