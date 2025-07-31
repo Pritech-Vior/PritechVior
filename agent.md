@@ -1,228 +1,234 @@
-🔖 agent.md — PRITECH VIOR Enterprise System Specification
+System Specification
 🧾 Summary
-PRITECH VIOR is an IT innovation and project solution provider based in Tanzania, offering:
+PRITECH VIOR is a Tanzanian-based IT innovation and solution provider offering:
 
-Project design and implementation (students & enterprise clients)
+🛠️ Project design & implementation (students & enterprises)
 
-A full-featured digital system shop (software + physical products)
+🛍️ A digital shop (physical + digital products) with POS
 
-E-learning platform with local/international course offerings
+🎓 E-learning platform with global course access
 
-Internal real-time collaboration (chat, project teams)
+💬 Internal real-time collaboration tools
 
-A full Application Software Archive
+💾 Application Software Archive
 
-USSD-based AzamPay payment integration
+💳 USSD-based AzamPay payment integration
 
-Point of Sale (POS) for in-office & field sales
+🧾 Financial & treasury management
 
-Multi-role access control based on a real company structure
+⚙️ Microservices-based modular system
 
-Fully deployable on cPanel with MySQL, using microservices
+🧑‍💼 Role-based access aligned with company structure
+
+☁️ Fully deployable on cPanel with MySQL
+
+📱 Mobile-first PWA with full responsiveness
 
 🧱 Architecture & Tech Stack
 Layer	Technology
-Frontend	React (SPA via Vite), TailwindCSS, Neumorphic UI, Framer Motion
-Backend	Django (REST Framework), Django Channels, Microservice-based
-Database	MySQL (cPanel hosted), using Django ORM migrations
-Auth	Custom User Model, Role-Based Access
-Real-Time	Django Channels + Redis (WebSockets for chat, notifications)
-Payments	AzamPay API (USSD + Webhooks)
-Deployment	cPanel (WSGI for Python app, public_html for frontend)
+Frontend	React (SPA via Vite), TailwindCSS, Framer Motion, Three.js, Neumorphic UI
+Backend	Django + Django REST Framework, Django Channels (WebSocket)
+Database	MySQL (cPanel hosted), Django ORM (migration-based)
+Auth	Custom user model with Role-Based Access Control
+Real-Time	Django Channels + Redis for chat/notifications
+Payments	AzamPay API (USSD & webhook-based)
+PWA	Full support: manifest.json, service workers, offline caching
+Deployment	cPanel (Python 3.11.13 via WSGI), React frontend via public_html
 
 🧑‍💼 User Roles
-Role	Permissions
-Admin	Full system control
-Project Manager	Manages both student & enterprise projects
-Developer	Manages systems and internal software tools
-Designer	Uploads designs and visuals
-Treasury	Handles financial reporting and payment integration
-Sales/Marketing	Shop listings, promotions, SEO
-Customer Support	Ticket & chat support for all users
-Instructor	Manages e-learning content, courses, and learners
-Student	Access to projects, e-learning, and shop
-Client	Company/enterprise clients for project requests
-Learner	Participates in e-learning only
-Guest	Browse public content only
+Role	Description
+Admin	Full access to all modules
+Project Manager	Manages student & enterprise projects
+Developer	Manages internal tools and uploads software
+Designer	Manages design assets and visuals
+Treasury	Handles financials, transactions, reports
+Sales/Marketing	Product listings, SEO, and promotions
+Customer Support	Responds to user issues, manages support tickets
+Instructor	Creates and manages courses, quizzes
+Student	Access to e-learning and student projects
+Client	Enterprise project requester
+Learner	Limited e-learning access
+Guest	Browses public pages only
 
-📦 Modules Overview
+📦 System Modules
 1. 🎓 E-Learning
-Instructor dashboard for course creation
+Instructor dashboard
 
-Lesson upload (YouTube, Vimeo, or direct upload)
+Upload lessons (YouTube, Vimeo, or direct)
 
-Quizzes: Auto/manual grading
-
-Learner profile with progress tracking
-
-Course search by topic, category
+Quizzes with auto/manual grading
 
 Certificate generation (PDF)
 
-Payment lock/unlock (via AzamPay)
+Learner progress tracking
+
+AzamPay-based payment lock/unlock
 
 2. 💡 Project Management
-Projects categorized as:
+Student & Enterprise projects
 
-Student Projects (final year, mini projects)
+Upload briefs, ZIPs, source code, screenshots
 
-Enterprise Projects (internal or client-commissioned)
+Version control and status updates
 
-Student uploads via form (brief, code, ZIP, images)
+Approval flow
 
-Admin/PM approval flow
+Download access (free or paid)
 
-Download access post-payment or free
+3. 🛍️ Shop & POS
+A. POS
+React-based in-office terminal
 
-Versioning & status tracking
+Barcode scanning, receipt printing
 
-3. 🛍️ System Shop & POS
-A. 🔄 POS Integration
-For in-office & kiosk sales (React-based POS frontend)
+Offline-first sync (localStorage + server)
 
-Staff login, barcode scanning, receipt printing
+B. Product Types
+Tanzanian local goods
 
-Inventory sync with product module
+Amazon/AliExpress affiliate items
 
-Offline-first (localStorage + sync queue)
-
-B. 🛒 Multi-Type Products
-Tanzanian local goods (e.g., electronics, crafts)
-
-Imported items from Amazon, AliExpress (with affiliate/reseller tracking)
-
-Office inventory (in-house equipment or software tools)
-
-Digital and physical product support
+Office tools (hardware/software)
 
 C. Shop Features
-Product details (price, brand, condition, shipping)
-
-Cart + checkout flow
-
-AzamPay payment support (USSD prompt + confirmation)
+Cart, checkout, AzamPay USSD
 
 Order management (Sales → Treasury → Delivery)
 
-Invoice generation (PDF)
+Invoice PDF, reviews & ratings
 
-Reviews & ratings
+4. 💾 Application Software Archive
+Public + internal ZIP/PDF downloads
 
-4. 🧑‍💻 Application Software Archive
-Internal & public downloadable tools (ZIP, PDF)
+Usage stats, license info
 
-Categorized (POS, HR, Inventory, etc.)
-
-Uploaded by Developers
-
-Usage stats & download count
-
-Licensing information
+Tagged by category (POS, HR, etc.)
 
 5. 💬 Real-Time Communication
-User ↔ User chat (e.g., Dev ↔ Designer)
+Direct & group chat
 
-Team group chat (e.g., Project group)
+Project teams & role-based rooms
 
-Push notifications for:
+Live push notifications (projects, shop, courses)
 
-New orders
+6. 🧾 Treasury
+Full transaction logging
 
-Project updates
+Income/expense dashboards
 
-Course announcements
+Manual entries + exports (PDF/CSV)
 
-Powered by Django Channels + WebSocket
-
-Notification model tied to all key entities
-
-6. 🧾 Treasury Management
-View all transactions (AzamPay + manual)
-
-Dashboard for income/expense stats
-
-Exportable financial reports
-
-Transaction-to-user mapping
-
-Manual record entry (offline payments)
+AzamPay sync
 
 7. 📚 Static Content & Blog
-Home, About, Contact, Services
+Pages: Home, About, Services, Contact
 
-Blog/news section (optional)
+Blog/news system
 
-Support FAQs (student/client/project)
+FAQ & help center
 
-💳 AzamPay USSD Integration
-Endpoint	Purpose
-/api/initiate-payment/	Starts USSD flow for checkout
-/api/azam-callback/	Webhook to confirm payment
-/api/transaction-log/	Logs for treasury & reporting
+💳 AzamPay Integration
+Endpoint	Description
+/api/initiate-payment/	Starts USSD prompt
+/api/azam-callback/	Verifies payment via webhook
+/api/transaction-log/	Logs payment info
 
-Mapped to Order, CourseAccess, or ProjectDownload.
+Mapped to: Order, CourseAccess, ProjectDownload.
 
 🗃️ Database & Seeding
-MySQL (hosted via cPanel)
+Django ORM (MySQL, migration-based)
 
-Managed via Django ORM
-
-makemigrations + migrate
-
-Initial seed command:
+Initial command:
 
 bash
 Copy
 Edit
 python manage.py seed_data
-Includes:
+Seeds:
 
-Roles
+User roles
+
+Sample projects, courses, products
 
 Default admin user
 
-Sample projects, products, and courses
-
-🔗 Microservices Architecture (By Function)
-Service	Tech/Notes
-Auth Service	Django App + JWT session/token auth
-Project Service	Separate Django app handling projects
-Shop Service	Product, POS, and order logic
-E-learning Service	Manages courses and content
-Chat Service	Channels + Redis
-Payment Service	AzamPay interaction logic
-Archive Service	Manages downloadable software tools
-
-Each Django app has its own models, views, serializers, URLs — bound together via a central router.
+🔗 Microservices (Django Apps)
+Service	Description
+Auth	JWT, sessions, permissions
+Project	All project-related logic
+Shop	Products, orders, POS
+E-Learning	Courses, quizzes, certificates
+Chat	Real-time comms (WebSockets)
+Payment	AzamPay API handlers
+Archive	Software download archive
 
 🛠 Deployment (cPanel)
-Backend (Django)
-Upload ZIP or clone via Git
+Backend
+Upload zipped Django app or pull via Git
 
-Use Python App (3.11.13) in cPanel
+Use Python 3.11.13 App in cPanel
 
-Install required packages (requirements.txt)
+Install packages with requirements.txt
 
-Configure WSGI & static/media files
+Configure WSGI, static, and media paths
 
-Link MySQL via settings.py
+Connect MySQL in settings.py
 
-Frontend (React SPA)
-Build: npm run build
+Frontend
+Build:
 
+bash
+Copy
+Edit
+npm run build
 Upload dist/ to public_html/
 
-Use .htaccess to redirect to index.html (SPA fallback)
+.htaccess for SPA fallback
 
-✅ Deliverables to Developer
-You can now give this entire spec to any developer to:
+Include:
 
-Build backend microservices (Django apps)
+manifest.json
 
-Connect MySQL via XAMPP for dev or cPanel live
+service-worker.js
 
-Integrate AzamPay payment flow
+Offline support & add-to-home functionality (PWA)
 
-Build React SPA frontend with neumorphic style
+🧠 Main Landing Page — Horizontal 3D Storytelling
+Concept
+A horizontal scroll-based PWA experience like walking through a virtual IT agency. Each "room" reveals a module.
 
-Deploy on cPanel using Python 3.11.13
+Section	Experience
+🏠 Lobby	Animated welcome room with 3D logo
+🧪 Lab	Floating project displays
+📚 Studio	Interactive e-learning course wall
+🛒 Shop	3D showroom with POS and products
+💾 Archive	Vault-style software drawers
+💬 Collab Hall	Chat pods and team panels
+💳 Treasury	Financial dashboards in VR panels
+🌐 Exit Hub	Contact forms, social links
+
+UX Stack
+Three.js / React Three Fiber — immersive 3D
+
+Framer Motion + GSAP — scroll animations
+
+TailwindCSS — responsive, neumorphic UI
+
+Locomotive Scroll / Lenis — horizontal flow
+
+React PWA Plugin — for service worker & manifest
+
+✅ Developer Deliverables
+A developer can use this spec to:
+
+Build all backend Django services
+
+Connect frontend React app with neumorphic & 3D UI
+
+Integrate AzamPay USSD flows
+
+Deploy to cPanel (Python 3.11.13 + MySQL)
+
+Enable full PWA support with mobile-first UX
+
+Implement the horizontal 3D path-scroll storytelling landing page
