@@ -1,30 +1,23 @@
+import { Routes, Route } from "react-router-dom";
 import ButtonGradient from "./assets/svg/ButtonGradient";
-import About from "./components/About";
-import Benefits from "./components/Benefits";
-import Collaboration from "./components/Collaboration";
-import Contact from "./components/Contact";
-import Footer from "./components/Footer";
-import Header from "./components/Header";
-import Hero from "./components/Hero";
-import Projects from "./components/Projects";
-import Roadmap from "./components/Roadmap";
-import Services from "./components/Services";
+import HomePage from "./pages/HomePage";
+import BlogPage from "./pages/BlogPage";
+import ArchivePage from "./pages/ArchivePage";
+import ThinkForgePage from "./pages/ThinkForgePage";
+import ViorMartPage from "./pages/ViorMartPage";
+import ViorXPage from "./pages/ViorXPage";
 
 const App = () => {
   return (
     <>
-      <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
-        <Header />
-        <Hero />
-        <Benefits />
-        <Collaboration />
-        <Services />
-        <Projects />
-        <Roadmap />
-        <About />
-        <Contact />
-        <Footer />
-      </div>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/archive" element={<ArchivePage />} />
+        <Route path="/thinkforge" element={<ThinkForgePage />} />
+        <Route path="/viormart" element={<ViorMartPage />} />
+        <Route path="/viorx" element={<ViorXPage />} />
+      </Routes>
 
       <ButtonGradient />
     </>

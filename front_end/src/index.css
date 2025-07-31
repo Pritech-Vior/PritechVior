@@ -17,6 +17,21 @@
   scroll-behavior: smooth
 }
 
+/* Hide traditional scrollbar */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+/* For Firefox */
+html {
+  scrollbar-width: none;
+}
+
 @layer base {
   body {
     @apply font-sans bg-n-8 text-n-1 text-base;
