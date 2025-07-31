@@ -1,6 +1,8 @@
 import ButtonGradient from "./assets/svg/ButtonGradient";
+import About from "./components/About";
 import Benefits from "./components/Benefits";
 import Collaboration from "./components/Collaboration";
+import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
@@ -19,6 +21,8 @@ const App = () => {
         <Services />
         <Projects />
         <Roadmap />
+        <About />
+        <Contact />
         <Footer />
       </div>
 
