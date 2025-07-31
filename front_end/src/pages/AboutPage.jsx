@@ -1,3 +1,4 @@
+import React from "react";
 import { Users, Target, Eye, Heart, Building, User, Briefcase, DollarSign, Code, ShoppingBag, GraduationCap, HeadphonesIcon } from "lucide-react";
 import Section from "../components/Section";
 import Heading from "../components/Heading";
@@ -34,52 +35,199 @@ const AboutPage = () => {
     }
   ];
 
-  const OrganizationNode = ({ icon, title, subtitle, children, level = 0, isSpecial = false }) => (
-    <div className={`flex flex-col items-center ${level > 0 ? 'mt-8' : ''}`}>
-      <div className={`
-        relative ${isSpecial ? 'bg-n-6 border-color-1' : 'bg-n-7'} 
-        rounded-xl p-3 border-2 ${isSpecial ? 'border-color-1' : 'border-n-6'} 
-        hover:border-color-1 transition-all duration-300 shadow-lg hover:shadow-xl
-        ${level === 0 ? 'w-56 h-28 min-w-[200px] bg-n-6 border-color-1' : 
-          level === 1 ? 'w-48 h-24 min-w-[180px]' : 
-          'w-44 h-20 min-w-[160px]'}
-        max-w-[250px]
-      `}>
-        {/* Add subtle accent for special divisions */}
-        {isSpecial && level > 0 && (
-          <div className="absolute top-0 right-0 w-3 h-3 bg-color-1 rounded-bl-lg"></div>
+  const OrganizationNode = ({ icon, title, subtitle, children, level = 0, isSpecial = false, childCount = 0, isLast = false }) => {
+    const childrenArray = React.Children.toArray(children);
+    
+    return (
+      <div className={`flex flex-col items-center ${level > 0 ? 'mt-12' : ''} relative`}>
+        {/* Connection point touching top border of card */}
+        {level > 0 && (
+          <>
+            {/* Curved connection line touching top border */}
+            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-1 h-8">
+              <svg width="4" height="32" className="absolute">
+                <path 
+                  d="M2,0 Q2,8 2,16 Q2,24 2,32" 
+                  stroke="url(#gradient1)" 
+                  strokeWidth="3" 
+                  fill="none"
+                  strokeLinecap="round"
+                />
+                <defs>
+                  <linearGradient id="gradient1" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#0ea5e9" />
+                    <stop offset="100%" stopColor="#3b82f6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            {/* Connection knot on card border */}
+            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-color-1 rounded-full border-2 border-white z-30 shadow-lg"></div>
+          </>
         )}
-        <div className="flex flex-col items-center justify-center h-full text-center px-2">
-          <div className="flex items-center gap-2 mb-2">
-            {icon}
-            <span className={`font-bold text-white leading-tight ${
-              level === 0 ? 'text-sm' : 
-              level === 1 ? 'text-xs' : 'text-[11px]'
-            }`}>
-              {title}
-            </span>
-          </div>
-          {subtitle && (
-            <span className={`text-n-3 text-center leading-tight px-1 ${
-              level === 0 ? 'text-xs' : 
-              level === 1 ? 'text-[10px]' : 'text-[9px]'
-            }`}>
-              {subtitle}
-            </span>
+        
+        <div className={`
+          relative ${isSpecial ? 'bg-n-6 border-color-1' : 'bg-n-7'} 
+          rounded-xl p-3 border-2 ${isSpecial ? 'border-color-1' : 'border-n-6'} 
+          hover:border-color-1 transition-all duration-300 shadow-lg hover:shadow-xl
+          ${level === 0 ? 'w-56 h-28 min-w-[200px] bg-n-6 border-color-1' : 
+            level === 1 ? 'w-48 h-24 min-w-[180px]' : 
+            'w-44 h-20 min-w-[160px]'}
+          max-w-[250px] z-20 relative
+        `}>
+          {/* Connection point touching bottom border of card */}
+          {childrenArray.length > 0 && (
+            <>
+              {/* Connection knot on bottom border */}
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-color-2 rounded-full border-2 border-white z-30 shadow-lg"></div>
+              
+              {/* Arrow pointing down from bottom border */}
+              <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 z-30">
+                <div className="w-0 h-0 border-l-4 border-r-4 border-t-6 border-l-transparent border-r-transparent border-t-color-2 drop-shadow-sm"></div>
+              </div>
+            </>
           )}
-        </div>
-      </div>
-      {children && (
-        <div className="relative mt-6">
-          {/* Connecting lines */}
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-6 w-px h-6 bg-color-1"></div>
-          <div className="flex justify-center gap-4 flex-wrap">
-            {children}
+          
+          {/* Add subtle accent for special divisions */}
+          {isSpecial && level > 0 && (
+            <div className="absolute top-0 right-0 w-3 h-3 bg-color-1 rounded-bl-lg"></div>
+          )}
+          
+          <div className="flex flex-col items-center justify-center h-full text-center px-2">
+            <div className="flex items-center gap-2 mb-2">
+              {icon}
+              <span className={`font-bold text-white leading-tight ${
+                level === 0 ? 'text-sm' : 
+                level === 1 ? 'text-xs' : 'text-[11px]'
+              }`}>
+                {title}
+              </span>
+            </div>
+            {subtitle && (
+              <span className={`text-n-3 text-center leading-tight px-1 ${
+                level === 0 ? 'text-xs' : 
+                level === 1 ? 'text-[10px]' : 'text-[9px]'
+              }`}>
+                {subtitle}
+              </span>
+            )}
           </div>
         </div>
-      )}
-    </div>
-  );
+        
+        {childrenArray.length > 0 && (
+          <div className="relative mt-12 w-full">
+            {/* Curved main vertical line from bottom border */}
+            <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 w-1 h-8">
+              <svg width="4" height="32" className="absolute">
+                <path 
+                  d="M2,0 Q2,8 2,16 Q2,24 2,32" 
+                  stroke="url(#gradient2)" 
+                  strokeWidth="3" 
+                  fill="none"
+                  strokeLinecap="round"
+                />
+                <defs>
+                  <linearGradient id="gradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#3b82f6" />
+                    <stop offset="100%" stopColor="#0ea5e9" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            
+            {/* Curved horizontal distribution line for multiple children */}
+            {childrenArray.length > 1 && (
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 flex items-center justify-center">
+                <svg 
+                  width={Math.min(childrenArray.length * 200, 800)} 
+                  height="8"
+                  className="absolute"
+                >
+                  <path 
+                    d={`M20,4 Q${Math.min(childrenArray.length * 100, 400)},1 ${Math.min(childrenArray.length * 200 - 20, 780)},4`}
+                    stroke="url(#gradient3)" 
+                    strokeWidth="3" 
+                    fill="none"
+                    strokeLinecap="round"
+                  />
+                  <defs>
+                    <linearGradient id="gradient3" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#0ea5e9" />
+                      <stop offset="50%" stopColor="#3b82f6" />
+                      <stop offset="100%" stopColor="#0ea5e9" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            )}
+            
+            {/* Connection knots on horizontal curved line */}
+            {childrenArray.length > 1 && (
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 flex justify-between items-center"
+                   style={{ 
+                     width: `${Math.min(childrenArray.length * 200, 800)}px`,
+                     paddingLeft: '20px',
+                     paddingRight: '20px'
+                   }}>
+                {childrenArray.map((_, index) => (
+                  <div key={index} className="relative">
+                    <div className="w-2 h-2 bg-color-1 rounded-full border border-white shadow-sm"></div>
+                    {/* Curved drop line from knot to child card */}
+                    <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-1">
+                      <svg width="4" height="24" className="absolute">
+                        <path 
+                          d="M2,0 Q1,6 2,12 Q3,18 2,24" 
+                          stroke="url(#gradient4)" 
+                          strokeWidth="2" 
+                          fill="none"
+                          strokeLinecap="round"
+                        />
+                        <defs>
+                          <linearGradient id="gradient4" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#0ea5e9" />
+                            <stop offset="100%" stopColor="#3b82f6" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {/* Children container */}
+            <div className="flex justify-center gap-6 lg:gap-8 flex-wrap relative">
+              {childrenArray.map((child, index) => (
+                <div key={index} className="relative flex flex-col items-center">
+                  {/* Single child gets direct curved connection */}
+                  {childrenArray.length === 1 && (
+                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 w-1">
+                      <svg width="4" height="32" className="absolute">
+                        <path 
+                          d="M2,0 Q1,8 2,16 Q3,24 2,32" 
+                          stroke="url(#gradient5)" 
+                          strokeWidth="3" 
+                          fill="none"
+                          strokeLinecap="round"
+                        />
+                        <defs>
+                          <linearGradient id="gradient5" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#3b82f6" />
+                            <stop offset="100%" stopColor="#0ea5e9" />
+                          </linearGradient>
+                        </defs>
+                      </svg>
+                    </div>
+                  )}
+                  {child}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
@@ -154,75 +302,76 @@ const AboutPage = () => {
             
             <div className="bg-n-8 rounded-3xl p-6 lg:p-8 border border-n-6 overflow-x-auto">
               {/* CEO Level */}
-              <div className="flex justify-center mb-12">
+              <div className="flex justify-center mb-16">
                 <OrganizationNode
                   icon={<User className="w-6 h-6 text-white" />}
                   title="CEO / Founder"
                   subtitle="Oversees vision, mission & operations"
                   level={0}
-                />
-              </div>
-
-              {/* Management Level */}
-              <div className="flex justify-center gap-4 lg:gap-6 mb-12 flex-wrap">
-                <OrganizationNode
-                  icon={<Briefcase className="w-4 h-4 text-white" />}
-                  title="Operations Manager"
-                  subtitle="Day-to-day coordination"
-                  level={1}
-                />
-                <OrganizationNode
-                  icon={<Code className="w-4 h-4 text-white" />}
-                  title="Technical Director"
-                  subtitle="Software & systems lead"
-                  level={1}
-                />
-                <OrganizationNode
-                  icon={<Target className="w-4 h-4 text-white" />}
-                  title="Business Dev. Lead"
-                  subtitle="Partnerships & marketing"
-                  level={1}
-                />
-                <OrganizationNode
-                  icon={<DollarSign className="w-4 h-4 text-white" />}
-                  title="Finance & Admin Lead"
-                  subtitle="Treasury & procurement"
-                  level={1}
-                />
-              </div>
-
-              {/* Department Level */}
-              <div className="flex justify-center gap-3 lg:gap-4 mb-12 flex-wrap">
-                <OrganizationNode
-                  icon={<Users className="w-3 h-3 text-white" />}
-                  title="Project Manager"
-                  subtitle="Student project officers"
-                  level={2}
-                />
-                <OrganizationNode
-                  icon={<Code className="w-3 h-3 text-white" />}
-                  title="Software Engineers"
-                  subtitle="System & app developers"
-                  level={2}
-                />
-                <OrganizationNode
-                  icon={<Target className="w-3 h-3 text-white" />}
-                  title="Marketing Team"
-                  subtitle="UI/UX & branding"
-                  level={2}
-                />
-                <OrganizationNode
-                  icon={<DollarSign className="w-3 h-3 text-white" />}
-                  title="Treasury Officer"
-                  subtitle="Procurement officer"
-                  level={2}
-                />
+                >
+                  {/* Management Level */}
+                  <OrganizationNode
+                    icon={<Briefcase className="w-4 h-4 text-white" />}
+                    title="Operations Manager"
+                    subtitle="Day-to-day coordination"
+                    level={1}
+                  >
+                    <OrganizationNode
+                      icon={<Users className="w-3 h-3 text-white" />}
+                      title="Project Manager"
+                      subtitle="Student project officers"
+                      level={2}
+                    />
+                  </OrganizationNode>
+                  
+                  <OrganizationNode
+                    icon={<Code className="w-4 h-4 text-white" />}
+                    title="Technical Director"
+                    subtitle="Software & systems lead"
+                    level={1}
+                  >
+                    <OrganizationNode
+                      icon={<Code className="w-3 h-3 text-white" />}
+                      title="Software Engineers"
+                      subtitle="System & app developers"
+                      level={2}
+                    />
+                  </OrganizationNode>
+                  
+                  <OrganizationNode
+                    icon={<Target className="w-4 h-4 text-white" />}
+                    title="Business Dev. Lead"
+                    subtitle="Partnerships & marketing"
+                    level={1}
+                  >
+                    <OrganizationNode
+                      icon={<Target className="w-3 h-3 text-white" />}
+                      title="Marketing Team"
+                      subtitle="UI/UX & branding"
+                      level={2}
+                    />
+                  </OrganizationNode>
+                  
+                  <OrganizationNode
+                    icon={<DollarSign className="w-4 h-4 text-white" />}
+                    title="Finance & Admin Lead"
+                    subtitle="Treasury & procurement"
+                    level={1}
+                  >
+                    <OrganizationNode
+                      icon={<DollarSign className="w-3 h-3 text-white" />}
+                      title="Treasury Officer"
+                      subtitle="Procurement officer"
+                      level={2}
+                    />
+                  </OrganizationNode>
+                </OrganizationNode>
               </div>
 
               {/* Special Divisions */}
-              <div className="border-t-2 border-color-1 pt-8">
+              <div className="border-t-2 border-color-1 pt-12">
                 <h3 className="text-xl font-bold text-color-1 text-center mb-8">Special Divisions / Units</h3>
-                <div className="flex justify-center gap-3 lg:gap-4 flex-wrap">
+                <div className="flex justify-center gap-6 lg:gap-8 flex-wrap">
                   <OrganizationNode
                     icon={<GraduationCap className="w-4 h-4 text-white" />}
                     title="E-Learning Unit"
