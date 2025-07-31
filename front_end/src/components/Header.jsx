@@ -55,8 +55,10 @@ const Header = () => {
            style={{ width: `${scrollProgress}%` }}></div>
            
       <div className="flex items-center px-5 lg:px-7.5 xl:px-10 max-lg:py-4">
-        <Link className="block w-[10rem] xl:mr-8" to="/">
-          <img src={pritechviorLogo} width={160} height={32} alt="PritechVior" />
+        <Link className="block xl:mr-8" to="/">
+          <div className="relative w-12 h-12 rounded-full bg-gradient-to-br from-color-1/10 to-color-2/10 border-2 border-color-1/30 hover:border-color-1/60 transition-all duration-300 hover:shadow-lg hover:shadow-color-1/20 flex items-center justify-center group">
+            <img src={pritechviorLogo} width={32} height={32} alt="PritechVior" className="w-8 h-8 object-contain group-hover:scale-110 transition-transform duration-300" />
+          </div>
         </Link>
 
         <nav

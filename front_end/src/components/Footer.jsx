@@ -13,7 +13,10 @@ const Footer = () => {
           {/* Company Info */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <img src={pritechviorLogo} width={140} height={28} alt="PritechVior" />
+              <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-color-1/10 to-color-2/10 border-2 border-color-1/30 hover:border-color-1/50 transition-all duration-300 flex items-center justify-center group">
+                <img src={pritechviorLogo} width={28} height={28} alt="PritechVior" className="w-6 h-6 object-contain group-hover:scale-105 transition-transform duration-300" />
+              </div>
+              <span className="text-lg font-bold text-n-1">PRITECH VIOR</span>
             </div>
             <p className="body-2 text-n-4 mb-6 max-w-md">
               Your trusted Tanzanian IT innovation partner. From project development to 
