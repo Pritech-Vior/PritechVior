@@ -4,8 +4,8 @@ Allow: /
 # Important pages for sitelinks
 Allow: /about
 Allow: /projects
-Allow: /elearning
-Allow: /shop
+Allow: /thinkforge
+Allow: /viormart
 Allow: /scholar
 Allow: /contact
 

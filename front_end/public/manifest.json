@@ -37,17 +37,17 @@
       "icons": [{ "src": "/src/assets/pritechvior-logo.svg", "sizes": "96x96" }]
     },
     {
-      "name": "E-Learning",
+      "name": "ThinkForge",
       "short_name": "Learn",
       "description": "Access our online courses and training",
-      "url": "/elearning", 
+      "url": "/thinkforge", 
       "icons": [{ "src": "/src/assets/pritechvior-logo.svg", "sizes": "96x96" }]
     },
     {
-      "name": "Shop",
-      "short_name": "Shop",
+      "name": "Viormart",
+      "short_name": "Viormart",
       "description": "Browse our products and services",
-      "url": "/shop",
+      "url": "/viormart",
       "icons": [{ "src": "/src/assets/pritechvior-logo.svg", "sizes": "96x96" }]
     },
     {
