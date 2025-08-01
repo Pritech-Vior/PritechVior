@@ -1,12 +1,28 @@
-import { BookOpen, Users, Clock, Star, Award, Play } from "lucide-react";
+import { BookOpen, Users, Clock, Star, Award, Play, Search, Filter } from "lucide-react";
 import Section from "../components/Section";
 import Heading from "../components/Heading";
 import Button from "../components/Button";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { courses } from "../constants";
+import { useState } from "react";
 
 const ThinkForgePage = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedLevel, setSelectedLevel] = useState("All");
+
+  const categories = ["All", "Programming", "Design", "Business", "Marketing", "Data Science", "Web Development"];
+  const levels = ["All", "Beginner", "Intermediate", "Advanced"];
+
+  const filteredCourses = courses.filter(course => {
+    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         course.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         course.instructor.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || course.category === selectedCategory;
+    const matchesLevel = selectedLevel === "All" || course.level === selectedLevel;
+    return matchesSearch && matchesCategory && matchesLevel;
+  });
   const CourseCard = ({ course }) => (
     <div className="bg-n-7 rounded-xl p-6 border border-n-6 hover:border-color-1 transition-colors">
       <div className="flex items-start justify-between mb-4">
@@ -75,11 +91,54 @@ const ThinkForgePage = () => {
             text="Master new skills with our comprehensive online courses designed for professionals, students, and entrepreneurs looking to excel in the digital age."
           />
 
+          {/* Search and Filter Section */}
+          <div className="mb-12">
+            <div className="flex flex-col lg:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4" />
+                <input
+                  type="text"
+                  placeholder="Search courses by title, description, or instructor..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none transition-colors"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <Filter size={20} className="text-n-4" />
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 focus:border-color-1 focus:outline-none transition-colors"
+                >
+                  {categories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+                <select
+                  value={selectedLevel}
+                  onChange={(e) => setSelectedLevel(e.target.value)}
+                  className="px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 focus:border-color-1 focus:outline-none transition-colors"
+                >
+                  {levels.map(level => (
+                    <option key={level} value={level}>{level}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="text-center text-n-3">
+              Found {filteredCourses.length} course{filteredCourses.length !== 1 ? 's' : ''} 
+              {selectedCategory !== "All" && ` in ${selectedCategory}`}
+              {selectedLevel !== "All" && ` at ${selectedLevel} level`}
+            </div>
+          </div>
+
           {/* Featured Courses */}
           <div className="mb-12">
             <h2 className="text-2xl font-semibold text-n-1 mb-6">Featured Courses</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {courses.filter(course => course.featured).map((course) => (
+              {filteredCourses.filter(course => course.featured).map((course) => (
                 <CourseCard key={course.id} course={course} />
               ))}
             </div>
@@ -89,10 +148,18 @@ const ThinkForgePage = () => {
           <div>
             <h2 className="text-2xl font-semibold text-n-1 mb-6">All Courses</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {courses.map((course) => (
+              {filteredCourses.map((course) => (
                 <CourseCard key={course.id} course={course} />
               ))}
             </div>
+
+            {filteredCourses.length === 0 && (
+              <div className="text-center py-12">
+                <BookOpen size={64} className="mx-auto text-n-4 mb-4" />
+                <h3 className="text-xl font-semibold text-n-1 mb-2">No courses found</h3>
+                <p className="text-n-3">Try adjusting your search terms, category, or level filter.</p>
+              </div>
+            )}
           </div>
 
           {/* Learning Paths */}

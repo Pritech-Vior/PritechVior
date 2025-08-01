@@ -23,7 +23,7 @@ const ContactPage = () => {
     {
       icon: <MapPin className="w-6 h-6 text-color-1" />,
       title: "Visit Us",
-      details: "Tanzania",
+      details: "Mbeya, Tanzania",
       description: "Meet us at our office location"
     },
     {

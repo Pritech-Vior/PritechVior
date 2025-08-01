@@ -339,7 +339,7 @@ export const projects = [
     image: "healthcare-system.jpg",
     status: "In Production",
     year: "2024",
-    client: "Dar es Salaam Medical Center",
+    client: "Mbeya Regional Medical Center",
     link: "#"
   }
 ];
@@ -793,7 +793,7 @@ export const studentStories = [
   {
     id: "0",
     name: "Amina Hassan",
-    university: "University of Dar es Salaam",
+    university: "University of Mbeya",
     course: "Computer Science",
     year: "2024",
     project: "E-Commerce Platform for Local SMEs",

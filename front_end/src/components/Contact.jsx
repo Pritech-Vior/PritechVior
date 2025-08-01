@@ -34,8 +34,8 @@ const Contact = () => {
                   <div>
                     <h6 className="h6 text-n-1 mb-1">Address</h6>
                     <p className="body-2 text-n-4">
-                      Dar es Salaam, Tanzania<br />
-                      East Africa Technology Hub
+                      Mbeya, Tanzania<br />
+                      Southern Highlands Technology Hub
                     </p>
                   </div>
                 </div>

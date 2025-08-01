@@ -1,12 +1,28 @@
-import { ShoppingCart, Star, Package, ExternalLink, Filter } from "lucide-react";
+import { ShoppingCart, Star, Package, ExternalLink, Filter, Search } from "lucide-react";
 import Section from "../components/Section";
 import Heading from "../components/Heading";
 import Button from "../components/Button";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { products } from "../constants";
+import { useState } from "react";
 
 const ViorMartPage = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedBrand, setSelectedBrand] = useState("All");
+
+  const categories = ["All", "Hardware", "Software", "Services", "Accessories", "Books"];
+  const brands = ["All", "Dell", "HP", "Microsoft", "Adobe", "Logitech", "PritechVior"];
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         product.brand.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
+    const matchesBrand = selectedBrand === "All" || product.brand === selectedBrand;
+    return matchesSearch && matchesCategory && matchesBrand;
+  });
   const ProductCard = ({ product }) => (
     <div className="bg-n-7 rounded-xl p-6 border border-n-6 hover:border-color-1 transition-colors">
       <div className="flex items-start justify-between mb-4">
@@ -82,11 +98,54 @@ const ViorMartPage = () => {
             text="Your one-stop shop for premium tech products, development services, and digital solutions. Quality products at competitive prices."
           />
 
+          {/* Search and Filter Section */}
+          <div className="mb-12">
+            <div className="flex flex-col lg:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4" />
+                <input
+                  type="text"
+                  placeholder="Search products by name, description, or brand..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none transition-colors"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <Filter size={20} className="text-n-4" />
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 focus:border-color-1 focus:outline-none transition-colors"
+                >
+                  {categories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+                <select
+                  value={selectedBrand}
+                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  className="px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 focus:border-color-1 focus:outline-none transition-colors"
+                >
+                  {brands.map(brand => (
+                    <option key={brand} value={brand}>{brand}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="text-center text-n-3">
+              Found {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} 
+              {selectedCategory !== "All" && ` in ${selectedCategory}`}
+              {selectedBrand !== "All" && ` from ${selectedBrand}`}
+            </div>
+          </div>
+
           {/* Featured Products */}
           <div className="mb-12">
             <h2 className="text-2xl font-semibold text-n-1 mb-6">Featured Products</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {products.filter(product => product.featured).map((product) => (
+              {filteredProducts.filter(product => product.featured).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -96,16 +155,20 @@ const ViorMartPage = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold text-n-1">All Products</h2>
-              <Button className="px-4 py-2 text-sm border border-n-4 text-n-1 hover:bg-n-7">
-                <Filter size={16} className="mr-2" />
-                Filter
-              </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
+
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-12">
+                <Package size={64} className="mx-auto text-n-4 mb-4" />
+                <h3 className="text-xl font-semibold text-n-1 mb-2">No products found</h3>
+                <p className="text-n-3">Try adjusting your search terms, category, or brand filter.</p>
+              </div>
+            )}
           </div>
 
           {/* Categories */}
