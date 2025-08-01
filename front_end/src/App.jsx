@@ -9,6 +9,7 @@ import ViorXPage from "./pages/ViorXPage";
 import AboutPage from "./pages/AboutPage";
 import ScholarPage from "./pages/ScholarPage";
 import ContactPage from "./pages/ContactPage";
+import ProjectsPage from "./pages/ProjectsPage";
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
         <Route path="/thinkforge" element={<ThinkForgePage />} />
         <Route path="/viormart" element={<ViorMartPage />} />
         <Route path="/viorx" element={<ViorXPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/scholar" element={<ScholarPage />} />
         <Route path="/contact" element={<ContactPage />} />

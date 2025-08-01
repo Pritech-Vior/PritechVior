@@ -1,19 +1,32 @@
-import { Download, Star, Package, Shield, Monitor } from "lucide-react";
+import { Download, Star, Package, Shield, Monitor, Search, Filter } from "lucide-react";
 import Section from "../components/Section";
 import Heading from "../components/Heading";
 import Button from "../components/Button";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { archiveItems } from "../constants";
+import { useState } from "react";
 
 const ArchivePage = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const categories = ["All", "Productivity", "Design", "Development", "Browser", "Utilities", "Media", "Security", "Communication", "Remote Access"];
+
+  const filteredItems = archiveItems.filter(item => {
+    const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
   const ArchiveCard = ({ item }) => (
-    <div className="bg-n-7 rounded-xl p-6 border border-n-6 hover:border-color-1 transition-colors">
+    <div className="bg-n-7 rounded-xl p-6 border border-n-6 hover:border-color-1 transition-colors group">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <Package size={32} className="text-color-1" />
           <div>
-            <h3 className="text-xl font-semibold text-n-1">{item.title}</h3>
+            <h3 className="text-xl font-semibold text-n-1 group-hover:text-color-1 transition-colors">{item.title}</h3>
             <p className="text-n-4 text-sm">v{item.version}</p>
           </div>
         </div>
@@ -24,15 +37,15 @@ const ArchivePage = () => {
         )}
       </div>
 
-      <p className="text-n-3 text-sm mb-4">{item.description}</p>
+      <p className="text-n-3 text-sm mb-4 leading-relaxed">{item.description}</p>
 
       <div className="flex flex-wrap gap-2 mb-4">
-        <span className="px-3 py-1 bg-color-1/20 text-color-1 rounded-full text-xs">
+        <span className="px-3 py-1 bg-color-1/20 text-color-1 rounded-full text-xs font-medium">
           {item.category}
         </span>
-        <span className={`px-3 py-1 rounded-full text-xs ${
+        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
           item.license === 'Free' ? 'bg-green-500/20 text-green-400' :
-          item.license === 'Freemium' ? 'bg-blue-500/20 text-blue-400' :
+          item.license.includes('Free') ? 'bg-blue-500/20 text-blue-400' :
           'bg-yellow-500/20 text-yellow-400'
         }`}>
           {item.license}
@@ -70,78 +83,97 @@ const ArchivePage = () => {
         </div>
       </div>
 
-      <Button className="w-full" href={`#download-${item.id}`}>
+      {item.requirements && (
+        <div className="mb-4 p-3 bg-n-8 rounded-lg border border-n-6">
+          <h4 className="text-n-1 font-medium mb-1 text-xs">System Requirements:</h4>
+          <p className="text-n-4 text-xs">{item.requirements}</p>
+        </div>
+      )}
+
+      <Button className="w-full group-hover:bg-color-1 transition-colors" href="/contact">
         <Download size={16} className="mr-2" />
-        Download Now
+        Request Download
       </Button>
     </div>
   );
 
   return (
-    <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
+    <>
       <Header />
       
-      <Section className="pt-[12rem] -mt-[5.25rem]" id="archive">
-        <div className="container relative">
+      <Section className="pt-[12rem] -mt-[5.25rem]" crosses crossesOffset="lg:translate-y-[5.25rem]" customPaddings id="archive">
+        <div className="container relative z-2">
           <Heading
-            className="md:max-w-md lg:max-w-2xl text-center mx-auto"
-            title="Software Archive"
-            text="Download premium software, tools, and resources to boost your productivity and streamline your development workflow."
+            tag="Software Archive"
+            title="Daily-Use Software Collection"
+            text="Download essential software for productivity, creativity, and development. All software is verified and carefully selected for reliability."
           />
 
-          {/* Featured Software */}
+          {/* Search and Filter Section */}
           <div className="mb-12">
-            <h2 className="text-2xl font-semibold text-n-1 mb-6">Featured Software</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {archiveItems.filter(item => item.featured).map((item) => (
-                <ArchiveCard key={item.id} item={item} />
-              ))}
+            <div className="flex flex-col lg:flex-row gap-4 mb-6">
+              <div className="relative flex-1">
+                <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4" />
+                <input
+                  type="text"
+                  placeholder="Search software..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none transition-colors"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Filter size={20} className="text-n-4" />
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 focus:border-color-1 focus:outline-none transition-colors"
+                >
+                  {categories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="text-center text-n-3">
+              Found {filteredItems.length} software{filteredItems.length !== 1 ? 's' : ''} 
+              {selectedCategory !== "All" && ` in ${selectedCategory}`}
             </div>
           </div>
 
-          {/* All Software */}
-          <div>
-            <h2 className="text-2xl font-semibold text-n-1 mb-6">All Software</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {archiveItems.map((item) => (
-                <ArchiveCard key={item.id} item={item} />
-              ))}
-            </div>
+          {/* Archive Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {filteredItems.map((item) => (
+              <ArchiveCard key={item.id} item={item} />
+            ))}
           </div>
 
-          {/* Categories */}
-          <div className="mt-16">
-            <h2 className="text-2xl font-semibold text-n-1 mb-6 text-center">Browse by Category</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {['Productivity', 'Education', 'Finance', 'Development'].map((category, index) => (
-                <div key={index} className="bg-n-7 rounded-lg p-4 text-center border border-n-6 hover:border-color-1 transition-colors cursor-pointer">
-                  <Package size={32} className="text-color-1 mx-auto mb-2" />
-                  <h3 className="text-n-1 font-medium">{category}</h3>
-                  <p className="text-n-4 text-sm">
-                    {archiveItems.filter(item => item.category === category).length} items
-                  </p>
-                </div>
-              ))}
+          {filteredItems.length === 0 && (
+            <div className="text-center py-12">
+              <Package size={64} className="mx-auto text-n-4 mb-4" />
+              <h3 className="text-xl font-semibold text-n-1 mb-2">No software found</h3>
+              <p className="text-n-3">Try adjusting your search terms or category filter.</p>
             </div>
-          </div>
+          )}
 
-          {/* Upload Request */}
-          <div className="text-center mt-16">
-            <div className="bg-gradient-to-r from-color-1/10 to-color-2/10 rounded-2xl p-8 border border-color-1/20">
-              <h3 className="text-2xl font-semibold text-n-1 mb-4">
-                Request Software
-              </h3>
-              <p className="text-n-3 mb-6 max-w-2xl mx-auto">
-                Can't find what you're looking for? Let us know what software or tools you need, and we'll add them to our archive.
-              </p>
-              <Button href="#contact">Request Software</Button>
-            </div>
+          {/* Download Notice */}
+          <div className="bg-n-7/50 border border-n-6 rounded-xl p-8 text-center">
+            <Shield size={48} className="mx-auto text-color-1 mb-4" />
+            <h3 className="text-xl font-semibold text-n-1 mb-2">Download Notice</h3>
+            <p className="text-n-3 mb-6 max-w-2xl mx-auto">
+              All software downloads are verified and safe. To maintain quality and support, 
+              please contact us to request download links for any software in our archive.
+            </p>
+            <Button href="/contact">
+              Contact for Downloads
+            </Button>
           </div>
         </div>
       </Section>
 
       <Footer />
-    </div>
+    </>
   );
 };
 
