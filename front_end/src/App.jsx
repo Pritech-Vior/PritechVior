@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import ButtonGradient from "./assets/svg/ButtonGradient";
+import Chatbot from "./components/Chatbot";
 import HomePage from "./pages/HomePage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
@@ -40,6 +41,7 @@ const App = () => {
       </Routes>
 
       <ButtonGradient />
+      <Chatbot />
     </>
   );
 };

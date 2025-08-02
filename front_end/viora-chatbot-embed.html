@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viora Chatbot - PritechVior</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* Chatbot Styles */
+        .viora-chatbot {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999999;
+            font-family: inherit;
+        }
+
+        .viora-chat-button {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #AC6AFF 0%, #FFC876 100%);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(172, 106, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .viora-chat-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(172, 106, 255, 0.4);
+        }
+
+        .viora-chat-button svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        .viora-notification-dot {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .viora-chat-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 384px;
+            max-width: calc(100vw - 48px);
+            height: 600px;
+            max-height: calc(100vh - 120px);
+            background: #15131D;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #252134;
+        }
+
+        .viora-chat-window.open {
+            display: flex;
+        }
+
+        .viora-chat-header {
+            background: linear-gradient(135deg, #AC6AFF 0%, #FFC876 100%);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .viora-bot-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .viora-bot-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .viora-bot-avatar svg {
+            width: 20px;
+            height: 20px;
+            color: white;
+        }
+
+        .viora-bot-details h3 {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .viora-bot-details p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .viora-chat-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .viora-control-btn {
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .viora-control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .viora-control-btn svg {
+            width: 16px;
+            height: 16px;
+            color: white;
+        }
+
+        .viora-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: #0E0C15;
+        }
+
+        .viora-message {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .viora-message.user {
+            flex-direction: row-reverse;
+        }
+
+        .viora-message-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .viora-message.bot .viora-message-avatar {
+            background: linear-gradient(135deg, #AC6AFF 0%, #FFC876 100%);
+        }
+
+        .viora-message.user .viora-message-avatar {
+            background: #AC6AFF;
+        }
+
+        .viora-message-avatar svg {
+            width: 12px;
+            height: 12px;
+            color: white;
+        }
+
+        .viora-message-content {
+            max-width: 280px;
+        }
+
+        .viora-message-bubble {
+            padding: 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .viora-message.bot .viora-message-bubble {
+            background: #252134;
+            color: #FFFFFF;
+            margin-right: 32px;
+        }
+
+        .viora-message.user .viora-message-bubble {
+            background: #AC6AFF;
+            color: white;
+            margin-left: 32px;
+        }
+
+        .viora-message-options {
+            margin-top: 8px;
+            margin-right: 32px;
+        }
+
+        .viora-option-btn {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            background: #252134;
+            border: 1px solid rgba(172, 106, 255, 0.2);
+            border-radius: 8px;
+            color: #AC6AFF;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .viora-option-btn:hover {
+            background: #15131D;
+            border-color: rgba(172, 106, 255, 0.4);
+        }
+
+        .viora-typing {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .viora-typing-avatar {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #AC6AFF 0%, #FFC876 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .viora-typing-avatar svg {
+            width: 12px;
+            height: 12px;
+            color: white;
+        }
+
+        .viora-typing-bubble {
+            background: #252134;
+            padding: 12px;
+            border-radius: 16px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .viora-typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #ADA8C3;
+            border-radius: 50%;
+            animation: viora-bounce 1.4s infinite ease-in-out;
+        }
+
+        .viora-typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .viora-typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes viora-bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        .viora-input-area {
+            padding: 16px;
+            border-top: 1px solid #252134;
+            background: #15131D;
+        }
+
+        .viora-input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .viora-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #0E0C15;
+            border: 1px solid #252134;
+            border-radius: 24px;
+            color: #FFFFFF;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .viora-input:focus {
+            border-color: #AC6AFF;
+        }
+
+        .viora-input::placeholder {
+            color: #757185;
+        }
+
+        .viora-send-btn {
+            padding: 12px;
+            background: linear-gradient(135deg, #AC6AFF 0%, #FFC876 100%);
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .viora-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .viora-send-btn svg {
+            width: 16px;
+            height: 16px;
+            color: white;
+        }
+
+        .viora-quick-actions {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .viora-quick-btn {
+            padding: 4px 12px;
+            background: rgba(172, 106, 255, 0.1);
+            border: none;
+            border-radius: 16px;
+            color: #AC6AFF;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .viora-quick-btn:hover {
+            background: rgba(172, 106, 255, 0.2);
+        }
+
+        .viora-branding {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #757185;
+        }
+
+        .viora-branding span {
+            color: #AC6AFF;
+            font-weight: 500;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 480px) {
+            .viora-chat-window {
+                width: calc(100vw - 24px);
+                right: 12px;
+                bottom: 80px;
+            }
+
+            .viora-chatbot {
+                right: 12px;
+                bottom: 12px;
+            }
+        }
+
+        /* Icon rendering */
+        .viora-icon-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .viora-icon {
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+        }
+
+        .viora-icon.green { color: #4ade80; }
+        .viora-icon.blue { color: #60a5fa; }
+        .viora-icon.yellow { color: #fbbf24; }
+        .viora-icon.purple { color: #a855f7; }
+        .viora-icon.red { color: #f87171; }
+    </style>
+</head>
+<body>
+    <!-- Your website content goes here -->
+    <div style="padding: 40px; text-align: center; background: #f8fafc; min-height: 100vh;">
+        <h1 style="color: #1f2937; margin-bottom: 16px;">Welcome to Our Website</h1>
+        <p style="color: #6b7280; margin-bottom: 32px;">This is a demo page showing the Viora chatbot integration.</p>
+        <p style="color: #9ca3af; font-size: 14px;">Look for the chat button in the bottom right corner!</p>
+    </div>
+
+    <!-- Viora Chatbot -->
+    <div class="viora-chatbot" id="vioraChatbot">
+        <!-- Chat Button -->
+        <button class="viora-chat-button" id="vioraChatButton">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <div class="viora-notification-dot">1</div>
+        </button>
+
+        <!-- Chat Window -->
+        <div class="viora-chat-window" id="vioraChatWindow">
+            <!-- Header -->
+            <div class="viora-chat-header">
+                <div class="viora-bot-info">
+                    <div class="viora-bot-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 8V4H8"/>
+                            <rect width="16" height="12" x="4" y="8" rx="2"/>
+                            <path d="M2 14h2"/>
+                            <path d="M20 14h2"/>
+                            <path d="M15 13v2"/>
+                            <path d="M9 13v2"/>
+                        </svg>
+                    </div>
+                    <div class="viora-bot-details">
+                        <h3>Viora Assistant</h3>
+                        <p>PritechVior Support</p>
+                    </div>
+                </div>
+                <div class="viora-chat-controls">
+                    <button class="viora-control-btn" id="vioraMinimizeBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                        </svg>
+                    </button>
+                    <button class="viora-control-btn" id="vioraCloseBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 6 6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="viora-messages" id="vioraMessages">
+                <div class="viora-message bot">
+                    <div class="viora-message-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 8V4H8"/>
+                            <rect width="16" height="12" x="4" y="8" rx="2"/>
+                            <path d="M2 14h2"/>
+                            <path d="M20 14h2"/>
+                            <path d="M15 13v2"/>
+                            <path d="M9 13v2"/>
+                        </svg>
+                    </div>
+                    <div class="viora-message-content">
+                        <div class="viora-message-bubble">
+                            Hello! I'm Viora, your PritechVior assistant. How can I help you today?
+                        </div>
+                        <div class="viora-message-options">
+                            <button class="viora-option-btn" onclick="sendMessage('Services & Solutions')">Services & Solutions</button>
+                            <button class="viora-option-btn" onclick="sendMessage('Shop & Products')">Shop & Products</button>
+                            <button class="viora-option-btn" onclick="sendMessage('Student Projects')">Student Projects</button>
+                            <button class="viora-option-btn" onclick="sendMessage('General Inquiry')">General Inquiry</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="viora-input-area">
+                <div class="viora-input-row">
+                    <input type="text" class="viora-input" id="vioraInput" placeholder="Type your message..." />
+                    <button class="viora-send-btn" id="vioraSendBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="viora-quick-actions">
+                    <button class="viora-quick-btn" onclick="sendMessage('Services')">Services</button>
+                    <button class="viora-quick-btn" onclick="sendMessage('Shop')">Shop</button>
+                    <button class="viora-quick-btn" onclick="sendMessage('Student Help')">Student Help</button>
+                    <button class="viora-quick-btn" onclick="sendMessage('Contact')">Contact</button>
+                </div>
+                <div class="viora-branding">
+                    Powered by <span>PritechVior AI</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Chatbot JavaScript
+        class VioraChatbot {
+            constructor() {
+                this.isOpen = false;
+                this.isTyping = false;
+                this.messages = [];
+                
+                this.init();
+                this.setupEventListeners();
+                this.loadPredefinedResponses();
+            }
+
+            init() {
+                this.chatButton = document.getElementById('vioraChatButton');
+                this.chatWindow = document.getElementById('vioraChatWindow');
+                this.messagesContainer = document.getElementById('vioraMessages');
+                this.input = document.getElementById('vioraInput');
+                this.sendBtn = document.getElementById('vioraSendBtn');
+                this.minimizeBtn = document.getElementById('vioraMinimizeBtn');
+                this.closeBtn = document.getElementById('vioraCloseBtn');
+            }
+
+            setupEventListeners() {
+                this.chatButton.addEventListener('click', () => this.toggleChat());
+                this.closeBtn.addEventListener('click', () => this.toggleChat());
+                this.sendBtn.addEventListener('click', () => this.handleSend());
+                this.input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.handleSend();
+                });
+            }
+
+            loadPredefinedResponses() {
+                this.responses = {
+                    "services": {
+                        text: "We offer comprehensive IT solutions including:\n\n• Project Design & Implementation\n• IT Consulting & Innovation\n• E-Learning Platform (ThinkForge)\n• E-Commerce & POS Solutions\n• Software Archive & Hosting\n• Internal Collaboration Tools\n\nWhich service interests you most?",
+                        options: ["Project Development", "IT Consulting", "E-Learning", "E-Commerce", "More Info"]
+                    },
+                    "shop": {
+                        text: "Welcome to ViorMart! We offer:\n\n• Custom Software Development\n• Professional Laptops & Hardware\n• Tech Accessories\n• Digital Services\n• Affiliate Products\n\nWhat are you looking for today?",
+                        options: ["Custom Software", "Hardware", "Services", "View Catalog"]
+                    },
+                    "student": {
+                        text: "Our Scholar program helps students with:\n\n• Final Year Project Development\n• Academic Research & Writing\n• Programming Tutoring\n• Project Templates\n• Career Mentorship\n\nStarting from 25,000 TZS. Which service do you need?",
+                        options: ["Final Year Project", "Research Help", "Tutoring", "Templates", "Pricing"]
+                    },
+                    "contact": {
+                        text: "Get in touch with us:\n\n• Email: info@pritechvior.co.tz\n• WhatsApp: +255 XXX XXX XXX\n• Website: pritechvior.co.tz\n• Location: Dar es Salaam, Tanzania\n\n• Mon-Fri: 8AM-6PM EAT\n• Sat: 9AM-3PM EAT",
+                        options: ["Send Email", "WhatsApp", "Schedule Call"]
+                    }
+                };
+            }
+
+            toggleChat() {
+                this.isOpen = !this.isOpen;
+                this.chatWindow.classList.toggle('open', this.isOpen);
+                
+                if (this.isOpen) {
+                    this.input.focus();
+                    // Hide notification dot
+                    const dot = this.chatButton.querySelector('.viora-notification-dot');
+                    if (dot) dot.style.display = 'none';
+                }
+            }
+
+            handleSend() {
+                const message = this.input.value.trim();
+                if (!message) return;
+
+                this.addMessage(message, 'user');
+                this.input.value = '';
+                
+                this.showTyping();
+                setTimeout(() => {
+                    this.hideTyping();
+                    this.processMessage(message);
+                }, 1000 + Math.random() * 1000);
+            }
+
+            addMessage(text, sender, options = null) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `viora-message ${sender}`;
+                
+                const avatar = sender === 'user' ? 
+                    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>` :
+                    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 8V4H8"/>
+                        <rect width="16" height="12" x="4" y="8" rx="2"/>
+                        <path d="M2 14h2"/>
+                        <path d="M20 14h2"/>
+                        <path d="M15 13v2"/>
+                        <path d="M9 13v2"/>
+                    </svg>`;
+
+                let optionsHtml = '';
+                if (options && sender === 'bot') {
+                    optionsHtml = '<div class="viora-message-options">' +
+                        options.map(option => 
+                            `<button class="viora-option-btn" onclick="sendMessage('${option}')">${option}</button>`
+                        ).join('') +
+                    '</div>';
+                }
+
+                messageDiv.innerHTML = `
+                    <div class="viora-message-avatar">${avatar}</div>
+                    <div class="viora-message-content">
+                        <div class="viora-message-bubble">${this.formatMessage(text)}</div>
+                        ${optionsHtml}
+                    </div>
+                `;
+
+                this.messagesContainer.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+
+            formatMessage(text) {
+                // Format text with icons for bullet points
+                return text.split('\n').map(line => {
+                    if (line.includes('• Complete system') || line.includes('• Full-stack') || 
+                        line.includes('• Database') || line.includes('• Testing') || 
+                        line.includes('• Documentation') || line.includes('• 6 months')) {
+                        return `<div class="viora-icon-text">
+                            <svg class="viora-icon green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 12l2 2 4-4"/>
+                                <circle cx="12" cy="12" r="10"/>
+                            </svg>
+                            <span>${line.replace('• ', '')}</span>
+                        </div>`;
+                    }
+                    if (line.includes('• Email:')) {
+                        return `<div class="viora-icon-text">
+                            <svg class="viora-icon blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                <polyline points="22,6 12,13 2,6"/>
+                            </svg>
+                            <span>${line.replace('• ', '')}</span>
+                        </div>`;
+                    }
+                    if (line.includes('• WhatsApp:')) {
+                        return `<div class="viora-icon-text">
+                            <svg class="viora-icon green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                            </svg>
+                            <span>${line.replace('• ', '')}</span>
+                        </div>`;
+                    }
+                    if (line.startsWith('• ')) {
+                        return `<div style="margin-bottom: 4px;">${line}</div>`;
+                    }
+                    return line ? `<div style="margin-bottom: 4px;">${line}</div>` : '';
+                }).join('');
+            }
+
+            processMessage(message) {
+                const lowerMessage = message.toLowerCase();
+                let response = null;
+
+                // Check for predefined responses
+                for (const [key, resp] of Object.entries(this.responses)) {
+                    if (lowerMessage.includes(key)) {
+                        response = resp;
+                        break;
+                    }
+                }
+
+                // Handle greetings
+                if (!response && (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey'))) {
+                    response = {
+                        text: "Hello! Great to meet you! I'm Viora, and I'm excited to help you discover how PritechVior can support your technology needs. What brings you here today?",
+                        options: ["Services & Solutions", "Shop & Products", "Student Projects", "General Inquiry"]
+                    };
+                }
+
+                // Default response
+                if (!response) {
+                    response = {
+                        text: "I'd love to help you with that! While I process your specific question, here are some popular topics I can assist with right away:",
+                        options: ["Services & Solutions", "Shop & Products", "Student Projects", "Contact Support"]
+                    };
+                }
+
+                this.addMessage(response.text, 'bot', response.options);
+            }
+
+            showTyping() {
+                this.isTyping = true;
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'viora-typing';
+                typingDiv.id = 'vioraTyping';
+                typingDiv.innerHTML = `
+                    <div class="viora-typing-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 8V4H8"/>
+                            <rect width="16" height="12" x="4" y="8" rx="2"/>
+                            <path d="M2 14h2"/>
+                            <path d="M20 14h2"/>
+                            <path d="M15 13v2"/>
+                            <path d="M9 13v2"/>
+                        </svg>
+                    </div>
+                    <div class="viora-typing-bubble">
+                        <div class="viora-typing-dot"></div>
+                        <div class="viora-typing-dot"></div>
+                        <div class="viora-typing-dot"></div>
+                    </div>
+                `;
+                this.messagesContainer.appendChild(typingDiv);
+                this.scrollToBottom();
+            }
+
+            hideTyping() {
+                this.isTyping = false;
+                const typingDiv = document.getElementById('vioraTyping');
+                if (typingDiv) typingDiv.remove();
+            }
+
+            scrollToBottom() {
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
+        }
+
+        // Global function for option buttons
+        function sendMessage(message) {
+            if (window.vioraChatbot) {
+                window.vioraChatbot.input.value = message;
+                window.vioraChatbot.handleSend();
+            }
+        }
+
+        // Initialize chatbot when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            window.vioraChatbot = new VioraChatbot();
+        });
+    </script>
+</body>
+</html>
