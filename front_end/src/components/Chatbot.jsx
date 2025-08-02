@@ -309,34 +309,34 @@ const Chatbot = () => {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="viora-chatbot fixed bottom-16 right-4 z-50 w-80 sm:w-72 bg-n-8 rounded-xl shadow-2xl border border-n-6 overflow-hidden max-h-[80vh]">
+        <div className="viora-chatbot fixed bottom-16 right-4 z-50 w-80 sm:w-80 md:w-96 lg:w-[420px] xl:w-[440px] bg-n-8 rounded-xl shadow-2xl border border-n-6 overflow-hidden max-h-[80vh] md:max-h-[85vh] lg:max-h-[90vh]">
           {/* Header */}
-          <div className="bg-gradient-to-r from-color-1 to-color-2 p-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <Bot className="w-4 h-4 text-white" />
+          <div className="bg-gradient-to-r from-color-1 to-color-2 p-3 md:p-4 flex items-center justify-between">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <Bot className="w-4 h-4 md:w-5 md:h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-white font-medium text-sm">Viora</h3>
-                <p className="text-white/80 text-xs">AI Assistant</p>
+                <h3 className="text-white font-medium text-sm md:text-base">Viora</h3>
+                <p className="text-white/80 text-xs md:text-sm">AI Assistant</p>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 md:gap-2">
               <button
                 onClick={toggleMinimize}
-                className="p-1 hover:bg-white/20 rounded transition-colors"
+                className="p-1 md:p-1.5 hover:bg-white/20 rounded transition-colors"
               >
                 {isMinimized ? (
-                  <Maximize2 className="w-3 h-3 text-white" />
+                  <Maximize2 className="w-3 h-3 md:w-4 md:h-4 text-white" />
                 ) : (
-                  <Minimize2 className="w-3 h-3 text-white" />
+                  <Minimize2 className="w-3 h-3 md:w-4 md:h-4 text-white" />
                 )}
               </button>
               <button
                 onClick={toggleChat}
-                className="p-1 hover:bg-white/20 rounded transition-colors"
+                className="p-1 md:p-1.5 hover:bg-white/20 rounded transition-colors"
               >
-                <X className="w-3 h-3 text-white" />
+                <X className="w-3 h-3 md:w-4 md:h-4 text-white" />
               </button>
             </div>
           </div>
@@ -345,51 +345,51 @@ const Chatbot = () => {
           {!isMinimized && (
             <>
               {/* Messages */}
-              <div className="h-64 sm:h-56 overflow-y-auto p-3 space-y-3 bg-n-7">
+              <div className="h-64 sm:h-56 md:h-72 lg:h-80 xl:h-96 overflow-y-auto p-3 md:p-4 space-y-3 bg-n-7">
                 {messages.map((message) => (
                   <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={`max-w-[85%] ${message.sender === 'user' ? 'order-2' : 'order-1'}`}>
                       {/* Avatar */}
-                      <div className={`flex items-center gap-1 mb-1 ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center ${
+                      <div className={`flex items-center gap-1 md:gap-2 mb-1 ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                        <div className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center ${
                           message.sender === 'user' 
                             ? 'bg-color-1' 
                             : 'bg-gradient-to-r from-color-1 to-color-2'
                         }`}>
                           {message.sender === 'user' ? (
-                            <User className="w-2.5 h-2.5 text-white" />
+                            <User className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" />
                           ) : (
-                            <Bot className="w-2.5 h-2.5 text-white" />
+                            <Bot className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" />
                           )}
                         </div>
-                        <span className="text-xs text-n-4">
+                        <span className="text-xs md:text-xs text-n-4">
                           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                       
                       {/* Message */}
-                      <div className={`p-2.5 rounded-xl ${
+                      <div className={`p-2.5 md:p-3 rounded-xl ${
                         message.sender === 'user'
-                          ? 'bg-color-1 text-white ml-6'
-                          : 'bg-n-6 text-n-1 mr-6'
+                          ? 'bg-color-1 text-white ml-6 md:ml-8'
+                          : 'bg-n-6 text-n-1 mr-6 md:mr-8'
                       }`}>
                         {message.sender === 'bot' && message.text.includes('•') ? (
-                          <div className="text-xs">
+                          <div className="text-xs md:text-sm">
                             {renderMessageWithIcons(message.text)}
                           </div>
                         ) : (
-                          <p className="text-xs whitespace-pre-line">{message.text}</p>
+                          <p className="text-xs md:text-sm whitespace-pre-line">{message.text}</p>
                         )}
                       </div>
 
                       {/* Options */}
                       {message.options && message.sender === 'bot' && (
-                        <div className="mt-2 mr-6 space-y-1">
+                        <div className="mt-2 mr-6 md:mr-8 space-y-1">
                           {message.options.slice(0, 3).map((option, index) => (
                             <button
                               key={index}
                               onClick={() => handleOptionClick(option)}
-                              className="block w-full text-left p-1.5 text-xs text-color-1 bg-n-6 hover:bg-n-5 rounded transition-colors border border-color-1/20 hover:border-color-1/40"
+                              className="block w-full text-left p-1.5 md:p-2 text-xs md:text-sm text-color-1 bg-n-6 hover:bg-n-5 rounded md:rounded-lg transition-colors border border-color-1/20 hover:border-color-1/40"
                             >
                               {option}
                             </button>
@@ -403,15 +403,15 @@ const Chatbot = () => {
                 {/* Typing indicator */}
                 {isTyping && (
                   <div className="flex justify-start">
-                    <div className="flex items-center gap-1">
-                      <div className="w-5 h-5 bg-gradient-to-r from-color-1 to-color-2 rounded-full flex items-center justify-center">
-                        <Bot className="w-2.5 h-2.5 text-white" />
+                    <div className="flex items-center gap-1 md:gap-2">
+                      <div className="w-5 h-5 md:w-6 md:h-6 bg-gradient-to-r from-color-1 to-color-2 rounded-full flex items-center justify-center">
+                        <Bot className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" />
                       </div>
-                      <div className="bg-n-6 text-n-1 p-2 rounded-xl">
+                      <div className="bg-n-6 text-n-1 p-2 md:p-2.5 rounded-xl">
                         <div className="flex space-x-1">
-                          <div className="w-1.5 h-1.5 bg-n-3 rounded-full animate-bounce"></div>
-                          <div className="w-1.5 h-1.5 bg-n-3 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-1.5 h-1.5 bg-n-3 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-n-3 rounded-full animate-bounce"></div>
+                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-n-3 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-n-3 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
                       </div>
                     </div>
@@ -422,7 +422,7 @@ const Chatbot = () => {
               </div>
 
               {/* Input */}
-              <div className="p-3 border-t border-n-6 bg-n-8">
+              <div className="p-3 md:p-4 border-t border-n-6 bg-n-8">
                 <div className="flex items-center gap-2">
                   <input
                     type="text"
@@ -430,24 +430,24 @@ const Chatbot = () => {
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder="Ask Viora..."
-                    className="flex-1 bg-n-7 border border-n-6 rounded-lg px-3 py-1.5 text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none text-xs"
+                    className="flex-1 bg-n-7 border border-n-6 rounded-lg px-3 py-1.5 md:px-4 md:py-2 text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none text-xs md:text-sm"
                   />
                   <button
                     onClick={() => handleSendMessage()}
                     disabled={!inputMessage.trim() || isTyping}
-                    className="p-1.5 bg-gradient-to-r from-color-1 to-color-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+                    className="p-1.5 md:p-2 bg-gradient-to-r from-color-1 to-color-2 text-white rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
                   >
-                    <Send className="w-3 h-3" />
+                    <Send className="w-3 h-3 md:w-4 md:h-4" />
                   </button>
                 </div>
                 
                 {/* Quick Actions */}
-                <div className="flex gap-1 mt-2 flex-wrap">
+                <div className="flex gap-1 md:gap-2 mt-2 flex-wrap">
                   {["Services", "Shop", "Contact"].map((action) => (
                     <button
                       key={action}
                       onClick={() => handleSendMessage(action)}
-                      className="px-2 py-1 text-xs text-color-1 bg-color-1/10 hover:bg-color-1/20 rounded-full transition-colors"
+                      className="px-2 py-1 md:px-3 md:py-1.5 text-xs md:text-sm text-color-1 bg-color-1/10 hover:bg-color-1/20 rounded-full transition-colors"
                     >
                       {action}
                     </button>
@@ -456,7 +456,7 @@ const Chatbot = () => {
                 
                 {/* Branding */}
                 <div className="text-center mt-2">
-                  <p className="text-xs text-n-4">
+                  <p className="text-xs md:text-sm text-n-4">
                     <span className="text-color-1 font-medium">Viora AI</span>
                   </p>
                 </div>
