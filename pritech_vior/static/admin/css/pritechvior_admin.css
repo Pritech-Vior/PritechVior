@@ -1,0 +1,690 @@
+/* PritechVior Admin Dashboard Custom Styles */
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300&display=swap');
+
+:root {
+  /* Color Palette from Frontend */
+  --color-1: #AC6AFF;
+  --color-2: #FFC876;
+  --color-3: #FF776F;
+  --color-4: #7ADB78;
+  --color-5: #858DFF;
+  --color-6: #FF98E2;
+  
+  /* Neutrals */
+  --n-1: #FFFFFF;
+  --n-2: #CAC6DD;
+  --n-3: #ADA8C3;
+  --n-4: #757185;
+  --n-5: #3F3A52;
+  --n-6: #252134;
+  --n-7: #15131D;
+  --n-8: #0E0C15;
+  --n-9: #474060;
+  --n-10: #43435C;
+  --n-11: #1B1B2E;
+  --n-12: #2E2A41;
+  --n-13: #6C7275;
+  
+  /* Stroke */
+  --stroke-1: #26242C;
+  
+  /* Fonts */
+  --font-sora: "Sora", sans-serif;
+  --font-code: "Source Code Pro", monospace;
+  --font-grotesk: "Space Grotesk", sans-serif;
+}
+
+/* Global Styles */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Main Admin Layout */
+body {
+  font-family: var(--font-sora) !important;
+  background: var(--n-8) !important;
+  color: var(--n-1) !important;
+}
+
+/* Header */
+#header {
+  background: linear-gradient(135deg, var(--n-7) 0%, var(--n-8) 100%) !important;
+  border-bottom: 1px solid var(--n-6) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+#branding {
+  background: transparent !important;
+}
+
+#branding h1 {
+  font-family: var(--font-sora) !important;
+  font-size: 24px !important;
+  font-weight: 600 !important;
+  color: var(--n-1) !important;
+  background: none !important;
+}
+
+#branding h1 a:link, 
+#branding h1 a:visited {
+  color: var(--n-1) !important;
+  background: none !important;
+  text-decoration: none !important;
+}
+
+/* User Tools */
+#user-tools {
+  background: transparent !important;
+  color: var(--n-2) !important;
+  font-family: var(--font-code) !important;
+  font-size: 12px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+}
+
+#user-tools a {
+  color: var(--n-2) !important;
+  text-decoration: none !important;
+  transition: color 0.2s ease !important;
+}
+
+#user-tools a:hover {
+  color: var(--color-1) !important;
+}
+
+/* Navigation */
+.module h2, .module caption, .inline-group h2 {
+  background: var(--color-1) !important;
+  color: var(--n-1) !important;
+  font-family: var(--font-sora) !important;
+  font-weight: 600 !important;
+  border-radius: 8px 8px 0 0 !important;
+  border: none !important;
+}
+
+/* Content Area */
+#content {
+  background: var(--n-8) !important;
+  padding: 20px !important;
+}
+
+.breadcrumbs {
+  background: var(--n-7) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 8px !important;
+  padding: 10px 15px !important;
+  font-family: var(--font-code) !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  color: var(--n-3) !important;
+}
+
+.breadcrumbs a {
+  color: var(--color-1) !important;
+  text-decoration: none !important;
+}
+
+.breadcrumbs a:hover {
+  color: var(--color-2) !important;
+}
+
+/* Main Dashboard */
+#content-main {
+  background: transparent !important;
+}
+
+/* Module Styling */
+.module {
+  background: var(--n-7) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 10px !important;
+  margin-bottom: 20px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+  backdrop-filter: blur(10px) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.module::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(172, 106, 255, 0.05) 0%, rgba(255, 200, 118, 0.05) 100%);
+  pointer-events: none;
+}
+
+.module table {
+  background: transparent !important;
+  border: none !important;
+}
+
+.module tbody tr {
+  background: transparent !important;
+  border-bottom: 1px solid var(--n-6) !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.module tbody tr:hover {
+  background: var(--n-6) !important;
+}
+
+.module td, .module th {
+  border: none !important;
+  padding: 12px 15px !important;
+  color: var(--n-2) !important;
+}
+
+.module th {
+  background: var(--n-6) !important;
+  color: var(--n-1) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 11px !important;
+  letter-spacing: 0.1em !important;
+}
+
+/* Dashboard Links */
+.app-list .section h2 {
+  background: var(--color-1) !important;
+  color: var(--n-1) !important;
+  padding: 15px 20px !important;
+  margin: 0 !important;
+  font-family: var(--font-sora) !important;
+  font-weight: 600 !important;
+  border-radius: 10px 10px 0 0 !important;
+}
+
+.app-list .section table {
+  background: var(--n-7) !important;
+  border: 1px solid var(--n-6) !important;
+  border-top: none !important;
+  border-radius: 0 0 10px 10px !important;
+}
+
+.app-list td, .app-list th {
+  border: none !important;
+  padding: 15px 20px !important;
+}
+
+.app-list tr {
+  border-bottom: 1px solid var(--n-6) !important;
+}
+
+.app-list tr:hover {
+  background: var(--n-6) !important;
+}
+
+.app-list a {
+  color: var(--n-1) !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  transition: color 0.2s ease !important;
+}
+
+.app-list a:hover {
+  color: var(--color-1) !important;
+}
+
+/* Buttons */
+.button, input[type="submit"], input[type="button"], .submit-row input, button {
+  background: var(--color-1) !important;
+  border: none !important;
+  color: var(--n-1) !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  font-family: var(--font-code) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 4px 15px rgba(172, 106, 255, 0.3) !important;
+}
+
+.button:hover, input[type="submit"]:hover, input[type="button"]:hover, .submit-row input:hover, button:hover {
+  background: var(--color-2) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(255, 200, 118, 0.4) !important;
+}
+
+.button.default, input[type="submit"].default {
+  background: var(--color-4) !important;
+  box-shadow: 0 4px 15px rgba(122, 219, 120, 0.3) !important;
+}
+
+/* Delete button */
+.deletelink, .deletelink-box {
+  background: var(--color-3) !important;
+  box-shadow: 0 4px 15px rgba(255, 119, 111, 0.3) !important;
+}
+
+/* Forms */
+.form-row {
+  background: var(--n-7) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 8px !important;
+  padding: 15px !important;
+  margin-bottom: 15px !important;
+}
+
+.form-row label {
+  color: var(--n-2) !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+input[type="text"], input[type="password"], input[type="email"], input[type="url"], 
+input[type="number"], input[type="tel"], textarea, select {
+  background: var(--n-8) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 6px !important;
+  color: var(--n-1) !important;
+  padding: 10px 12px !important;
+  font-family: var(--font-sora) !important;
+  transition: border-color 0.2s ease !important;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, 
+input[type="url"]:focus, input[type="number"]:focus, input[type="tel"]:focus, 
+textarea:focus, select:focus {
+  border-color: var(--color-1) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(172, 106, 255, 0.2) !important;
+}
+
+/* Fieldsets */
+fieldset {
+  background: var(--n-7) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 10px !important;
+  margin-bottom: 20px !important;
+}
+
+fieldset h2 {
+  background: var(--color-1) !important;
+  color: var(--n-1) !important;
+  padding: 12px 20px !important;
+  margin: 0 !important;
+  border-radius: 10px 10px 0 0 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+/* Messages */
+.messagelist li {
+  background: var(--n-7) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 8px !important;
+  color: var(--n-1) !important;
+  margin-bottom: 10px !important;
+  padding: 15px 20px !important;
+  font-family: var(--font-sora) !important;
+}
+
+.messagelist .success {
+  border-left: 4px solid var(--color-4) !important;
+  background: linear-gradient(90deg, rgba(122, 219, 120, 0.1) 0%, var(--n-7) 100%) !important;
+}
+
+.messagelist .error {
+  border-left: 4px solid var(--color-3) !important;
+  background: linear-gradient(90deg, rgba(255, 119, 111, 0.1) 0%, var(--n-7) 100%) !important;
+}
+
+.messagelist .warning {
+  border-left: 4px solid var(--color-2) !important;
+  background: linear-gradient(90deg, rgba(255, 200, 118, 0.1) 0%, var(--n-7) 100%) !important;
+}
+
+/* Pagination */
+.paginator {
+  background: var(--n-7) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 8px !important;
+  padding: 10px 15px !important;
+  margin: 20px 0 !important;
+}
+
+.paginator a, .paginator .this-page {
+  background: var(--n-6) !important;
+  border: 1px solid var(--n-5) !important;
+  border-radius: 6px !important;
+  color: var(--n-1) !important;
+  padding: 8px 12px !important;
+  margin: 0 5px !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.paginator a:hover {
+  background: var(--color-1) !important;
+  border-color: var(--color-1) !important;
+}
+
+.paginator .this-page {
+  background: var(--color-1) !important;
+  border-color: transparent !important;
+}
+
+/* Tables */
+.results {
+  background: var(--n-7) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+}
+
+.results thead th {
+  background: var(--n-6) !important;
+  color: var(--n-1) !important;
+  border-bottom: 1px solid var(--n-5) !important;
+  padding: 15px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 11px !important;
+  letter-spacing: 0.1em !important;
+}
+
+.results tbody tr {
+  border-bottom: 1px solid var(--n-6) !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.results tbody tr:hover {
+  background: rgba(172, 106, 255, 0.05) !important;
+}
+
+.results tbody td {
+  padding: 12px 15px !important;
+  color: var(--n-2) !important;
+  border: none !important;
+}
+
+/* Actions */
+.actions {
+  background: var(--n-7) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 8px !important;
+  padding: 15px !important;
+  margin-bottom: 20px !important;
+}
+
+.actions select {
+  margin-right: 10px !important;
+}
+
+.actions .button {
+  margin-left: 10px !important;
+}
+
+/* Filters */
+#changelist-filter {
+  background: var(--n-7) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 10px !important;
+  padding: 0 !important;
+  margin-left: 20px !important;
+}
+
+#changelist-filter h2 {
+  background: var(--color-1) !important;
+  color: var(--n-1) !important;
+  padding: 15px 20px !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  border-radius: 10px 10px 0 0 !important;
+}
+
+#changelist-filter h3 {
+  background: var(--n-6) !important;
+  color: var(--n-1) !important;
+  padding: 10px 20px !important;
+  margin: 0 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+#changelist-filter ul {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+#changelist-filter li {
+  border-bottom: 1px solid var(--n-6) !important;
+}
+
+#changelist-filter a {
+  color: var(--n-2) !important;
+  padding: 10px 20px !important;
+  display: block !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+
+#changelist-filter a:hover, #changelist-filter .selected a {
+  background: rgba(172, 106, 255, 0.1) !important;
+  color: var(--color-1) !important;
+}
+
+/* Search */
+#toolbar {
+  background: transparent !important;
+  margin-bottom: 20px !important;
+}
+
+#searchbar {
+  background: var(--n-8) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 8px !important;
+  color: var(--n-1) !important;
+  padding: 12px 15px !important;
+  font-family: var(--font-sora) !important;
+  width: 300px !important;
+}
+
+#searchbar:focus {
+  border-color: var(--color-1) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(172, 106, 255, 0.2) !important;
+}
+
+/* Login Form */
+.login {
+  background: var(--n-8) !important;
+}
+
+.login #container {
+  background: transparent !important;
+}
+
+.login #content {
+  background: var(--n-7) !important;
+  border: 1px solid var(--n-6) !important;
+  border-radius: 15px !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.login #content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(172, 106, 255, 0.1) 0%, rgba(255, 200, 118, 0.1) 100%);
+  pointer-events: none;
+}
+
+.login form {
+  background: transparent !important;
+  border: none !important;
+  padding: 40px !important;
+}
+
+.login .form-row {
+  background: transparent !important;
+  border: none !important;
+}
+
+.login .form-row input {
+  width: 100% !important;
+  margin-top: 5px !important;
+}
+
+/* Sidebar */
+#nav-sidebar {
+  background: var(--n-7) !important;
+  border-right: 1px solid var(--n-6) !important;
+  width: 280px !important;
+}
+
+#nav-sidebar .module {
+  border: none !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+#nav-sidebar .module caption {
+  background: var(--color-1) !important;
+  border-radius: 0 !important;
+  padding: 15px 20px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+#nav-sidebar .module th {
+  background: transparent !important;
+  padding: 12px 20px !important;
+  border-bottom: 1px solid var(--n-6) !important;
+}
+
+#nav-sidebar .module a {
+  color: var(--n-2) !important;
+  text-decoration: none !important;
+  padding: 12px 20px !important;
+  display: block !important;
+  transition: all 0.2s ease !important;
+  border-left: 3px solid transparent !important;
+}
+
+#nav-sidebar .module a:hover, #nav-sidebar .module .selected a {
+  background: rgba(172, 106, 255, 0.1) !important;
+  color: var(--color-1) !important;
+  border-left-color: var(--color-1) !important;
+}
+
+/* Dark Mode Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--n-8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--n-6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--n-5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #content {
+    padding: 15px !important;
+  }
+  
+  .module {
+    margin-bottom: 15px !important;
+  }
+  
+  #changelist-filter {
+    margin-left: 0 !important;
+    margin-top: 20px !important;
+  }
+  
+  #branding h1 {
+    font-size: 20px !important;
+  }
+  
+  .dashboard-stats {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 15px !important;
+  }
+  
+  .action-buttons {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  
+  .results {
+    overflow-x: auto !important;
+  }
+  
+  .results table {
+    min-width: 600px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  #content {
+    padding: 10px !important;
+  }
+  
+  #branding h1 {
+    font-size: 18px !important;
+  }
+  
+  .dashboard-stats {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .stat-card {
+    padding: 15px !important;
+  }
+  
+  .stat-number {
+    font-size: 28px !important;
+  }
+  
+  .module {
+    margin-bottom: 10px !important;
+  }
+  
+  .module h2, .module caption {
+    padding: 10px 15px !important;
+    font-size: 12px !important;
+  }
+  
+  .module td, .module th {
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+  }
+  
+  .button, input[type="submit"], input[type="button"], .submit-row input, button {
+    padding: 8px 15px !important;
+    font-size: 10px !important;
+  }
+}

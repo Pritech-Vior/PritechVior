@@ -1,0 +1,80 @@
+{% extends "admin/login.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/pritechvior_admin.css' %}">
+<style>
+.login #content {
+    max-width: 450px;
+    margin: 100px auto;
+}
+
+.login #content h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--n-1);
+    font-family: var(--font-sora);
+    font-size: 28px;
+    font-weight: 600;
+    background: linear-gradient(45deg, var(--color-1), var(--color-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.login .form-row {
+    margin-bottom: 20px;
+}
+
+.login .form-row label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--n-2);
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.login .submit-row {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.login .submit-row input {
+    width: 100%;
+    padding: 15px;
+    font-size: 14px;
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.login-welcome {
+    text-align: center;
+    margin-bottom: 30px;
+    color: var(--n-3);
+    font-family: var(--font-code);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-logo">
+    <img src="{% static 'admin/img/pritechvior-logo.svg' %}" 
+         alt="PritechVior Logo" 
+         style="height: 80px; width: auto; max-width: 100%;">
+</div>
+
+<div class="login-welcome">
+    Welcome to PritechVior Admin Dashboard
+</div>
+
+{{ block.super }}
+{% endblock %}
