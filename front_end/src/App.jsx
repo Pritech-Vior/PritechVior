@@ -10,6 +10,9 @@ import AboutPage from "./pages/AboutPage";
 import ScholarPage from "./pages/ScholarPage";
 import ContactPage from "./pages/ContactPage";
 import ProjectsPage from "./pages/ProjectsPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 
 const App = () => {
   return (
@@ -25,6 +28,9 @@ const App = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/scholar" element={<ScholarPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       </Routes>
 
       <ButtonGradient />

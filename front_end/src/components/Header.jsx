@@ -5,6 +5,7 @@ import { User } from "lucide-react";
 import { brainwave, pritechviorLogo } from "../assets";
 import { navigation } from "../constants";
 import Button from "./Button";
+import AccountDropdown from "./AccountDropdown";
 import MenuSvg from "../assets/svg/MenuSvg";
 import { HamburgerMenu } from "./design/Header";
 import { useState, useEffect } from "react";
@@ -101,24 +102,33 @@ const Header = () => {
               )
             ))}
             
-            {/* Mobile Account Link */}
-            <a
-              href="#login"
-              onClick={handleClick}
-              className="flex items-center gap-2 font-code text-lg uppercase text-n-1 transition-colors hover:text-color-1 px-4 py-4 md:py-6 lg:hidden"
-            >
-              <User size={18} />
-              Account
-            </a>
+            {/* Mobile Account Links */}
+            <div className="lg:hidden border-t border-n-6 mt-4 pt-4">
+              <Link
+                to="/login"
+                onClick={handleClick}
+                className="flex items-center gap-2 font-code text-lg uppercase text-n-1 transition-colors hover:text-color-1 px-4 py-3"
+              >
+                <User size={18} />
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                onClick={handleClick}
+                className="flex items-center gap-2 font-code text-lg uppercase text-n-1 transition-colors hover:text-color-1 px-4 py-3"
+              >
+                <User size={18} />
+                Sign Up
+              </Link>
+            </div>
+            
+            {/* Mobile Account Link - moved to AccountDropdown */}
           </div>
 
           <HamburgerMenu />
         </nav>
 
-        <Button className="hidden lg:flex px-4 py-2 items-center gap-2" href="#login">
-          <User size={18} />
-          Account
-        </Button>
+        <AccountDropdown />
 
         <Button
           className="ml-auto lg:hidden"
