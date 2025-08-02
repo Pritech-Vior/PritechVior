@@ -2,6 +2,9 @@ import { Routes, Route } from "react-router-dom";
 import ButtonGradient from "./assets/svg/ButtonGradient";
 import HomePage from "./pages/HomePage";
 import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
+import BlogManagePage from "./pages/BlogManagePage";
+import BlogCreatePage from "./pages/BlogCreatePage";
 import ArchivePage from "./pages/ArchivePage";
 import ThinkForgePage from "./pages/ThinkForgePage";
 import ViorMartPage from "./pages/ViorMartPage";
@@ -20,6 +23,9 @@ const App = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:id" element={<BlogPostPage />} />
+        <Route path="/blog/manage" element={<BlogManagePage />} />
+        <Route path="/blog/create" element={<BlogCreatePage />} />
         <Route path="/archive" element={<ArchivePage />} />
         <Route path="/thinkforge" element={<ThinkForgePage />} />
         <Route path="/viormart" element={<ViorMartPage />} />

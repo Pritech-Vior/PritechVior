@@ -59,21 +59,26 @@ export const navigation = [
   },
   {
     id: "4",
+    title: "Blog",
+    url: "/blog",
+  },
+  {
+    id: "5",
     title: "Archive",
     url: "/archive",
   },
   {
-    id: "5",
+    id: "6",
     title: "Shop",
     url: "/viormart",
   },
   {
-    id: "6",
+    id: "7",
     title: "Scholar",
     url: "/scholar",
   },
   {
-    id: "7",
+    id: "8",
     title: "Contact",
     url: "/contact",
   },
@@ -350,34 +355,40 @@ export const blogPosts = [
     id: "0",
     title: "Building Scalable Web Applications with React and Node.js",
     excerpt: "Learn how to create modern, scalable web applications using the latest technologies and best practices.",
+    content: "In today's digital landscape, building scalable web applications is crucial for business success. This comprehensive guide will walk you through the process of creating modern web applications using React for the frontend and Node.js for the backend.\n\nWe'll cover essential topics including:\n\n1. Setting up your development environment\n2. Creating a robust React architecture\n3. Implementing RESTful APIs with Node.js\n4. Database design and optimization\n5. Authentication and security best practices\n6. Deployment strategies and scaling techniques\n\nBy the end of this tutorial, you'll have a solid understanding of how to build production-ready web applications that can handle thousands of users.",
     author: "PritechVior Team",
     date: "2025-07-30",
     category: "Web Development",
     readTime: "8 min read",
     featured: true,
     tags: ["React", "Node.js", "JavaScript", "Tutorial"],
+    image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=400&fit=crop"
   },
   {
     id: "1",
     title: "Digital Transformation for Tanzanian SMEs",
     excerpt: "A comprehensive guide to digital transformation strategies specifically tailored for small and medium enterprises in Tanzania.",
+    content: "Digital transformation is no longer optional for businesses in Tanzania. Small and medium enterprises (SMEs) must embrace digital technologies to remain competitive in today's market.\n\nThis guide explores:\n\n1. Understanding the digital landscape in Tanzania\n2. Identifying transformation opportunities\n3. Building digital capabilities\n4. Overcoming common challenges\n5. Measuring success and ROI\n\nWe'll also share real-world case studies of successful digital transformations by Tanzanian SMEs.",
     author: "PritechVior Team",
     date: "2025-07-28",
     category: "Business",
     readTime: "12 min read",
     featured: false,
     tags: ["Digital Transformation", "SME", "Tanzania", "Strategy"],
+    image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=400&fit=crop"
   },
   {
     id: "2",
     title: "Integrating AzamPay for Seamless Mobile Payments",
     excerpt: "Step-by-step guide to implementing AzamPay payment gateway in your web and mobile applications.",
+    content: "Mobile money is the backbone of financial transactions in Tanzania. AzamPay provides a robust API for integrating mobile payment solutions into your applications.\n\nThis tutorial covers:\n\n1. AzamPay API overview and setup\n2. Authentication and security\n3. Processing payments and refunds\n4. Handling webhooks and callbacks\n5. Testing and going live\n6. Best practices for error handling\n\nWe'll build a complete payment integration from scratch, including both frontend and backend implementation.",
     author: "PritechVior Team",
     date: "2025-07-25",
     category: "Fintech",
     readTime: "10 min read",
     featured: true,
     tags: ["AzamPay", "Payment Gateway", "Mobile Money", "Integration"],
+    image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=400&fit=crop"
   },
 ];
 

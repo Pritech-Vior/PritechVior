@@ -8,50 +8,63 @@ import { blogPosts } from "../constants";
 
 const BlogPage = () => {
   const BlogCard = ({ post }) => (
-    <article className="bg-n-7 rounded-xl p-6 border border-n-6 hover:border-color-1 transition-colors">
-      <div className="flex flex-wrap gap-2 mb-4">
-        <span className="px-3 py-1 bg-color-1/20 text-color-1 rounded-full text-xs">
-          {post.category}
-        </span>
-        {post.featured && (
-          <span className="px-3 py-1 bg-color-2 text-white rounded-full text-xs font-semibold">
-            Featured
-          </span>
-        )}
-      </div>
-
-      <h2 className="text-xl font-semibold text-n-1 mb-3 hover:text-color-1 transition-colors cursor-pointer">
-        {post.title}
-      </h2>
+    <article className="bg-n-7 rounded-xl overflow-hidden border border-n-6 hover:border-color-1 transition-colors">
+      {post.image && (
+        <div className="aspect-video overflow-hidden">
+          <img
+            src={post.image}
+            alt={post.title}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+          />
+        </div>
+      )}
       
-      <p className="text-n-3 text-sm mb-4">{post.excerpt}</p>
-
-      <div className="flex items-center gap-4 text-xs text-n-4 mb-4">
-        <div className="flex items-center gap-1">
-          <User size={14} />
-          {post.author}
-        </div>
-        <div className="flex items-center gap-1">
-          <Calendar size={14} />
-          {new Date(post.date).toLocaleDateString()}
-        </div>
-        <div className="flex items-center gap-1">
-          <Clock size={14} />
-          {post.readTime}
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2 mb-4">
-        {post.tags.map((tag, index) => (
-          <span key={index} className="px-2 py-1 bg-n-6 text-n-2 rounded text-xs">
-            #{tag}
+      <div className="p-6">
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span className="px-3 py-1 bg-color-1/20 text-color-1 rounded-full text-xs">
+            {post.category}
           </span>
-        ))}
-      </div>
+          {post.featured && (
+            <span className="px-3 py-1 bg-color-2 text-white rounded-full text-xs font-semibold">
+              Featured
+            </span>
+          )}
+        </div>
 
-      <Button className="w-full" href={`/blog/${post.id}`}>
-        Read More
-      </Button>
+        <h2 className="text-xl font-semibold text-n-1 mb-3 hover:text-color-1 transition-colors cursor-pointer">
+          {post.title}
+        </h2>
+        
+        <p className="text-n-3 text-sm mb-4 line-clamp-3">{post.excerpt}</p>
+
+        <div className="flex items-center gap-4 text-xs text-n-4 mb-4">
+          <div className="flex items-center gap-1">
+            <User size={14} />
+            {post.author}
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar size={14} />
+            {new Date(post.date).toLocaleDateString()}
+          </div>
+          <div className="flex items-center gap-1">
+            <Clock size={14} />
+            {post.readTime}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 mb-4">
+          {post.tags.map((tag, index) => (
+            <span key={index} className="px-2 py-1 bg-n-6 text-n-2 rounded text-xs flex items-center gap-1">
+              <Tag size={10} />
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        <Button className="w-full" href={`/blog/${post.id}`}>
+          Read More
+        </Button>
+      </div>
     </article>
   );
 
