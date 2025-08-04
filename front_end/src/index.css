@@ -38,6 +38,27 @@ html {
   }
 }
 
+/* Dashboard Layout Fixes */
+.dashboard-layout {
+  min-height: 100vh;
+  display: flex;
+}
+
+.dashboard-sidebar {
+  flex-shrink: 0;
+}
+
+.dashboard-main {
+  flex: 1;
+  min-width: 0; /* Prevents flex item from overflowing */
+}
+
+/* Ensure proper scrolling in dashboard */
+.dashboard-content {
+  height: 100vh;
+  overflow-y: auto;
+}
+
 .rotate-45 {
   @apply rotate-[45deg]
 }
