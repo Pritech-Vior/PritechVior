@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/icons/icon-96x96.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#AC6AFF" />
+    <meta name="description" content="Empowering Africa Through Technology Innovation - Your trusted Tanzanian IT partner" />
+    
+    <!-- PWA Meta Tags -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/icons/icon-192x192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PritechVior">
+    <link rel="apple-touch-icon" sizes="72x72" href="%PUBLIC_URL%/icons/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="96x96" href="%PUBLIC_URL%/icons/icon-96x96.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="%PUBLIC_URL%/icons/icon-128x128.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="%PUBLIC_URL%/icons/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="%PUBLIC_URL%/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="%PUBLIC_URL%/icons/icon-192x192.png">
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileImage" content="%PUBLIC_URL%/icons/icon-144x144.png">
+    <meta name="msapplication-TileColor" content="#AC6AFF">
+    <meta name="msapplication-config" content="%PUBLIC_URL%/browserconfig.xml">
+    
+    <!-- Additional PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="PritechVior">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="keywords" content="PritechVior, Tanzania IT, Technology Innovation, Software Development, Web Development, IT Solutions, Africa Technology">
+    <meta name="author" content="PritechVior">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="PRITECH VIOR - Technology Innovation Partner">
+    <meta property="og:description" content="Empowering Africa Through Technology Innovation - Your trusted Tanzanian IT partner">
+    <meta property="og:image" content="%PUBLIC_URL%/icons/icon-512x512.png">
+    <meta property="og:url" content="https://www.pritechvior.co.tz">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PRITECH VIOR - Technology Innovation Partner">
+    <meta name="twitter:description" content="Empowering Africa Through Technology Innovation - Your trusted Tanzanian IT partner">
+    <meta name="twitter:image" content="%PUBLIC_URL%/icons/icon-512x512.png">
+    
+    <title>PRITECH VIOR - Technology Innovation Partner</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    
+    <!-- PWA Install Prompt -->
+    <div id="pwaInstallPrompt" style="display: none; position: fixed; bottom: 20px; left: 20px; right: 20px; background: linear-gradient(135deg, #AC6AFF 0%, #FFC876 100%); color: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 1000;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+          <strong>Install PritechVior App</strong>
+          <p style="margin: 5px 0 0 0; font-size: 14px;">Add to your home screen for the best experience!</p>
+        </div>
+        <div>
+          <button id="pwaInstallBtn" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 5px; margin-right: 10px; cursor: pointer;">Install</button>
+          <button id="pwaCloseBtn" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">&times;</button>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      // Service Worker Registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+              
+              // Check for service worker updates
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // New service worker is available
+                    if (confirm('New version available! Reload to update?')) {
+                      window.location.reload();
+                    }
+                  }
+                });
+              });
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+      
+      // PWA Install Prompt
+      let deferredPrompt;
+      const pwaInstallPrompt = document.getElementById('pwaInstallPrompt');
+      const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+      const pwaCloseBtn = document.getElementById('pwaCloseBtn');
+      
+      // Listen for the beforeinstallprompt event
+      window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('PWA install prompt triggered');
+        // Prevent the mini-infobar from appearing
+        e.preventDefault();
+        // Save the event for later use
+        deferredPrompt = e;
+        // Show our custom install prompt
+        pwaInstallPrompt.style.display = 'block';
+      });
+      
+      // Handle install button click
+      pwaInstallBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          // Show the install prompt
+          deferredPrompt.prompt();
+          // Wait for the user's response
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log('PWA install outcome:', outcome);
+          // Clear the deferred prompt
+          deferredPrompt = null;
+          // Hide the install prompt
+          pwaInstallPrompt.style.display = 'none';
+        }
+      });
+      
+      // Handle close button click
+      pwaCloseBtn.addEventListener('click', () => {
+        pwaInstallPrompt.style.display = 'none';
+      });
+      
+      // Listen for successful app installation
+      window.addEventListener('appinstalled', (e) => {
+        console.log('PWA was installed successfully');
+        pwaInstallPrompt.style.display = 'none';
+        // You could show a thank you message here
+      });
+      
+      // Handle iOS PWA display mode
+      if (window.navigator.standalone === true) {
+        console.log('Running in PWA mode on iOS');
+      }
+      
+      // Handle Android PWA display mode
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('Running in PWA mode');
+      }
+    </script>
+  </body>
+</html>

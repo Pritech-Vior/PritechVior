@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA Icon Generator - PritechVior</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            background: linear-gradient(135deg, #AC6AFF 0%, #FFC876 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed rgba(172, 106, 255, 0.5);
+            border-radius: 15px;
+            padding: 60px 40px;
+            text-align: center;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(172, 106, 255, 0.05);
+        }
+        
+        .upload-area:hover {
+            border-color: #AC6AFF;
+            background: rgba(172, 106, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .upload-area.dragover {
+            border-color: #FFC876;
+            background: rgba(255, 200, 118, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+        
+        .upload-text {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .icon-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .icon-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #AC6AFF;
+        }
+        
+        .icon-preview {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .icon-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .icon-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #AC6AFF;
+        }
+        
+        .icon-size {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #AC6AFF 0%, #FFC876 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9rem;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(172, 106, 255, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-download-all {
+            display: none;
+            margin: 40px auto;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #AC6AFF 0%, #FFC876 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 40px;
+            border-left: 4px solid #AC6AFF;
+        }
+        
+        .instructions h3 {
+            color: #AC6AFF;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        
+        .code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .upload-area {
+                padding: 40px 20px;
+            }
+            
+            .icon-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">PritechVior</h1>
+            <p class="subtitle">PWA Icon Generator</p>
+        </div>
+        
+        <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📱</div>
+            <div class="upload-text">Upload Your SVG Logo</div>
+            <div class="upload-hint">Click here or drag and drop your SVG file to generate PWA icons</div>
+            <input type="file" id="fileInput" accept=".svg,image/svg+xml" />
+        </div>
+        
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div id="iconGrid" class="icon-grid"></div>
+        
+        <button class="btn btn-download-all" id="downloadBtn" onclick="downloadAll()">
+            📦 Download All Icons
+        </button>
+        
+        <div class="instructions">
+            <h3>📋 Setup Instructions</h3>
+            <ol>
+                <li>Create a folder called <span class="code">icons</span> in your <span class="code">front_end/public/</span> directory</li>
+                <li>Download all generated icons and place them in the <span class="code">icons</span> folder</li>
+                <li>Update your <span class="code">manifest.json</span> to use PNG icons instead of SVG</li>
+                <li>Deploy your site and test PWA functionality</li>
+                <li>Use Chrome DevTools > Application > Manifest to verify icons load correctly</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const iconSizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        const maskableSizes = [192, 512];
+        let generatedIcons = {};
+        let totalIcons = iconSizes.length + maskableSizes.length;
+        let generatedCount = 0;
+
+        // Drag and drop functionality
+        const uploadArea = document.querySelector('.upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'image/svg+xml') {
+                generateIcons(files[0]);
+            } else {
+                alert('Please drop a valid SVG file');
+            }
+        });
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type === 'image/svg+xml') {
+                generateIcons(file);
+            } else {
+                alert('Please select a valid SVG file');
+            }
+        });
+
+        function updateProgress() {
+            const progress = (generatedCount / totalIcons) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            if (generatedCount === totalIcons) {
+                setTimeout(() => {
+                    document.getElementById('progressBar').style.display = 'none';
+                    document.getElementById('downloadBtn').style.display = 'block';
+                }, 500);
+            }
+        }
+
+        function generateIcons(svgFile) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const svgContent = e.target.result;
+                const iconGrid = document.getElementById('iconGrid');
+                iconGrid.innerHTML = '';
+                generatedIcons = {};
+                generatedCount = 0;
+                
+                // Show progress bar
+                document.getElementById('progressBar').style.display = 'block';
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('downloadBtn').style.display = 'none';
+                
+                // Generate regular icons
+                iconSizes.forEach(size => {
+                    generateIcon(svgContent, size, false);
+                });
+                
+                // Generate maskable icons
+                maskableSizes.forEach(size => {
+                    generateIcon(svgContent, size, true);
+                });
+            };
+            reader.readAsText(svgFile);
+        }
+
+        function generateIcon(svgContent, size, isMaskable) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = size;
+            canvas.height = size;
+
+            const img = new Image();
+            const svgBlob = new Blob([svgContent], {type: 'image/svg+xml'});
+            const url = URL.createObjectURL(svgBlob);
+            
+            img.onload = function() {
+                if (isMaskable) {
+                    // Add background for maskable icons
+                    const gradient = ctx.createLinearGradient(0, 0, size, size);
+                    gradient.addColorStop(0, '#AC6AFF');
+                    gradient.addColorStop(1, '#FFC876');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, size, size);
+                    
+                    // Scale down the icon to leave safe area for masking (20% padding)
+                    const padding = size * 0.1;
+                    const iconSize = size - (padding * 2);
+                    ctx.drawImage(img, padding, padding, iconSize, iconSize);
+                } else {
+                    // Regular icon
+                    ctx.drawImage(img, 0, 0, size, size);
+                }
+                
+                const dataUrl = canvas.toDataURL('image/png', 1.0);
+                const filename = isMaskable ? 
+                    `icon-${size}x${size}-maskable.png` : 
+                    `icon-${size}x${size}.png`;
+                
+                generatedIcons[filename] = dataUrl;
+                displayIcon(dataUrl, filename, size, isMaskable);
+                
+                generatedCount++;
+                updateProgress();
+                
+                URL.revokeObjectURL(url);
+            };
+            
+            img.onerror = function() {
+                console.error('Failed to load SVG');
+                alert('Error processing SVG file. Please ensure it\'s a valid SVG.');
+            };
+            
+            img.src = url;
+        }
+
+        function displayIcon(dataUrl, filename, size, isMaskable) {
+            const iconGrid = document.getElementById('iconGrid');
+            const iconItem = document.createElement('div');
+            iconItem.className = 'icon-item';
+            
+            const typeLabel = isMaskable ? ' (Maskable)' : '';
+            
+            iconItem.innerHTML = `
+                <div class="icon-preview">
+                    <img src="${dataUrl}" alt="${filename}">
+                </div>
+                <div class="icon-name">${filename}</div>
+                <div class="icon-size">${size}×${size}${typeLabel}</div>
+                <button class="btn" onclick="downloadIcon('${filename}', '${dataUrl}')">
+                    ⬇️ Download
+                </button>
+            `;
+            iconGrid.appendChild(iconItem);
+        }
+
+        function downloadIcon(filename, dataUrl) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function downloadAll() {
+            let downloadCount = 0;
+            const totalFiles = Object.keys(generatedIcons).length;
+            
+            // Show download instructions
+            alert(`Downloading ${totalFiles} icon files...\n\nAfter download:\n1. Create 'icons' folder in public/\n2. Place all downloaded icons there\n3. Update manifest.json\n4. Deploy your site`);
+            
+            // Download each icon with a small delay
+            Object.keys(generatedIcons).forEach((filename, index) => {
+                setTimeout(() => {
+                    downloadIcon(filename, generatedIcons[filename]);
+                    downloadCount++;
+                    
+                    if (downloadCount === totalFiles) {
+                        setTimeout(() => {
+                            alert('✅ All icons downloaded successfully!\n\nNext steps:\n1. Move all files to front_end/public/icons/\n2. Update your manifest.json\n3. Deploy and test your PWA');
+                        }, 1000);
+                    }
+                }, index * 200); // 200ms delay between downloads
+            });
+        }
+    </script>
+</body>
+</html>
