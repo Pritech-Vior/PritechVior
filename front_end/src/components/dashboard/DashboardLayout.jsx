@@ -188,7 +188,7 @@ const DashboardLayout = ({ children, title, userRole = "student", userRoles = []
         )}
         
         {/* Page Content - Takes remaining space */}
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        <main className="flex-1 p-4 lg:py-6 lg:pl-0 lg:pr-0 overflow-auto">
           <div className="w-full max-w-full">
             {children}
           </div>
