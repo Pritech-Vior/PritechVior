@@ -38,7 +38,7 @@ const VioraChatbot = () => {
     
     elearning: "ThinkForge is our comprehensive e-learning platform offering:\n\n• Full-Stack Web Development (MERN)\n• Mobile App Development\n• Digital Marketing\n• Professional Certifications\n\nCourses start from 50,000 TZS with flexible payment options. Interested in enrolling?",
     
-    contact: "You can reach us through:\n\n📧 Email: info@pritechvior.co.tz\n📱 WhatsApp: +255 123 456 789\n🌐 Website: pritechvior.co.tz\n📍 Location: Mbeya, Tanzania\n\nOur support team is available 24/7. How else can I help you?",
+    contact: "You can reach us through:\n\n📧 Email: info@pritechvior.co.tz\n📱 WhatsApp: +255 627 147 681\n🌐 Website: pritechvior.co.tz\n📍 Location: Mbeya, Tanzania\n\nOur support team is available 24/7. How else can I help you?",
     
     pricing: "Our pricing is very competitive:\n\n• Student Projects: 150,000 - 500,000 TZS\n• Custom Websites: 800,000+ TZS\n• E-Learning Courses: 50,000 - 200,000 TZS\n• Consulting: 100,000+ TZS/month\n\nWe offer flexible payment plans and student discounts!",
     
