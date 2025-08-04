@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Menu, X, Users, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
+import pritechviorLogo from "../../assets/pritechvior-logo.svg";
 import Sidebar from "./Sidebar";
 
 const DashboardLayout = ({ children, title, userRole = "student", userRoles = [] }) => {
@@ -85,12 +86,18 @@ const DashboardLayout = ({ children, title, userRole = "student", userRoles = []
                 <Menu size={20} className="text-n-3 group-hover:text-color-1 transition-colors" />
               )}
             </button>
-            <div className={`w-8 h-8 bg-gradient-to-r ${currentRoleConfig.color} rounded-lg flex items-center justify-center shadow-lg`}>
-              <span className="text-white font-bold text-sm">PV</span>
+            <div className={`w-8 h-8 bg-gradient-to-r ${currentRoleConfig.color} rounded-lg flex items-center justify-center shadow-lg p-1`}>
+              <img 
+                src={pritechviorLogo} 
+                alt="PritechVior Logo" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
               <h2 className="text-n-1 font-semibold text-sm">PritechVior</h2>
-              <p className="text-n-4 text-xs">{currentRoleConfig.title}</p>
+              <p className="text-n-4 text-xs">
+                {userRoles?.length > 1 ? 'Staff Portal' : `${currentRoleConfig.title}`}
+              </p>
             </div>
           </div>
           

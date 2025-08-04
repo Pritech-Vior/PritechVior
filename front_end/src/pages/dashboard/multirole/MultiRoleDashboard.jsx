@@ -26,81 +26,81 @@ import { Link } from "react-router-dom";
 const MultiRoleDashboard = ({ userRoles = ["client", "designer", "technician", "writer"] }) => {
   const [selectedRole, setSelectedRole] = useState(userRoles[0]);
 
-  // Role configurations
+  // Role configurations - Staff-focused data
   const roleConfigs = {
     client: {
-      title: "Client Manager",
+      title: "Client Relations Manager",
       color: "from-blue-500 to-blue-600",
       icon: Briefcase,
-      description: "Manage custom projects and development requests",
-      stats: { projects: 8, completed: 15, investment: "$125.4K", satisfaction: "95%" },
+      description: "Oversee client projects and manage customer relationships",
+      stats: { clients: 24, projects: 18, revenue: "$287.5K", satisfaction: "97%" },
       quickActions: [
-        { title: "View Projects", path: "/client/projects", icon: FileText },
-        { title: "Submit Request", path: "/client/requests", icon: MessageCircle },
-        { title: "Track Progress", path: "/client/reports", icon: BarChart3 },
-        { title: "Schedule Meeting", path: "/client/meetings", icon: Calendar }
+        { title: "Client Portfolio", path: "/client/portfolio", icon: FileText },
+        { title: "Project Pipeline", path: "/client/pipeline", icon: BarChart3 },
+        { title: "Client Meetings", path: "/client/meetings", icon: Calendar },
+        { title: "Revenue Reports", path: "/client/revenue", icon: TrendingUp }
       ]
     },
     designer: {
-      title: "Creative Designer",
+      title: "Creative Design Lead",
       color: "from-purple-500 to-purple-600",
       icon: PenTool,
-      description: "Create stunning UI/UX designs and multimedia content",
-      stats: { projects: 14, designs: 127, rating: "4.9★", assets: "2.4K" },
+      description: "Lead design initiatives and manage creative workflows",
+      stats: { projects: 14, assets: 342, teams: 6, efficiency: "94%" },
       quickActions: [
-        { title: "Design Projects", path: "/designer/projects", icon: Monitor },
-        { title: "Asset Library", path: "/designer/assets", icon: FileText },
-        { title: "Client Reviews", path: "/designer/reviews", icon: Star },
-        { title: "Portfolio Analytics", path: "/designer/analytics", icon: BarChart3 }
+        { title: "Design Pipeline", path: "/designer/pipeline", icon: Monitor },
+        { title: "Team Assets", path: "/designer/assets", icon: FileText },
+        { title: "Quality Reviews", path: "/designer/reviews", icon: Star },
+        { title: "Creative Analytics", path: "/designer/analytics", icon: BarChart3 }
       ]
     },
     technician: {
-      title: "Technical Developer",
+      title: "Technical Operations Manager",
       color: "from-green-500 to-green-600",
       icon: Wrench,
-      description: "Develop and maintain technical solutions and systems",
-      stats: { systems: 127, uptime: "99.7%", issues: 3, tasks: 12 },
+      description: "Oversee system operations and technical infrastructure",
+      stats: { systems: 127, uptime: "99.7%", incidents: 3, efficiency: "96%" },
       quickActions: [
-        { title: "System Monitor", path: "/technician/monitoring", icon: Monitor },
-        { title: "Active Alerts", path: "/technician/alerts", icon: AlertCircle },
-        { title: "Maintenance", path: "/technician/maintenance", icon: Settings },
-        { title: "Performance", path: "/technician/reports", icon: Activity }
+        { title: "System Overview", path: "/technician/overview", icon: Monitor },
+        { title: "Incident Management", path: "/technician/incidents", icon: AlertCircle },
+        { title: "Team Operations", path: "/technician/operations", icon: Settings },
+        { title: "Performance Metrics", path: "/technician/metrics", icon: Activity }
       ]
     },
     writer: {
-      title: "Content Writer",
+      title: "Content Strategy Manager",
       color: "from-yellow-500 to-yellow-600",
       icon: PenTool,
-      description: "Create research papers, documentation, and publications",
-      stats: { articles: 156, words: "248K", rating: "4.8★", projects: 8 },
+      description: "Manage content creation and publication workflows",
+      stats: { publications: 89, writers: 12, quality: "4.9★", reach: "156K" },
       quickActions: [
-        { title: "Writing Projects", path: "/writer/projects", icon: FileText },
-        { title: "Research Ideas", path: "/writer/ideas", icon: Target },
-        { title: "Publications", path: "/writer/analytics", icon: BarChart3 },
-        { title: "Client Feedback", path: "/writer/feedback", icon: MessageCircle }
+        { title: "Content Pipeline", path: "/writer/pipeline", icon: FileText },
+        { title: "Editorial Calendar", path: "/writer/calendar", icon: Calendar },
+        { title: "Publication Metrics", path: "/writer/metrics", icon: BarChart3 },
+        { title: "Team Coordination", path: "/writer/team", icon: Users }
       ]
     }
   };
 
-  // Combined activities from all roles
+  // Combined staff activities from all roles
   const recentActivities = [
-    { id: 1, role: "client", action: "New project request submitted", time: "2 hours ago", type: "request" },
-    { id: 2, role: "designer", action: "UI mockup completed for mobile app", time: "3 hours ago", type: "design" },
-    { id: 3, role: "technician", action: "System performance optimization", time: "5 hours ago", type: "maintenance" },
-    { id: 4, role: "writer", action: "Research paper chapter completed", time: "1 day ago", type: "writing" },
-    { id: 5, role: "client", action: "Project milestone achieved", time: "1 day ago", type: "milestone" },
-    { id: 6, role: "designer", action: "Brand guidelines delivered", time: "2 days ago", type: "delivery" },
-    { id: 7, role: "technician", action: "Critical bug fix deployed", time: "2 days ago", type: "bugfix" },
-    { id: 8, role: "writer", action: "Student thesis consultation", time: "3 days ago", type: "consultation" }
+    { id: 1, role: "client", action: "Client portfolio review completed", time: "2 hours ago", type: "management" },
+    { id: 2, role: "designer", action: "Design team sprint planning", time: "3 hours ago", type: "planning" },
+    { id: 3, role: "technician", action: "Infrastructure upgrade deployment", time: "5 hours ago", type: "deployment" },
+    { id: 4, role: "writer", action: "Content strategy meeting with team", time: "1 day ago", type: "strategy" },
+    { id: 5, role: "client", action: "Revenue target exceeded this quarter", time: "1 day ago", type: "milestone" },
+    { id: 6, role: "designer", action: "Creative workflow optimization", time: "2 days ago", type: "optimization" },
+    { id: 7, role: "technician", action: "Security protocol implementation", time: "2 days ago", type: "security" },
+    { id: 8, role: "writer", action: "Editorial guidelines updated", time: "3 days ago", type: "guidelines" }
   ];
 
-  // Upcoming deadlines across all roles
+  // Upcoming staff responsibilities across all roles
   const upcomingDeadlines = [
-    { id: 1, role: "client", task: "E-Commerce App Review", deadline: "2025-01-10", priority: "high" },
-    { id: 2, role: "designer", task: "Brand Identity Package", deadline: "2025-01-12", priority: "medium" },
-    { id: 3, role: "technician", task: "Security Patch Update", deadline: "2025-01-15", priority: "high" },
-    { id: 4, role: "writer", task: "Research Paper Submission", deadline: "2025-01-18", priority: "medium" },
-    { id: 5, role: "client", task: "University Portal Demo", deadline: "2025-01-20", priority: "low" }
+    { id: 1, role: "client", task: "Quarterly Client Review", deadline: "2025-01-10", priority: "high" },
+    { id: 2, role: "designer", task: "Design Team Performance Review", deadline: "2025-01-12", priority: "medium" },
+    { id: 3, role: "technician", task: "System Maintenance Window", deadline: "2025-01-15", priority: "high" },
+    { id: 4, role: "writer", task: "Content Strategy Presentation", deadline: "2025-01-18", priority: "medium" },
+    { id: 5, role: "client", task: "New Client Onboarding", deadline: "2025-01-20", priority: "low" }
   ];
 
   const getRoleIcon = (role) => {
@@ -113,14 +113,14 @@ const MultiRoleDashboard = ({ userRoles = ["client", "designer", "technician", "
 
   const getActivityIcon = (type) => {
     switch (type) {
-      case "request": return MessageCircle;
-      case "design": return PenTool;
-      case "maintenance": return Wrench;
-      case "writing": return FileText;
+      case "management": return Users;
+      case "planning": return Calendar;
+      case "deployment": return Wrench;
+      case "strategy": return Target;
       case "milestone": return CheckCircle;
-      case "delivery": return TrendingUp;
-      case "bugfix": return AlertCircle;
-      case "consultation": return Users;
+      case "optimization": return TrendingUp;
+      case "security": return AlertCircle;
+      case "guidelines": return FileText;
       default: return Activity;
     }
   };

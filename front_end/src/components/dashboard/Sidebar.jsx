@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import pritechviorLogo from "../../assets/pritechvior-logo.svg";
 import { 
   Home, 
   User, 
@@ -147,13 +148,19 @@ const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles 
       {/* Header */}
       <div className={`flex items-center p-4 border-b border-n-6/50 flex-shrink-0 relative ${collapsed ? 'justify-center' : 'justify-between'}`}>
         <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
-          <div className="w-8 h-8 bg-gradient-to-r from-color-1 to-color-2 rounded-lg flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-sm">PV</span>
+          <div className="w-8 h-8 bg-gradient-to-r from-color-1 to-color-2 rounded-lg flex items-center justify-center shadow-lg p-1">
+            <img 
+              src={pritechviorLogo} 
+              alt="PritechVior Logo" 
+              className="w-full h-full object-contain"
+            />
           </div>
           {!collapsed && (
             <div>
               <h2 className="text-n-1 font-semibold text-sm">PritechVior</h2>
-              <p className="text-n-4 text-xs capitalize">{userRole} Portal</p>
+              <p className="text-n-4 text-xs">
+                {userRoles?.length > 1 ? 'Staff Portal' : `${userRole.charAt(0).toUpperCase() + userRole.slice(1)} Portal`}
+              </p>
             </div>
           )}
         </div>
