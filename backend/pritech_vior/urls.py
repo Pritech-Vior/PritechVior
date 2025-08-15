@@ -16,8 +16,33 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
+# Main API router
+router = DefaultRouter()
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    
+    # API Authentication
+    path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    # App APIs
+    path('shop/', include('shop.urls')),
+    path('elearning/', include('elearning.urls')),
+    path('archive/', include('archive.urls')),
+    path('blog/', include('blog.urls')),
+    path('projects/', include('projects.urls')),
+    
+    # Main API
+    path('api/', include(router.urls)),
+    
+    # DRF Browsable API
+    path('api-auth/', include('rest_framework.urls')),
 ]

@@ -1,188 +1,74 @@
-{% extends "admin/index.html" %}
-{% load static %}
-
-{% block extrastyle %}
-{{ block.super }}
+{% extends "admin/index.html" %} {% load static %} {% block extrastyle %} {{
+block.super }}
 <style>
-.dashboard-welcome {
-    background: linear-gradient(135deg, var(--n-7) 0%, var(--n-6) 100%);
-    border: 1px solid var(--n-6);
+  .dashboard-welcome {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border: 1px solid #90caf9;
     border-radius: 15px;
     padding: 30px;
     margin-bottom: 30px;
     text-align: center;
     position: relative;
     overflow: hidden;
-}
+  }
 
-.dashboard-welcome::before {
-    content: '';
+  .dashboard-welcome::before {
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(172, 106, 255, 0.1) 0%, rgba(255, 200, 118, 0.1) 100%);
-    pointer-events: none;
-}
-
-.dashboard-welcome h1 {
-    color: var(--n-1);
-    font-family: var(--font-sora);
-    font-size: 32px;
-    font-weight: 600;
-    margin-bottom: 15px;
-    color: var(--color-1);
-    position: relative;
+    background: linear-gradient(
+      135deg,
+      rgba(33, 150, 243, 0.1) 0%,
+      rgba(33, 150, 243, 0.05) 100%
+    );
     z-index: 1;
-}
+  }
 
-.dashboard-welcome p {
-    color: var(--n-3);
-    font-family: var(--font-code);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+  .dashboard-welcome h1 {
     position: relative;
-    z-index: 1;
-}
+    z-index: 2;
+    color: #1976d2;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+    font-weight: 300;
+  }
 
-.dashboard-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
+  .dashboard-welcome p {
+    position: relative;
+    z-index: 2;
+    color: #424242;
+    font-size: 1.1em;
+    margin: 0;
+  }
 
-.stat-card {
-    background: var(--n-7);
-    border: 1px solid var(--n-6);
+  .admin-section {
+    background: #fff;
     border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.2s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-}
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(172, 106, 255, 0.05) 0%, rgba(255, 200, 118, 0.05) 100%);
-    pointer-events: none;
-}
-
-.stat-number {
-    font-size: 36px;
-    font-weight: 700;
-    color: var(--color-1);
-    font-family: var(--font-sora);
-    position: relative;
-    z-index: 1;
-}
-
-.stat-label {
-    color: var(--n-3);
-    font-family: var(--font-code);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-top: 5px;
-    position: relative;
-    z-index: 1;
-}
-
-.quick-actions {
-    background: var(--n-7);
-    border: 1px solid var(--n-6);
-    border-radius: 10px;
-    padding: 25px;
-    margin-bottom: 30px;
-}
-
-.quick-actions h2 {
-    color: var(--color-1);
-    font-family: var(--font-sora);
-    font-size: 18px;
-    font-weight: 600;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
-}
+    overflow: hidden;
+  }
 
-.action-buttons {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-}
+  .admin-section h2 {
+    background: #f5f5f5;
+    padding: 15px 20px;
+    margin: 0;
+    border-bottom: 1px solid #e0e0e0;
+    color: #424242;
+  }
 
-.action-btn {
-    background: var(--color-1);
-    border: none;
-    color: var(--n-1);
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-family: var(--font-code);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.2s ease;
-    display: block;
-}
-
-.action-btn:hover {
-    background: var(--color-2);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 200, 118, 0.4);
-    color: var(--n-1);
-    text-decoration: none;
-}
+  .module {
+    border: none !important;
+    border-radius: 0 !important;
+  }
 </style>
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="dashboard-welcome">
-    <h1>Welcome to PritechVior Admin</h1>
-    <p>Manage your platform with powerful tools and insights</p>
+  <h1>Welcome to Pritech Vior Admin</h1>
+  <p>Manage your applications and content from this central dashboard</p>
 </div>
 
-<div class="dashboard-stats">
-    <div class="stat-card">
-        <div class="stat-number">{{ user_count|default:"0" }}</div>
-        <div class="stat-label">Total Users</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-number">{{ project_count|default:"0" }}</div>
-        <div class="stat-label">Active Projects</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-number">{{ blog_count|default:"0" }}</div>
-        <div class="stat-label">Blog Posts</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-number">{{ order_count|default:"0" }}</div>
-        <div class="stat-label">Orders</div>
-    </div>
-</div>
-
-<div class="quick-actions">
-    <h2>Quick Actions</h2>
-    <div class="action-buttons">
-        <a href="{% url 'admin:users_user_add' %}" class="action-btn">Add User</a>
-        <a href="{% url 'admin:projects_project_add' %}" class="action-btn">New Project</a>
-        <a href="{% url 'admin:blog_blogpost_add' %}" class="action-btn">Create Post</a>
-        <a href="{% url 'admin:shop_product_add' %}" class="action-btn">Add Product</a>
-    </div>
-</div>
-
-{{ block.super }}
-{% endblock %}
+{{ block.super }} {% endblock %}
