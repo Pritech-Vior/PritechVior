@@ -106,7 +106,7 @@ class ArchiveViewSet(viewsets.ModelViewSet):
         serializer = ArchiveDownloadRequestSerializer(download_request)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[])
     def download(self, request, pk=None):
         """Download archive file or get download info"""
         archive = self.get_object()
@@ -246,7 +246,7 @@ class ArchivePlatformDownloadViewSet(viewsets.ModelViewSet):
         version_id = self.request.data.get('version')
         serializer.save(version_id=version_id)
     
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[])
     def download(self, request, pk=None):
         """Handle platform-specific download and track count"""
         platform_download = self.get_object()
