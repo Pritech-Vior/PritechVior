@@ -19,10 +19,10 @@ const RegisterPage = () => {
   const { register, isLoading, error, clearError } = useAuth();
 
   const [formData, setFormData] = useState({
-    username: "",
     email: "",
     first_name: "",
     last_name: "",
+    phone: "",
     password: "",
     password_confirm: "",
     role: "guest",
@@ -120,8 +120,9 @@ const RegisterPage = () => {
 
   const validateForm = () => {
     if (
-      !formData.username ||
       !formData.email ||
+      !formData.first_name ||
+      !formData.last_name ||
       !formData.password ||
       !formData.password_confirm
     ) {
@@ -145,6 +146,12 @@ const RegisterPage = () => {
       return false;
     }
 
+    // Phone number validation (optional)
+    if (formData.phone && !/^[\d\s\-+()]+$/.test(formData.phone)) {
+      setFormError("Please enter a valid phone number");
+      return false;
+    }
+
     return true;
   };
 
@@ -156,7 +163,12 @@ const RegisterPage = () => {
     }
 
     try {
-      await register(formData);
+      // Use email as username
+      const registrationData = {
+        ...formData,
+        username: formData.email,
+      };
+      await register(registrationData);
       navigate("/", { replace: true });
     } catch (err) {
       setFormError(err.message);
@@ -164,17 +176,21 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-n-8 flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen bg-n-8 flex items-center justify-center px-4 py-4">
+      <div className="max-w-lg w-full space-y-4">
         {/* Header */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-n-1">Create Account</h2>
-          <p className="mt-2 text-n-3">Join our platform and get started</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-n-1">
+            Create Account
+          </h2>
+          <p className="mt-1 text-sm text-n-3">
+            Join our platform and get started
+          </p>
         </div>
 
         {/* Registration Form */}
-        <div className="bg-n-7 rounded-xl p-8 border border-n-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-n-7 rounded-xl p-6 md:p-8 border border-n-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Error Display */}
             {(error || formError) && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-center space-x-3">
@@ -185,35 +201,8 @@ const RegisterPage = () => {
               </div>
             )}
 
-            {/* Username Field */}
-            <div className="space-y-2">
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-n-1"
-              >
-                Username *
-              </label>
-              <div className="relative">
-                <User
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4"
-                  size={20}
-                />
-                <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  autoComplete="username"
-                  required
-                  value={formData.username}
-                  onChange={handleChange}
-                  className="pl-10"
-                  placeholder="Choose a username"
-                />
-              </div>
-            </div>
-
             {/* Email Field */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label
                 htmlFor="email"
                 className="block text-sm font-medium text-n-1"
@@ -223,7 +212,7 @@ const RegisterPage = () => {
               <div className="relative">
                 <Mail
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4"
-                  size={20}
+                  size={18}
                 />
                 <Input
                   id="email"
@@ -234,42 +223,44 @@ const RegisterPage = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className="pl-10"
-                  placeholder="Enter your email"
+                  placeholder="Enter your email address"
                 />
               </div>
             </div>
 
             {/* Name Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
                 <label
                   htmlFor="first_name"
                   className="block text-sm font-medium text-n-1"
                 >
-                  First Name
+                  First Name *
                 </label>
                 <Input
                   id="first_name"
                   name="first_name"
                   type="text"
                   autoComplete="given-name"
+                  required
                   value={formData.first_name}
                   onChange={handleChange}
                   placeholder="First name"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <label
                   htmlFor="last_name"
                   className="block text-sm font-medium text-n-1"
                 >
-                  Last Name
+                  Last Name *
                 </label>
                 <Input
                   id="last_name"
                   name="last_name"
                   type="text"
                   autoComplete="family-name"
+                  required
                   value={formData.last_name}
                   onChange={handleChange}
                   placeholder="Last name"
@@ -277,8 +268,34 @@ const RegisterPage = () => {
               </div>
             </div>
 
+            {/* Phone Field */}
+            <div className="space-y-1">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-n-1"
+              >
+                Phone Number
+              </label>
+              <div className="relative">
+                <User
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4"
+                  size={18}
+                />
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="pl-10"
+                  placeholder="Phone number (optional)"
+                />
+              </div>
+            </div>
+
             {/* Role Selection */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <label
                 htmlFor="role"
                 className="block text-sm font-medium text-n-1"
@@ -288,7 +305,7 @@ const RegisterPage = () => {
               <div className="relative">
                 <UserCheck
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4"
-                  size={20}
+                  size={18}
                 />
                 <select
                   id="role"
@@ -298,9 +315,9 @@ const RegisterPage = () => {
                   onChange={handleChange}
                   disabled={loadingRoles}
                   className="
-                    w-full pl-10 pr-4 py-3 
+                    w-full pl-10 pr-4 py-2.5 
                     bg-n-8 border border-n-6 rounded-lg
-                    text-n-1 
+                    text-n-1 text-sm
                     focus:outline-none focus:ring-2 focus:ring-primary-1 focus:border-transparent
                     transition-all duration-200
                     disabled:opacity-50 disabled:cursor-not-allowed
@@ -331,96 +348,98 @@ const RegisterPage = () => {
                 </div>
               )}
 
-              <p className="text-xs text-n-4">
+              <p className="text-xs text-n-4 mt-0.5">
                 Select the role that best describes your intended use
               </p>
             </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-n-1"
-              >
-                Password *
-              </label>
-              <div className="relative">
-                <Lock
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4"
-                  size={20}
-                />
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="pl-10 pr-10"
-                  placeholder="Create a password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-n-4 hover:text-n-1 transition-colors"
+            {/* Password Fields */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-n-1"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
+                  Password *
+                </label>
+                <div className="relative">
+                  <Lock
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4"
+                    size={18}
+                  />
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="pl-10 pr-10"
+                    placeholder="Create password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-n-4 hover:text-n-1 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
-              <p className="text-xs text-n-4">
-                Must be at least 8 characters long
-              </p>
+
+              <div className="space-y-1">
+                <label
+                  htmlFor="password_confirm"
+                  className="block text-sm font-medium text-n-1"
+                >
+                  Confirm Password *
+                </label>
+                <div className="relative">
+                  <Lock
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4"
+                    size={18}
+                  />
+                  <Input
+                    id="password_confirm"
+                    name="password_confirm"
+                    type={showConfirmPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    required
+                    value={formData.password_confirm}
+                    onChange={handleChange}
+                    className="pl-10 pr-10"
+                    placeholder="Confirm password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-n-4 hover:text-n-1 transition-colors"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
 
-            {/* Confirm Password Field */}
-            <div className="space-y-2">
-              <label
-                htmlFor="password_confirm"
-                className="block text-sm font-medium text-n-1"
-              >
-                Confirm Password *
-              </label>
-              <div className="relative">
-                <Lock
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4"
-                  size={20}
-                />
-                <Input
-                  id="password_confirm"
-                  name="password_confirm"
-                  type={showConfirmPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  required
-                  value={formData.password_confirm}
-                  onChange={handleChange}
-                  className="pl-10 pr-10"
-                  placeholder="Confirm your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-n-4 hover:text-n-1 transition-colors"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
-                </button>
-              </div>
-            </div>
+            <p className="text-xs text-n-4 -mt-1">
+              Password must be at least 8 characters long
+            </p>
 
             {/* Terms and Conditions */}
-            <div className="flex items-center">
+            <div className="flex items-start">
               <input
                 id="terms"
                 name="terms"
                 type="checkbox"
                 required
-                className="h-4 w-4 text-primary-1 focus:ring-primary-1 border-n-6 rounded"
+                className="h-4 w-4 text-primary-1 focus:ring-primary-1 border-n-6 rounded mt-0.5"
               />
-              <label htmlFor="terms" className="ml-2 block text-sm text-n-3">
+              <label htmlFor="terms" className="ml-2 block text-xs text-n-3">
                 I agree to the{" "}
                 <Link
                   to="/terms"
@@ -448,7 +467,7 @@ const RegisterPage = () => {
             </Button>
 
             {/* Google Sign Up */}
-            <div className="mt-6">
+            <div className="mt-4">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-n-6" />
@@ -458,7 +477,7 @@ const RegisterPage = () => {
                 </div>
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4">
                 <Button
                   type="button"
                   variant="outline"
@@ -493,8 +512,8 @@ const RegisterPage = () => {
           </form>
 
           {/* Sign In Link */}
-          <div className="mt-6 text-center">
-            <p className="text-n-3">
+          <div className="mt-4 text-center">
+            <p className="text-sm text-n-3">
               Already have an account?{" "}
               <Link
                 to="/auth/login"

@@ -13,7 +13,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'password', 'password_confirm', 'role')
+        fields = ('username', 'email', 'first_name', 'last_name', 'phone', 'password', 'password_confirm', 'role')
 
     def validate_role(self, value):
         """Validate role - can be predefined or custom"""
