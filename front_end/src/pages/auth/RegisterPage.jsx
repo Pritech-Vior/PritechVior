@@ -104,6 +104,11 @@ const RegisterPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    if (name === "role") {
+      console.log("Role changed to:", value); // Debug
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
