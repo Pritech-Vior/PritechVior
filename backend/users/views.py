@@ -43,33 +43,76 @@ class UserRegistrationView(APIView):
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            
-            # Generate verification token
-            user.verification_token = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32))
-            user.save()
-            
-            # Generate JWT tokens
-            refresh = RefreshToken.for_user(user)
-            
-            return Response({
-                'message': 'Registration successful',
-                'user': {
-                    'id': user.id,
-                    'username': user.username,
-                    'email': user.email,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'role': user.role,
-                    'is_verified': user.is_verified,
-                },
-                'tokens': {
-                    'access': str(refresh.access_token),
-                    'refresh': str(refresh),
-                }
-            }, status=status.HTTP_201_CREATED)
+            try:
+                user = serializer.save()
+                
+                # Generate verification token
+                user.verification_token = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32))
+                user.save()
+                
+                # Generate JWT tokens
+                refresh = RefreshToken.for_user(user)
+                
+                return Response({
+                    'message': 'Registration successful',
+                    'user': {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'role': user.role,
+                        'is_verified': user.is_verified,
+                    },
+                    'tokens': {
+                        'access': str(refresh.access_token),
+                        'refresh': str(refresh),
+                    }
+                }, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                # Handle database integrity errors (like duplicate email)
+                error_message = str(e)
+                if 'email' in error_message.lower() and ('unique' in error_message.lower() or 'duplicate' in error_message.lower()):
+                    return Response({
+                        'error': 'Email already exists',
+                        'message': 'An account with this email address already exists. Please use a different email or try logging in.'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    return Response({
+                        'error': 'Registration failed',
+                        'message': 'An error occurred during registration. Please try again.'
+                    }, status=status.HTTP_400_BAD_REQUEST)
         
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Handle validation errors
+        errors = serializer.errors
+        error_messages = []
+        
+        # Create user-friendly error messages
+        for field, field_errors in errors.items():
+            if field == 'email' or field == 'username':
+                for error in field_errors:
+                    if 'already exists' in str(error) or 'unique' in str(error):
+                        error_messages.append('An account with this email address already exists.')
+                    else:
+                        error_messages.append(f'Email: {error}')
+            elif field == 'password':
+                for error in field_errors:
+                    error_messages.append(f'Password: {error}')
+            elif field == 'role':
+                for error in field_errors:
+                    error_messages.append(f'Role: {error}')
+            elif field == 'non_field_errors':
+                for error in field_errors:
+                    error_messages.append(str(error))
+            else:
+                for error in field_errors:
+                    error_messages.append(f'{field.replace("_", " ").title()}: {error}')
+        
+        return Response({
+            'error': 'Validation failed',
+            'message': error_messages[0] if error_messages else 'Please check your input and try again.',
+            'details': error_messages
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GoogleAuthView(APIView):

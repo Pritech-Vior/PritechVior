@@ -15,6 +15,18 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email', 'first_name', 'last_name', 'phone', 'password', 'password_confirm', 'role')
 
+    def validate_email(self, value):
+        """Validate email uniqueness"""
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("An account with this email address already exists.")
+        return value
+
+    def validate_username(self, value):
+        """Validate username uniqueness - since we use email as username, provide email-specific error"""
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("An account with this email address already exists.")
+        return value
+
     def validate_role(self, value):
         """Validate role - can be predefined or custom"""
         # Check if it's a predefined role

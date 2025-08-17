@@ -133,7 +133,10 @@ class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
+        // Use the improved error message from backend
+        const errorMessage =
+          errorData.message || errorData.error || "Registration failed";
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
