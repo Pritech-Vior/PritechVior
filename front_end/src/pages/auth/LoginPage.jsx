@@ -1,21 +1,22 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Eye, EyeOff, Lock, User, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, Lock, User } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/ToastContext";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isLoading, error, clearError } = useAuth();
+  const { login, isLoading, clearError } = useAuth();
+  const { showError, showSuccess } = useToast();
 
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [formError, setFormError] = useState("");
 
   const from = location.state?.from?.pathname || "/";
 
@@ -26,23 +27,23 @@ const LoginPage = () => {
       [name]: value,
     }));
     // Clear errors when user starts typing
-    if (error) clearError();
-    if (formError) setFormError("");
+    if (clearError) clearError();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.username || !formData.password) {
-      setFormError("Please fill in all fields");
+      showError("Please fill in all fields");
       return;
     }
 
     try {
       await login(formData);
+      showSuccess("Login successful! Welcome back.");
       navigate(from, { replace: true });
     } catch (err) {
-      setFormError(err.message);
+      showError(err.message || "Login failed. Please try again.");
     }
   };
 
@@ -58,16 +59,6 @@ const LoginPage = () => {
         {/* Login Form */}
         <div className="bg-n-7 rounded-xl p-8 border border-n-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Error Display */}
-            {(error || formError) && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-center space-x-3">
-                <AlertCircle className="text-red-400" size={20} />
-                <span className="text-red-400 text-sm">
-                  {error || formError}
-                </span>
-              </div>
-            )}
-
             {/* Username Field */}
             <div className="space-y-2">
               <label
@@ -209,7 +200,7 @@ const LoginPage = () => {
           {/* Sign Up Link */}
           <div className="mt-6 text-center">
             <p className="text-n-3">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
                 to="/auth/register"
                 className="font-medium text-primary-1 hover:text-primary-2 transition-colors"

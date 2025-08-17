@@ -1,22 +1,16 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Eye,
-  EyeOff,
-  User,
-  Mail,
-  Lock,
-  AlertCircle,
-  UserCheck,
-} from "lucide-react";
+import { Eye, EyeOff, User, Mail, Lock, UserCheck } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/ToastContext";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import authService from "../../services/authService";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { register, isLoading, error, clearError } = useAuth();
+  const { register, isLoading, clearError } = useAuth();
+  const { showError, showSuccess } = useToast();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -29,7 +23,6 @@ const RegisterPage = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formError, setFormError] = useState("");
   const [roles, setRoles] = useState([]);
   const [loadingRoles, setLoadingRoles] = useState(true);
 
@@ -114,8 +107,7 @@ const RegisterPage = () => {
       [name]: value,
     }));
     // Clear errors when user starts typing
-    if (error) clearError();
-    if (formError) setFormError("");
+    if (clearError) clearError();
   };
 
   const validateForm = () => {
@@ -126,29 +118,29 @@ const RegisterPage = () => {
       !formData.password ||
       !formData.password_confirm
     ) {
-      setFormError("Please fill in all required fields");
+      showError("Please fill in all required fields");
       return false;
     }
 
     if (formData.password !== formData.password_confirm) {
-      setFormError("Passwords do not match");
+      showError("Passwords do not match");
       return false;
     }
 
     if (formData.password.length < 8) {
-      setFormError("Password must be at least 8 characters long");
+      showError("Password must be at least 8 characters long");
       return false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setFormError("Please enter a valid email address");
+      showError("Please enter a valid email address");
       return false;
     }
 
     // Phone number validation (optional)
     if (formData.phone && !/^[\d\s\-+()]+$/.test(formData.phone)) {
-      setFormError("Please enter a valid phone number");
+      showError("Please enter a valid phone number");
       return false;
     }
 
@@ -169,9 +161,10 @@ const RegisterPage = () => {
         username: formData.email,
       };
       await register(registrationData);
+      showSuccess("Account created successfully! Welcome to PritechVior.");
       navigate("/", { replace: true });
     } catch (err) {
-      setFormError(err.message);
+      showError(err.message || "Registration failed. Please try again.");
     }
   };
 
@@ -191,16 +184,6 @@ const RegisterPage = () => {
         {/* Registration Form */}
         <div className="bg-n-7 rounded-xl p-6 md:p-8 border border-n-6">
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Error Display */}
-            {(error || formError) && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-center space-x-3">
-                <AlertCircle className="text-red-400" size={20} />
-                <span className="text-red-400 text-sm">
-                  {error || formError}
-                </span>
-              </div>
-            )}
-
             {/* Email Field */}
             <div className="space-y-1">
               <label
