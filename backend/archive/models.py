@@ -42,22 +42,6 @@ class Archive(models.Model):
     file_size = models.PositiveIntegerField(help_text='File size in bytes', default=0)
     file_size_display = models.CharField(max_length=20, blank=True, help_text='Human readable file size')
     
-    # External Source Information
-    SOURCE_TYPE_CHOICES = [
-        ('hosted', 'Hosted File'),
-        ('external', 'External Download'),
-        ('github', 'GitHub Release'),
-        ('official', 'Official Website'),
-        ('direct', 'Direct Link'),
-        ('mirror', 'Mirror Site'),
-    ]
-    
-    source_type = models.CharField(max_length=20, choices=SOURCE_TYPE_CHOICES, default='hosted')
-    external_url = models.URLField(blank=True, help_text='External download/source URL')
-    official_website = models.URLField(blank=True, help_text='Official website URL')
-    github_repo = models.URLField(blank=True, help_text='GitHub repository URL')
-    mirror_links = models.JSONField(default=list, help_text='Alternative download mirrors')
-    
     # Software Details
     license = models.CharField(max_length=30, choices=LICENSE_CHOICES, default='free')
     platforms = models.JSONField(default=list, help_text='List of supported platforms')
@@ -74,8 +58,21 @@ class Archive(models.Model):
     is_public = models.BooleanField(default=True)
     
     # Download Management
-    request_only = models.BooleanField(default=False, help_text='Require contact for download')
-    download_instructions = models.TextField(blank=True, help_text='Special download instructions')
+    download_url = models.URLField(blank=True, help_text='External download URL if not hosting file')
+    request_only = models.BooleanField(default=True, help_text='Require contact for download')
+    
+    # External Source Information
+    source_type = models.CharField(max_length=20, choices=[
+        ('file', 'File Upload'),
+        ('external', 'External Source'),
+        ('github', 'GitHub Repository'),
+        ('official', 'Official Website'),
+    ], default='file')
+    external_url = models.URLField(blank=True, help_text='External source URL')
+    github_repo = models.URLField(blank=True, help_text='GitHub repository URL')
+    official_website = models.URLField(blank=True, help_text='Official website URL')
+    mirror_links = models.JSONField(default=list, blank=True, help_text='List of mirror download links')
+    download_instructions = models.TextField(blank=True, help_text='Instructions for downloading from external sources')
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -108,66 +105,6 @@ class Archive(models.Model):
         """Return platforms as list for frontend"""
         return self.platforms if isinstance(self.platforms, list) else []
     
-    @property
-    def mirror_list(self):
-        """Return mirror links as list for frontend"""
-        return self.mirror_links if isinstance(self.mirror_links, list) else []
-    
-    @property
-    def download_link(self):
-        """Get the primary download link"""
-        if self.source_type == 'hosted' and self.file:
-            return self.file.url
-        elif self.external_url:
-            return self.external_url
-        return None
-    
-    @property
-    def has_external_source(self):
-        """Check if this archive uses external sources"""
-        return self.source_type != 'hosted' or bool(self.external_url)
-    
-    @property
-    def all_download_links(self):
-        """Get all available download links"""
-        links = []
-        
-        # Primary download link
-        primary = self.download_link
-        if primary:
-            links.append({
-                'type': 'primary',
-                'url': primary,
-                'label': self.get_source_type_display()
-            })
-        
-        # Official website
-        if self.official_website:
-            links.append({
-                'type': 'official',
-                'url': self.official_website,
-                'label': 'Official Website'
-            })
-        
-        # GitHub repository
-        if self.github_repo:
-            links.append({
-                'type': 'github',
-                'url': self.github_repo,
-                'label': 'GitHub Repository'
-            })
-        
-        # Mirror links
-        for i, mirror in enumerate(self.mirror_list):
-            if mirror:
-                links.append({
-                    'type': 'mirror',
-                    'url': mirror,
-                    'label': f'Mirror {i + 1}'
-                })
-        
-        return links
-    
     def increment_download_count(self):
         """Increment download count"""
         self.download_count += 1
@@ -175,6 +112,30 @@ class Archive(models.Model):
     
     def __str__(self):
         return self.title
+
+
+class ArchiveComment(models.Model):
+    """Comments on archives"""
+    archive = models.ForeignKey(Archive, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='archive_comments')
+    comment = models.TextField()
+    rating = models.PositiveIntegerField(choices=[
+        (1, '1 Star'),
+        (2, '2 Stars'),
+        (3, '3 Stars'),
+        (4, '4 Stars'),
+        (5, '5 Stars'),
+    ], null=True, blank=True, help_text='Optional rating (1-5 stars)')
+    is_approved = models.BooleanField(default=True, help_text='Moderate comments if needed')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['archive', 'user']  # One comment per user per archive
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.archive.title}"
 
 
 class ArchiveDownloadRequest(models.Model):

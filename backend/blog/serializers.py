@@ -5,15 +5,15 @@ from .models import BlogPost, NewsletterSubscription
 class BlogPostSerializer(serializers.ModelSerializer):
     """Serializer for blog posts"""
     author = serializers.StringRelatedField(read_only=True)
-    tag_list = serializers.ReadOnlyField()
-    date = serializers.ReadOnlyField()
+    excerpt = serializers.ReadOnlyField()
+    read_time = serializers.ReadOnlyField()
     
     class Meta:
         model = BlogPost
         fields = [
             'id', 'title', 'slug', 'content', 'excerpt', 'author',
-            'category', 'tags', 'tag_list', 'image', 'status',
-            'featured', 'read_time', 'views', 'date', 'created_at', 'updated_at'
+            'category', 'tags', 'featured_image', 'is_published',
+            'is_featured', 'read_time', 'views', 'created_at', 'updated_at'
         ]
 
 

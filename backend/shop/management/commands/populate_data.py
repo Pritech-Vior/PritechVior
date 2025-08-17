@@ -204,8 +204,6 @@ class Command(BaseCommand):
                 'featured': True,
                 'requirements': 'Windows 10 or later, 4GB RAM, 4GB storage',
                 'archived_by': admin_user,
-                'source_type': 'internal',
-                'file_path': '/archives/microsoft-office-2021.zip',
             },
             {
                 'title': 'Adobe Photoshop CC 2024',
@@ -220,10 +218,6 @@ class Command(BaseCommand):
                 'featured': True,
                 'requirements': 'Windows 10 64-bit, 8GB RAM, 20GB storage',
                 'archived_by': admin_user,
-                'source_type': 'external',
-                'external_url': 'https://www.adobe.com/products/photoshop.html',
-                'official_website': 'https://www.adobe.com',
-                'download_instructions': 'Visit Adobe website, create account, download Creative Cloud, install Photoshop',
             },
             {
                 'title': 'Visual Studio Code',
@@ -238,12 +232,6 @@ class Command(BaseCommand):
                 'featured': True,
                 'requirements': 'Windows 7 or later, 1GB RAM',
                 'archived_by': admin_user,
-                'source_type': 'github',
-                'github_repo': 'https://github.com/microsoft/vscode',
-                'external_url': 'https://code.visualstudio.com/download',
-                'official_website': 'https://code.visualstudio.com',
-                'mirror_links': ['https://github.com/microsoft/vscode/releases', 'https://update.code.visualstudio.com'],
-                'download_instructions': 'Download from official website or GitHub releases page',
             },
         ]
         

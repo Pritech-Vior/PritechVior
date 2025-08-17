@@ -42,7 +42,7 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated and self.request.user.role in ['ceo', 'admin', 'writer']:
             return BlogPost.objects.all()
-        return BlogPost.objects.filter(status='published')
+        return BlogPost.objects.filter(is_published=True)
     
     def retrieve(self, request, *args, **kwargs):
         """Override retrieve to increment view count"""
@@ -55,21 +55,21 @@ class BlogPostViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def featured(self, request):
         """Get featured blog posts"""
-        featured_posts = BlogPost.objects.filter(status='published', featured=True)
+        featured_posts = BlogPost.objects.filter(is_published=True, is_featured=True)
         serializer = BlogPostSerializer(featured_posts, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'])
     def recent(self, request):
         """Get recent blog posts"""
-        recent_posts = BlogPost.objects.filter(status='published').order_by('-created_at')[:5]
+        recent_posts = BlogPost.objects.filter(is_published=True).order_by('-created_at')[:5]
         serializer = BlogPostSerializer(recent_posts, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'])
     def popular(self, request):
         """Get popular blog posts"""
-        popular_posts = BlogPost.objects.filter(status='published').order_by('-views')[:5]
+        popular_posts = BlogPost.objects.filter(is_published=True).order_by('-views')[:5]
         serializer = BlogPostSerializer(popular_posts, many=True)
         return Response(serializer.data)
 

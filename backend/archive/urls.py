@@ -4,6 +4,7 @@ from . import views
 
 router = DefaultRouter()
 router.register(r'archives', views.ArchiveViewSet)
+router.register(r'comments', views.ArchiveCommentViewSet)
 router.register(r'download-requests', views.ArchiveDownloadRequestViewSet)
 
 urlpatterns = [
