@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import ButtonGradient from "./assets/svg/ButtonGradient";
 import Chatbot from "./components/Chatbot";
+import { AuthProvider } from "./contexts/AuthContext";
 import HomePage from "./pages/HomePage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
@@ -15,8 +16,12 @@ import AboutPage from "./pages/AboutPage";
 import ScholarPage from "./pages/ScholarPage";
 import ContactPage from "./pages/ContactPage";
 import ProjectsPage from "./pages/ProjectsPage";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
+
+// New Authentication Pages
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+
+// Legacy auth pages (will be removed later)
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 
 // Dashboard Imports
@@ -36,7 +41,7 @@ import MultiRoleWrapper from "./pages/dashboard/MultiRoleWrapper";
 
 const App = () => {
   return (
-    <>
+    <AuthProvider>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/blog" element={<BlogPage />} />
@@ -52,8 +57,14 @@ const App = () => {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/scholar" element={<ScholarPage />} />
         <Route path="/contact" element={<ContactPage />} />
+
+        {/* New Authentication Routes */}
+        <Route path="/auth/login" element={<LoginPage />} />
+        <Route path="/auth/register" element={<RegisterPage />} />
+
+        {/* Legacy routes for backward compatibility */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/signup" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         {/* Dashboard Routes */}
@@ -76,7 +87,7 @@ const App = () => {
 
       <ButtonGradient />
       <Chatbot />
-    </>
+    </AuthProvider>
   );
 };
 

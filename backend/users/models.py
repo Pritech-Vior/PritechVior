@@ -4,9 +4,39 @@ from django.db import models
 class CustomRole(models.Model):
     name = models.CharField(max_length=50, unique=True)
     permissions = models.ManyToManyField(Permission, blank=True)
+    is_visible_on_registration = models.BooleanField(default=True, help_text="Show this role on registration page")
+    description = models.TextField(blank=True, help_text="Role description for users")
+    icon = models.CharField(max_length=50, blank=True, help_text="Icon name for frontend display")
 
     def __str__(self):
         return self.name
+
+
+class RoleConfiguration(models.Model):
+    """Configuration for which predefined roles are visible on registration"""
+    role_name = models.CharField(max_length=20, unique=True, choices=[
+        ('guest', 'Guest'),
+        ('student', 'Student'),
+        ('parent', 'Parent'),
+        ('trainer', 'Trainer'),
+        ('client', 'Client'),
+        ('designer', 'Designer'),
+        ('writer', 'Writer'),
+        ('technician', 'Technician'),
+        ('admin', 'Admin'),
+        ('treasury', 'Treasury'),
+        ('ceo', 'CEO'),
+    ])
+    is_visible_on_registration = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0, help_text="Order to display on registration page")
+    description = models.TextField(blank=True, help_text="Role description for users")
+    icon = models.CharField(max_length=50, blank=True, help_text="Icon name for frontend display")
+    
+    class Meta:
+        ordering = ['display_order', 'role_name']
+    
+    def __str__(self):
+        return f"{self.get_role_name_display()} ({'Visible' if self.is_visible_on_registration else 'Hidden'})"
 
 
 class User(AbstractUser):
