@@ -1,5 +1,36 @@
 from rest_framework import serializers
-from .models import Archive, ArchiveDownloadRequest, ArchiveComment
+from .models import Archive, ArchiveDownloadRequest, ArchiveComment, ArchiveVersion, ArchivePlatformDownload
+
+
+class ArchivePlatformDownloadSerializer(serializers.ModelSerializer):
+    """Serializer for platform-specific downloads"""
+    download_link = serializers.ReadOnlyField()
+    file_size_formatted = serializers.ReadOnlyField()
+    platform_display = serializers.CharField(source='get_platform_display', read_only=True)
+    
+    class Meta:
+        model = ArchivePlatformDownload
+        fields = [
+            'id', 'platform', 'platform_display', 'download_link', 'file_size', 
+            'file_size_display', 'file_size_formatted', 'architecture', 'installer_type',
+            'platform_requirements', 'download_count', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['download_count', 'created_at', 'updated_at']
+
+
+class ArchiveVersionSerializer(serializers.ModelSerializer):
+    """Serializer for archive versions"""
+    platform_downloads = ArchivePlatformDownloadSerializer(many=True, read_only=True)
+    file_size_formatted = serializers.ReadOnlyField()
+    
+    class Meta:
+        model = ArchiveVersion
+        fields = [
+            'id', 'version', 'release_date', 'release_notes', 'is_latest', 'is_beta', 
+            'is_deprecated', 'file_size', 'file_size_display', 'file_size_formatted',
+            'requirements', 'platform_downloads', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
 
 
 class ArchiveCommentSerializer(serializers.ModelSerializer):
@@ -19,8 +50,10 @@ class ArchiveSerializer(serializers.ModelSerializer):
     file_size_formatted = serializers.ReadOnlyField()
     platform_list = serializers.ReadOnlyField()
     comments = ArchiveCommentSerializer(many=True, read_only=True)
+    versions = ArchiveVersionSerializer(many=True, read_only=True)
     comments_count = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
+    latest_version = serializers.SerializerMethodField()
     
     class Meta:
         model = Archive
@@ -31,7 +64,7 @@ class ArchiveSerializer(serializers.ModelSerializer):
             'archived_by', 'tags', 'is_public', 'download_url', 'request_only',
             'source_type', 'external_url', 'github_repo', 'official_website',
             'mirror_links', 'download_instructions', 'created_at', 'updated_at',
-            'comments', 'comments_count', 'average_rating'
+            'comments', 'comments_count', 'average_rating', 'versions', 'latest_version'
         ]
         read_only_fields = ['archived_by', 'download_count', 'created_at', 'updated_at']
     
@@ -44,6 +77,13 @@ class ArchiveSerializer(serializers.ModelSerializer):
             total_rating = sum(comment.rating for comment in approved_comments)
             return round(total_rating / approved_comments.count(), 1)
         return 0.0
+    
+    def get_latest_version(self, obj):
+        """Get the latest version with platform downloads"""
+        latest = obj.versions.filter(is_latest=True).first()
+        if latest:
+            return ArchiveVersionSerializer(latest).data
+        return None
 
 
 class ArchiveDownloadRequestSerializer(serializers.ModelSerializer):

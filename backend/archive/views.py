@@ -6,8 +6,14 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from django.db.models import Q
 import django_filters.rest_framework as filters
 
-from .models import Archive, ArchiveDownloadRequest, ArchiveComment
-from .serializers import ArchiveSerializer, ArchiveDownloadRequestSerializer, ArchiveCommentSerializer
+from .models import Archive, ArchiveDownloadRequest, ArchiveComment, ArchiveVersion, ArchivePlatformDownload
+from .serializers import (
+    ArchiveSerializer, 
+    ArchiveDownloadRequestSerializer, 
+    ArchiveCommentSerializer,
+    ArchiveVersionSerializer,
+    ArchivePlatformDownloadSerializer
+)
 
 
 class ArchiveFilter(filters.FilterSet):
@@ -100,19 +106,23 @@ class ArchiveViewSet(viewsets.ModelViewSet):
         serializer = ArchiveDownloadRequestSerializer(download_request)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    @action(detail=True, methods=['post'])
     def download(self, request, pk=None):
         """Download archive file or get download info"""
         archive = self.get_object()
         user = request.user
         
         # Check permissions for request-only archives
-        if archive.request_only and not archive.is_public:
+        if archive.request_only:
+            if not user.is_authenticated:
+                return Response({'error': 'Authentication required for request-only downloads'}, status=status.HTTP_401_UNAUTHORIZED)
+            
             if not ArchiveDownloadRequest.objects.filter(
                 user=user, archive=archive, status__in=['approved', 'sent']
             ).exists():
-                return Response({'error': 'Download not authorized'}, status=status.HTTP_403_FORBIDDEN)
+                return Response({'error': 'Download not authorized. Please request access first.'}, status=status.HTTP_403_FORBIDDEN)
         
+        # For non-request-only archives, allow public access
         # Increment download count
         archive.increment_download_count()
         
@@ -201,3 +211,56 @@ class ArchiveDownloadRequestViewSet(viewsets.ModelViewSet):
         
         serializer = ArchiveDownloadRequestSerializer(download_request)
         return Response(serializer.data)
+
+
+class ArchiveVersionViewSet(viewsets.ModelViewSet):
+    """ViewSet for archive versions"""
+    queryset = ArchiveVersion.objects.all()
+    serializer_class = ArchiveVersionSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        archive_id = self.request.query_params.get('archive')
+        if archive_id:
+            return ArchiveVersion.objects.filter(archive_id=archive_id)
+        return ArchiveVersion.objects.all()
+    
+    def perform_create(self, serializer):
+        archive_id = self.request.data.get('archive')
+        serializer.save(archive_id=archive_id)
+
+
+class ArchivePlatformDownloadViewSet(viewsets.ModelViewSet):
+    """ViewSet for platform-specific downloads"""
+    queryset = ArchivePlatformDownload.objects.all()
+    serializer_class = ArchivePlatformDownloadSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        version_id = self.request.query_params.get('version')
+        if version_id:
+            return ArchivePlatformDownload.objects.filter(version_id=version_id)
+        return ArchivePlatformDownload.objects.all()
+    
+    def perform_create(self, serializer):
+        version_id = self.request.data.get('version')
+        serializer.save(version_id=version_id)
+    
+    @action(detail=True, methods=['post'])
+    def download(self, request, pk=None):
+        """Handle platform-specific download and track count"""
+        platform_download = self.get_object()
+        
+        # Increment download count
+        platform_download.increment_download_count()
+        
+        # Return download info
+        serializer = ArchivePlatformDownloadSerializer(platform_download)
+        return Response({
+            'download_link': platform_download.download_link,
+            'platform': platform_download.platform,
+            'architecture': platform_download.architecture,
+            'file_size': platform_download.file_size_display,
+            'download_count': platform_download.download_count,
+            'message': 'Download tracked successfully'
+        })

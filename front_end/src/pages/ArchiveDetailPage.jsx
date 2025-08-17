@@ -9,6 +9,8 @@ import {
   User,
   MessageCircle,
   ArrowLeft,
+  Monitor,
+  ExternalLink,
 } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -28,6 +30,49 @@ const ArchiveDetailPage = () => {
   const [downloadMessage, setDownloadMessage] = useState("");
   const [commentText, setCommentText] = useState("");
   const [commentRating, setCommentRating] = useState(5);
+
+  // Handle platform-specific download
+  const handlePlatformDownload = async (platformDownload) => {
+    if (!platformDownload.download_link) {
+      alert("Download link not available for this platform.");
+      return;
+    }
+
+    try {
+      setDownloadRequesting(true);
+
+      // Track the download and get updated download info
+      const downloadData = await archiveService.trackPlatformDownload(
+        platformDownload.id
+      );
+
+      // Update archive download count locally if possible
+      if (archive) {
+        setArchive((prev) => ({
+          ...prev,
+          download_count: (prev.download_count || 0) + 1,
+        }));
+      }
+
+      // Initiate the download
+      if (downloadData.download_link) {
+        window.open(downloadData.download_link, "_blank");
+      } else {
+        // Fallback to the original link if API doesn't return one
+        window.open(platformDownload.download_link, "_blank");
+      }
+    } catch (error) {
+      console.error("Error tracking download:", error);
+      // Still attempt the download even if tracking fails
+      try {
+        window.open(platformDownload.download_link, "_blank");
+      } catch (downloadError) {
+        alert("Failed to start download. Please try again.");
+      }
+    } finally {
+      setDownloadRequesting(false);
+    }
+  };
 
   useEffect(() => {
     const fetchArchiveDetails = async () => {
@@ -328,6 +373,216 @@ const ArchiveDetailPage = () => {
                     {archive.description}
                   </p>
                 </div>
+
+                {/* Platforms */}
+                {archive.latest_version &&
+                  archive.latest_version.platform_downloads &&
+                  archive.latest_version.platform_downloads.length > 0 && (
+                    <div className="mt-8">
+                      <h3 className="text-lg font-semibold text-n-1 mb-4">
+                        Supported Platforms (Latest Version)
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {archive.latest_version.platform_downloads.map(
+                          (platformDownload, index) => (
+                            <div
+                              key={index}
+                              className="bg-n-8 rounded-lg p-4 border border-n-6 hover:border-color-1 transition-colors group cursor-pointer"
+                              onClick={() =>
+                                handlePlatformDownload(platformDownload)
+                              }
+                            >
+                              <div className="flex items-center gap-3">
+                                <Monitor size={24} className="text-color-1" />
+                                <div>
+                                  <h4 className="text-n-1 font-medium capitalize group-hover:text-color-1 transition-colors">
+                                    {platformDownload.platform_display}
+                                    {platformDownload.architecture &&
+                                      ` (${platformDownload.architecture})`}
+                                  </h4>
+                                  <p className="text-n-4 text-sm">
+                                    {platformDownload.file_size_display} •{" "}
+                                    {platformDownload.installer_type ||
+                                      "Download"}
+                                  </p>
+                                </div>
+                                {platformDownload.download_link && (
+                                  <ExternalLink
+                                    size={16}
+                                    className="text-n-4 group-hover:text-color-1 transition-colors ml-auto"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                {/* Fallback to old platform system if no versions */}
+                {(!archive.latest_version ||
+                  !archive.latest_version.platform_downloads ||
+                  archive.latest_version.platform_downloads.length === 0) &&
+                  archive.platforms &&
+                  archive.platforms.length > 0 && (
+                    <div className="mt-8">
+                      <h3 className="text-lg font-semibold text-n-1 mb-4">
+                        Supported Platforms
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {archive.platforms.map((platform, index) => (
+                          <div
+                            key={index}
+                            className="bg-n-8 rounded-lg p-4 border border-n-6 hover:border-color-1 transition-colors group cursor-pointer"
+                            onClick={() => {
+                              // Handle platform-specific download
+                              if (
+                                archive.mirror_links &&
+                                archive.mirror_links[index]
+                              ) {
+                                window.open(
+                                  archive.mirror_links[index],
+                                  "_blank"
+                                );
+                              }
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Monitor size={24} className="text-color-1" />
+                              <div>
+                                <h4 className="text-n-1 font-medium capitalize group-hover:text-color-1 transition-colors">
+                                  {platform}
+                                </h4>
+                                <p className="text-n-4 text-sm">
+                                  {archive.mirror_links &&
+                                  archive.mirror_links[index]
+                                    ? "Click to download"
+                                    : "Available"}
+                                </p>
+                              </div>
+                              {archive.mirror_links &&
+                                archive.mirror_links[index] && (
+                                  <ExternalLink
+                                    size={16}
+                                    className="text-n-4 group-hover:text-color-1 transition-colors ml-auto"
+                                  />
+                                )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                {/* Versions & Downloads */}
+                {archive.versions && archive.versions.length > 0 && (
+                  <div className="mt-8">
+                    <h3 className="text-lg font-semibold text-n-1 mb-4">
+                      Available Versions & Downloads
+                    </h3>
+                    <div className="space-y-3">
+                      {archive.versions.map((version, index) => (
+                        <div
+                          key={index}
+                          className="bg-n-8 rounded-lg p-4 border border-n-6 hover:border-color-1 transition-colors group"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-3">
+                              <Download size={20} className="text-color-1" />
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-n-1 font-medium group-hover:text-color-1 transition-colors">
+                                    Version {version.version}
+                                  </h4>
+                                  {version.is_latest && (
+                                    <span className="bg-color-2 text-white px-2 py-1 rounded text-xs font-semibold">
+                                      Latest
+                                    </span>
+                                  )}
+                                  {version.is_beta && (
+                                    <span className="bg-yellow-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                                      Beta
+                                    </span>
+                                  )}
+                                  {version.is_deprecated && (
+                                    <span className="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                                      Deprecated
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-n-4 text-sm">
+                                  Released: {formatDate(version.release_date)}
+                                  {version.file_size_display &&
+                                    ` • ${version.file_size_display}`}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Platform Downloads for this version */}
+                          {version.platform_downloads &&
+                            version.platform_downloads.length > 0 && (
+                              <div className="ml-8 space-y-2">
+                                {version.platform_downloads.map(
+                                  (platformDownload, platIndex) => (
+                                    <div
+                                      key={platIndex}
+                                      className="flex items-center justify-between p-3 bg-n-7 rounded-lg border border-n-6 hover:border-color-1 transition-colors cursor-pointer"
+                                      onClick={() =>
+                                        handlePlatformDownload(platformDownload)
+                                      }
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <Monitor
+                                          size={16}
+                                          className="text-color-1"
+                                        />
+                                        <div>
+                                          <h5 className="text-n-2 font-medium">
+                                            {platformDownload.platform_display}
+                                            {platformDownload.architecture &&
+                                              ` (${platformDownload.architecture})`}
+                                          </h5>
+                                          <p className="text-n-4 text-xs">
+                                            {platformDownload.file_size_display ||
+                                              "Unknown size"}
+                                            {platformDownload.installer_type &&
+                                              ` • ${platformDownload.installer_type}`}
+                                            {platformDownload.download_count >
+                                              0 &&
+                                              ` • ${platformDownload.download_count} downloads`}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      {platformDownload.download_link && (
+                                        <ExternalLink
+                                          size={14}
+                                          className="text-n-4 hover:text-color-1 transition-colors"
+                                        />
+                                      )}
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            )}
+
+                          {/* Release Notes */}
+                          {version.release_notes && (
+                            <div className="mt-3 ml-8 p-3 bg-n-7 rounded-lg border border-n-6">
+                              <h6 className="text-n-2 font-medium mb-1 text-sm">
+                                Release Notes:
+                              </h6>
+                              <p className="text-n-3 text-sm whitespace-pre-line">
+                                {version.release_notes}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* System Requirements */}
@@ -485,17 +740,76 @@ const ArchiveDetailPage = () => {
                     <h3 className="text-lg font-semibold text-n-1 mb-4">
                       Download Software
                     </h3>
-                    <p className="text-n-3 text-sm mb-4">
-                      This software is available for immediate download.
-                    </p>
-                    <Button
-                      onClick={handleDirectDownload}
-                      className="w-full mb-4"
-                      disabled={downloadRequesting}
-                    >
-                      <Download size={16} className="mr-2" />
-                      {downloadRequesting ? "Downloading..." : "Download Now"}
-                    </Button>
+
+                    {/* Show platform-specific downloads if available */}
+                    {archive.latest_version?.platform_downloads?.length > 0 ? (
+                      <>
+                        <p className="text-n-3 text-sm mb-4">
+                          Choose your platform for download:
+                        </p>
+                        <div className="space-y-2 mb-4">
+                          {archive.latest_version.platform_downloads.map(
+                            (platformDownload, index) => (
+                              <Button
+                                key={index}
+                                onClick={() =>
+                                  handlePlatformDownload(platformDownload)
+                                }
+                                variant="outline"
+                                className="w-full justify-between"
+                                disabled={downloadRequesting}
+                              >
+                                <div className="flex items-center">
+                                  <Monitor size={16} className="mr-2" />
+                                  <span>
+                                    {platformDownload.platform_display}
+                                    {platformDownload.architecture &&
+                                      ` (${platformDownload.architecture})`}
+                                  </span>
+                                </div>
+                                <span className="text-n-4 text-sm">
+                                  {platformDownload.file_size_display}
+                                </span>
+                              </Button>
+                            )
+                          )}
+                        </div>
+
+                        {/* General download option */}
+                        <div className="border-t border-n-6 pt-4 mb-4">
+                          <p className="text-n-4 text-xs mb-3">
+                            Or use general download:
+                          </p>
+                          <Button
+                            onClick={handleDirectDownload}
+                            variant="outline"
+                            className="w-full"
+                            disabled={downloadRequesting}
+                          >
+                            <Download size={16} className="mr-2" />
+                            {downloadRequesting
+                              ? "Downloading..."
+                              : "General Download"}
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-n-3 text-sm mb-4">
+                          This software is available for immediate download.
+                        </p>
+                        <Button
+                          onClick={handleDirectDownload}
+                          className="w-full mb-4"
+                          disabled={downloadRequesting}
+                        >
+                          <Download size={16} className="mr-2" />
+                          {downloadRequesting
+                            ? "Downloading..."
+                            : "Download Now"}
+                        </Button>
+                      </>
+                    )}
 
                     {/* Alternative: Request Download */}
                     <div className="border-t border-n-6 pt-4">

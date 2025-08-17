@@ -177,7 +177,7 @@ class ArchiveService {
       const response = await fetch(
         `${API_BASE_URL}/archive/api/archives/${archiveId}/download/`,
         {
-          method: "GET",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -214,6 +214,31 @@ class ArchiveService {
   // Get featured archives
   async getFeaturedArchives() {
     return this.getArchives({ featured: true });
+  }
+
+  // Track platform download
+  async trackPlatformDownload(platformDownloadId) {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/archive/api/platform-downloads/${platformDownloadId}/download/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error tracking platform download:", error);
+      throw error;
+    }
   }
 }
 
