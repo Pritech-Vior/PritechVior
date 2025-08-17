@@ -208,6 +208,11 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Google signup function (same as login, backend handles the difference)
+  const googleSignUp = async (googleToken, role = "guest") => {
+    return googleLogin(googleToken, role);
+  };
+
   // Logout function
   const logout = async () => {
     try {
@@ -249,6 +254,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     googleLogin,
+    googleSignUp,
     logout,
     updateUser,
     clearError,

@@ -6,10 +6,11 @@ import { useToast } from "../../contexts/ToastContext";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import authService from "../../services/authService";
+import googleOAuthService from "../../services/googleOAuthService";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const { register, isLoading, clearError } = useAuth();
+  const { register, googleSignUp, isLoading, clearError } = useAuth();
   const { showError, showSuccess } = useToast();
 
   const [formData, setFormData] = useState({
@@ -165,6 +166,31 @@ const RegisterPage = () => {
       navigate("/", { replace: true });
     } catch (err) {
       showError(err.message || "Registration failed. Please try again.");
+    }
+  };
+
+  const handleGoogleSignUp = async (e) => {
+    e.preventDefault(); // Prevent form submission
+    e.stopPropagation(); // Stop event bubbling
+
+    try {
+      showSuccess("Redirecting to Google...");
+
+      // Get Google OAuth token
+      const googleToken = await googleOAuthService.signUp();
+
+      // Use the selected role from the form, defaulting to guest
+      const selectedRole = formData.role || "guest";
+
+      // Call backend with Google token and selected role
+      await googleSignUp(googleToken, selectedRole);
+
+      showSuccess(
+        "Account created successfully with Google! Welcome to PritechVior."
+      );
+      navigate("/", { replace: true });
+    } catch (err) {
+      showError(err.message || "Google sign-up failed. Please try again.");
     }
   };
 
@@ -465,10 +491,8 @@ const RegisterPage = () => {
                   type="button"
                   variant="outline"
                   className="w-full"
-                  onClick={() => {
-                    // Google Sign Up will be implemented later
-                    console.log("Google Sign Up clicked");
-                  }}
+                  onClick={handleGoogleSignUp}
+                  disabled={isLoading || loadingRoles}
                 >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path

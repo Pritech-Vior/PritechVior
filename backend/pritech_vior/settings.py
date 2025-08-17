@@ -194,7 +194,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_ALL_ORIGINS = True  # For development only
 
 # Google OAuth2 Settings
-GOOGLE_OAUTH2_CLIENT_ID = "your-google-client-id.apps.googleusercontent.com"
+GOOGLE_OAUTH2_CLIENT_ID = "974890248625-v3pmajp89ktr8vslgl4jdpoqj57711sk.apps.googleusercontent.com"
 GOOGLE_OAUTH2_CLIENT_SECRET = "your-google-client-secret"
 
 # Frontend URL (for password reset emails)

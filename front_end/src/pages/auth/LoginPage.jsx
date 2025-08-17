@@ -5,11 +5,12 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
+import googleOAuthService from "../../services/googleOAuthService";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, isLoading, clearError } = useAuth();
+  const { login, googleLogin, isLoading, clearError } = useAuth();
   const { showError, showSuccess } = useToast();
 
   const [formData, setFormData] = useState({
@@ -44,6 +45,30 @@ const LoginPage = () => {
       navigate(from, { replace: true });
     } catch (err) {
       showError(err.message || "Login failed. Please try again.");
+    }
+  };
+
+  const handleGoogleSignIn = async (e) => {
+    e.preventDefault(); // Prevent form submission
+    e.stopPropagation(); // Stop event bubbling
+
+    console.log("Google Sign In clicked - preventing form submission");
+
+    try {
+      showSuccess("Redirecting to Google...");
+
+      // Get Google OAuth token
+      const googleToken = await googleOAuthService.signIn();
+      console.log("Google token received:", googleToken ? "✓" : "✗");
+
+      // Call backend with Google token (use guest role for login)
+      await googleLogin(googleToken, "guest");
+
+      showSuccess("Login successful with Google! Welcome back.");
+      navigate(from, { replace: true });
+    } catch (err) {
+      console.error("Google sign-in error:", err);
+      showError(err.message || "Google sign-in failed. Please try again.");
     }
   };
 
@@ -168,10 +193,8 @@ const LoginPage = () => {
                   type="button"
                   variant="outline"
                   className="w-full"
-                  onClick={() => {
-                    // Google Sign In will be implemented later
-                    console.log("Google Sign In clicked");
-                  }}
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
                 >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
