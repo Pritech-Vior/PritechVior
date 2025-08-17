@@ -7,6 +7,7 @@ import BlogPostPage from "./pages/BlogPostPage";
 import BlogManagePage from "./pages/BlogManagePage";
 import BlogCreatePage from "./pages/BlogCreatePage";
 import ArchivePage from "./pages/ArchivePage";
+import ArchiveDetailPage from "./pages/ArchiveDetailPage";
 import ThinkForgePage from "./pages/ThinkForgePage";
 import ViorMartPage from "./pages/ViorMartPage";
 import ViorXPage from "./pages/ViorXPage";
@@ -43,6 +44,7 @@ const App = () => {
         <Route path="/blog/manage" element={<BlogManagePage />} />
         <Route path="/blog/create" element={<BlogCreatePage />} />
         <Route path="/archive" element={<ArchivePage />} />
+        <Route path="/archive/:id" element={<ArchiveDetailPage />} />
         <Route path="/thinkforge" element={<ThinkForgePage />} />
         <Route path="/viormart" element={<ViorMartPage />} />
         <Route path="/viorx" element={<ViorXPage />} />
@@ -53,7 +55,7 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        
+
         {/* Dashboard Routes */}
         <Route path="/admin/*" element={<AdminDashboard />} />
         <Route path="/ceo/*" element={<CEODashboard />} />
@@ -67,7 +69,7 @@ const App = () => {
         <Route path="/designer/*" element={<DesignerDashboard />} />
         <Route path="/writer/*" element={<WriterDashboard />} />
         <Route path="/multirole/*" element={<MultiRoleDashboard />} />
-        
+
         {/* Demo route for multi-role functionality */}
         <Route path="/demo-multirole/*" element={<MultiRoleWrapper />} />
       </Routes>

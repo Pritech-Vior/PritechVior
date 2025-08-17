@@ -26,7 +26,7 @@ class ArchiveSerializer(serializers.ModelSerializer):
         model = Archive
         fields = [
             'id', 'title', 'description', 'version', 'category',
-            'file', 'file_size', 'file_size_formatted', 'license', 'platforms', 'platform_list',
+            'file', 'file_size', 'file_size_display', 'file_size_formatted', 'license', 'platforms', 'platform_list',
             'requirements', 'download_count', 'rating', 'featured',
             'archived_by', 'tags', 'is_public', 'download_url', 'request_only',
             'source_type', 'external_url', 'github_repo', 'official_website',
