@@ -12,6 +12,7 @@ import ArchivePage from "./pages/ArchivePage";
 import ArchiveDetailPage from "./pages/ArchiveDetailPage";
 import ThinkForgePage from "./pages/ThinkForgePage";
 import ViorMartPage from "./pages/ViorMartPage";
+import ProductDetailPage from "./pages/ProductDetailPage";
 import ViorXPage from "./pages/ViorXPage";
 import AboutPage from "./pages/AboutPage";
 import ScholarPage from "./pages/ScholarPage";
@@ -54,6 +55,7 @@ const App = () => {
           <Route path="/archive/:id" element={<ArchiveDetailPage />} />
           <Route path="/thinkforge" element={<ThinkForgePage />} />
           <Route path="/viormart" element={<ViorMartPage />} />
+          <Route path="/product/:slug" element={<ProductDetailPage />} />
           <Route path="/viorx" element={<ViorXPage />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/about" element={<AboutPage />} />

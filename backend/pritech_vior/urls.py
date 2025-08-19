@@ -37,7 +37,7 @@ urlpatterns = [
     
     # App APIs
     path('users/', include('users.urls')),
-    path('shop/', include('shop.urls')),
+    path('api/shop/', include('shop.urls')),
     path('elearning/', include('elearning.urls')),
     path('archive/', include('archive.urls')),
     path('blog/', include('blog.urls')),
