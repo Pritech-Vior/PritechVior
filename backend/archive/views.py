@@ -90,6 +90,11 @@ class ArchiveViewSet(viewsets.ModelViewSet):
         archive = self.get_object()
         user = request.user
         
+        # Debug logging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"Download request from user: {user} (authenticated: {user.is_authenticated})")
+        
         # Check if already requested
         if ArchiveDownloadRequest.objects.filter(user=user, archive=archive).exists():
             return Response({'error': 'Already requested'}, status=status.HTTP_400_BAD_REQUEST)

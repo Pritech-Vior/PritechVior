@@ -81,7 +81,7 @@ class ArchiveService {
   }
 
   // Request download for an archive
-  async requestDownload(archiveId, email, message, token = null) {
+  async requestDownload(archiveId, email, message, token) {
     try {
       const headers = {
         "Content-Type": "application/json",
@@ -89,6 +89,10 @@ class ArchiveService {
 
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
+      } else {
+        throw new Error(
+          "Authentication token is required for download requests"
+        );
       }
 
       const response = await fetch(

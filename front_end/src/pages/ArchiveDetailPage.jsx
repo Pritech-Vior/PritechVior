@@ -17,10 +17,13 @@ import Footer from "../components/Footer";
 import Section from "../components/Section";
 import Button from "../components/Button";
 import archiveService from "../services/archiveService";
+import { useAuth } from "../contexts/AuthContext";
+import authService from "../services/authService";
 
 const ArchiveDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [archive, setArchive] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -101,13 +104,32 @@ const ArchiveDetailPage = () => {
     fetchComments();
   }, [id]);
 
+  // Auto-populate email when user is logged in
+  useEffect(() => {
+    if (isAuthenticated && user?.email && !downloadEmail) {
+      setDownloadEmail(user.email);
+    }
+  }, [isAuthenticated, user, downloadEmail]);
+
   const handleDownloadRequest = async (e) => {
     e.preventDefault();
     if (!downloadEmail.trim()) return;
 
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      alert("Please log in to request downloads.");
+      return;
+    }
+
     try {
       setDownloadRequesting(true);
-      await archiveService.requestDownload(id, downloadEmail, downloadMessage);
+      const { accessToken } = authService.getTokens();
+      await archiveService.requestDownload(
+        id,
+        downloadEmail,
+        downloadMessage,
+        accessToken
+      );
       alert(
         "Download request submitted successfully! We will contact you soon."
       );
@@ -169,13 +191,19 @@ const ArchiveDetailPage = () => {
     e.preventDefault();
     if (!commentText.trim()) return;
 
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      alert("Please log in to add comments.");
+      return;
+    }
+
     try {
-      // This would need authentication token in real implementation
+      const { accessToken } = authService.getTokens();
       await archiveService.addComment(
         id,
         commentText,
         commentRating,
-        "dummy-token"
+        accessToken
       );
       setCommentText("");
       setCommentRating(5);
@@ -188,7 +216,7 @@ const ArchiveDetailPage = () => {
         console.error("Error fetching comments:", err);
       }
     } catch (err) {
-      alert("Failed to add comment. Please log in and try again.");
+      alert("Failed to add comment. Please try again.");
       console.error("Error adding comment:", err);
     }
   };
