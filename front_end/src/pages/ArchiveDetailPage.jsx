@@ -18,12 +18,14 @@ import Section from "../components/Section";
 import Button from "../components/Button";
 import archiveService from "../services/archiveService";
 import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 import authService from "../services/authService";
 
 const ArchiveDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { showSuccess, showError, showWarning } = useToast();
   const [archive, setArchive] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ const ArchiveDetailPage = () => {
   // Handle platform-specific download
   const handlePlatformDownload = async (platformDownload) => {
     if (!platformDownload.download_link) {
-      alert("Download link not available for this platform.");
+      showError("Download link not available for this platform.");
       return;
     }
 
@@ -70,7 +72,7 @@ const ArchiveDetailPage = () => {
       try {
         window.open(platformDownload.download_link, "_blank");
       } catch (downloadError) {
-        alert("Failed to start download. Please try again.");
+        showError("Failed to start download. Please try again.");
       }
     } finally {
       setDownloadRequesting(false);
@@ -117,7 +119,7 @@ const ArchiveDetailPage = () => {
 
     // Check if user is authenticated
     if (!isAuthenticated) {
-      alert("Please log in to request downloads.");
+      showWarning("Please log in to request downloads.");
       return;
     }
 
@@ -130,13 +132,13 @@ const ArchiveDetailPage = () => {
         downloadMessage,
         accessToken
       );
-      alert(
+      showSuccess(
         "Download request submitted successfully! We will contact you soon."
       );
       setDownloadEmail("");
       setDownloadMessage("");
     } catch (err) {
-      alert("Failed to submit download request. Please try again.");
+      showError("Failed to submit download request. Please try again.");
       console.error("Error requesting download:", err);
     } finally {
       setDownloadRequesting(false);
@@ -178,7 +180,7 @@ const ArchiveDetailPage = () => {
       // Increment download count
       archive.download_count = (archive.download_count || 0) + 1;
     } catch (err) {
-      alert(
+      showError(
         "Failed to start download. Please try the request download option."
       );
       console.error("Error downloading:", err);
@@ -193,7 +195,7 @@ const ArchiveDetailPage = () => {
 
     // Check if user is authenticated
     if (!isAuthenticated) {
-      alert("Please log in to add comments.");
+      showWarning("Please log in to add comments.");
       return;
     }
 
@@ -205,6 +207,7 @@ const ArchiveDetailPage = () => {
         commentRating,
         accessToken
       );
+      showSuccess("Comment added successfully!");
       setCommentText("");
       setCommentRating(5);
 
@@ -216,7 +219,7 @@ const ArchiveDetailPage = () => {
         console.error("Error fetching comments:", err);
       }
     } catch (err) {
-      alert("Failed to add comment. Please try again.");
+      showError("Failed to add comment. Please try again.");
       console.error("Error adding comment:", err);
     }
   };

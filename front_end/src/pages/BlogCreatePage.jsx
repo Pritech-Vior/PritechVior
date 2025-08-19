@@ -6,9 +6,11 @@ import Heading from "../components/Heading";
 import Button from "../components/Button";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { useToast } from "../contexts/ToastContext";
 
 const BlogCreatePage = () => {
   const navigate = useNavigate();
+  const { showSuccess } = useToast();
   const [formData, setFormData] = useState({
     title: "",
     excerpt: "",
@@ -18,14 +20,14 @@ const BlogCreatePage = () => {
     tags: "",
     featured: false,
     image: null,
-    imagePreview: null
+    imagePreview: null,
   });
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -34,10 +36,10 @@ const BlogCreatePage = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           image: file,
-          imagePreview: e.target.result
+          imagePreview: e.target.result,
         }));
       };
       reader.readAsDataURL(file);
@@ -46,19 +48,19 @@ const BlogCreatePage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // In a real application, you would send this data to your backend
     console.log("Blog post created:", formData);
-    
+
     // Show success message and redirect
-    alert("Blog post created successfully!");
+    showSuccess("Blog post created successfully!");
     navigate("/blog");
   };
 
   return (
     <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
       <Header />
-      
+
       <Section className="pt-[12rem] -mt-[5.25rem]" id="blog-create">
         <div className="container relative max-w-4xl mx-auto">
           {/* Back Button */}
@@ -96,7 +98,7 @@ const BlogCreatePage = () => {
                     placeholder="Enter an engaging title"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-n-2 text-sm font-medium mb-2">
                     Category *
@@ -133,7 +135,7 @@ const BlogCreatePage = () => {
                     placeholder="Enter author name"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-n-2 text-sm font-medium mb-2">
                     Tags (comma separated)
@@ -201,7 +203,7 @@ const BlogCreatePage = () => {
                       </span>
                     )}
                   </div>
-                  
+
                   {formData.imagePreview && (
                     <div className="relative inline-block">
                       <img
@@ -211,7 +213,13 @@ const BlogCreatePage = () => {
                       />
                       <button
                         type="button"
-                        onClick={() => setFormData(prev => ({ ...prev, image: null, imagePreview: null }))}
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            image: null,
+                            imagePreview: null,
+                          }))
+                        }
                         className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                       >
                         <X size={16} />
@@ -230,13 +238,19 @@ const BlogCreatePage = () => {
                   onChange={handleInputChange}
                   className="w-4 h-4 text-color-1 bg-n-8 border-n-6 rounded focus:ring-color-1"
                 />
-                <label htmlFor="featured" className="text-n-2 text-sm font-medium">
+                <label
+                  htmlFor="featured"
+                  className="text-n-2 text-sm font-medium"
+                >
                   Mark as Featured Post
                 </label>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                <Button type="submit" className="flex items-center justify-center gap-2">
+                <Button
+                  type="submit"
+                  className="flex items-center justify-center gap-2"
+                >
                   <Save size={16} />
                   Publish Post
                 </Button>

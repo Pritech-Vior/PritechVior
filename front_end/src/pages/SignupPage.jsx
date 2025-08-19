@@ -5,8 +5,10 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Section from "../components/Section";
 import Button from "../components/Button";
+import { useToast } from "../contexts/ToastContext";
 
 const SignupPage = () => {
+  const { showError } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,16 +23,16 @@ const SignupPage = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match!");
+      showError("Passwords don't match!");
       return;
     }
     // Handle signup logic here
@@ -40,14 +42,14 @@ const SignupPage = () => {
   return (
     <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
       <Header />
-      
+
       <Section className="pt-[12rem] -mt-[5.25rem]" id="signup">
         <div className="container relative z-1">
           <div className="flex items-center justify-center min-h-screen -mt-[12rem] pt-[12rem] pb-[6rem] px-4">
             <div className="w-full max-w-sm">
               {/* Back Link */}
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="inline-flex items-center gap-2 text-n-3 hover:text-color-1 transition-colors mb-6 font-code text-sm"
               >
                 <ArrowLeft size={16} />
@@ -58,7 +60,7 @@ const SignupPage = () => {
               <div className="relative">
                 {/* Background gradient effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-color-1/10 to-color-2/10 rounded-xl blur-2xl -z-1"></div>
-                
+
                 <div className="relative bg-n-8 border border-n-6 rounded-xl p-6 backdrop-blur-sm">
                   <div className="text-center mb-6">
                     <h1 className="h4 mb-3">Create Account</h1>
@@ -179,7 +181,9 @@ const SignupPage = () => {
                         <button
                           type="button"
                           className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          onClick={() =>
+                            setShowConfirmPassword(!showConfirmPassword)
+                          }
                         >
                           {showConfirmPassword ? (
                             <EyeOff className="h-4 w-4 text-n-4 hover:text-n-1 transition-colors" />
@@ -202,13 +206,22 @@ const SignupPage = () => {
                           className="h-4 w-4 text-color-1 bg-n-7 border-n-6 rounded focus:ring-color-1/50 focus:ring-2 mt-1"
                           required
                         />
-                        <label htmlFor="agree-terms" className="ml-3 block text-sm text-n-3">
+                        <label
+                          htmlFor="agree-terms"
+                          className="ml-3 block text-sm text-n-3"
+                        >
                           I agree to the{" "}
-                          <Link to="/terms" className="text-color-1 hover:text-color-2 transition-colors">
+                          <Link
+                            to="/terms"
+                            className="text-color-1 hover:text-color-2 transition-colors"
+                          >
                             Terms of Service
                           </Link>{" "}
                           and{" "}
-                          <Link to="/privacy" className="text-color-1 hover:text-color-2 transition-colors">
+                          <Link
+                            to="/privacy"
+                            className="text-color-1 hover:text-color-2 transition-colors"
+                          >
                             Privacy Policy
                           </Link>
                         </label>
@@ -222,17 +235,17 @@ const SignupPage = () => {
                           onChange={handleInputChange}
                           className="h-4 w-4 text-color-1 bg-n-7 border-n-6 rounded focus:ring-color-1/50 focus:ring-2"
                         />
-                        <label htmlFor="subscribe-newsletter" className="ml-3 block text-sm text-n-3">
+                        <label
+                          htmlFor="subscribe-newsletter"
+                          className="ml-3 block text-sm text-n-3"
+                        >
                           Subscribe to our newsletter for updates
                         </label>
                       </div>
                     </div>
 
                     {/* Submit Button */}
-                    <Button 
-                      type="submit"
-                      className="w-full justify-center"
-                    >
+                    <Button type="submit" className="w-full justify-center">
                       Create Account
                     </Button>
                   </form>
@@ -241,8 +254,8 @@ const SignupPage = () => {
                   <div className="mt-6 text-center">
                     <p className="text-n-4 text-sm">
                       Already have an account?{" "}
-                      <Link 
-                        to="/login" 
+                      <Link
+                        to="/login"
                         className="text-color-1 hover:text-color-2 font-medium transition-colors"
                       >
                         Sign in here
@@ -257,7 +270,9 @@ const SignupPage = () => {
                         <div className="w-full border-t border-n-6" />
                       </div>
                       <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-n-8 text-n-4 text-xs">Or continue with</span>
+                        <span className="px-2 bg-n-8 text-n-4 text-xs">
+                          Or continue with
+                        </span>
                       </div>
                     </div>
 
@@ -267,13 +282,17 @@ const SignupPage = () => {
                         type="button"
                         className="w-full inline-flex justify-center py-2.5 px-4 border border-n-6 rounded-lg bg-n-7 hover:bg-n-6 transition-colors"
                       >
-                        <span className="text-n-1 font-medium text-sm">Google</span>
+                        <span className="text-n-1 font-medium text-sm">
+                          Google
+                        </span>
                       </button>
                       <button
                         type="button"
                         className="w-full inline-flex justify-center py-2.5 px-4 border border-n-6 rounded-lg bg-n-7 hover:bg-n-6 transition-colors"
                       >
-                        <span className="text-n-1 font-medium text-sm">GitHub</span>
+                        <span className="text-n-1 font-medium text-sm">
+                          GitHub
+                        </span>
                       </button>
                     </div>
                   </div>
