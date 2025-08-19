@@ -193,6 +193,22 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_ALL_ORIGINS = True  # For development only
 
+# Allow credentials for JWT authentication
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow Authorization header for JWT tokens
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
 # Google OAuth2 Settings
 GOOGLE_OAUTH2_CLIENT_ID = "974890248625-v3pmajp89ktr8vslgl4jdpoqj57711sk.apps.googleusercontent.com"
 GOOGLE_OAUTH2_CLIENT_SECRET = "your-google-client-secret"

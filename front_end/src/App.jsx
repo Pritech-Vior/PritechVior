@@ -47,7 +47,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/blog" element={<BlogPage />} />
-          <Route path="/blog/:id" element={<BlogPostPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/blog/manage" element={<BlogManagePage />} />
           <Route path="/blog/create" element={<BlogCreatePage />} />
           <Route path="/archive" element={<ArchivePage />} />
