@@ -1,12 +1,23 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.html import format_html
-from .models import User, CustomRole
+from .models import User, CustomRole, RoleConfiguration
 @admin.register(CustomRole)
 class CustomRoleAdmin(admin.ModelAdmin):
-    list_display = ('name',)
-    search_fields = ('name',)
+    list_display = ('name', 'is_visible_on_registration', 'description')
+    list_filter = ('is_visible_on_registration',)
+    search_fields = ('name', 'description')
     filter_horizontal = ('permissions',)
+    fields = ('name', 'description', 'icon', 'is_visible_on_registration', 'permissions')
+
+
+@admin.register(RoleConfiguration)
+class RoleConfigurationAdmin(admin.ModelAdmin):
+    list_display = ('role_name', 'is_visible_on_registration', 'display_order', 'description')
+    list_filter = ('is_visible_on_registration',)
+    list_editable = ('is_visible_on_registration', 'display_order')
+    ordering = ('display_order', 'role_name')
+    fields = ('role_name', 'is_visible_on_registration', 'display_order', 'description', 'icon')
 
 
 @admin.register(User)
@@ -46,8 +57,3 @@ class UserAdmin(BaseUserAdmin):
             obj.get_role_display()
         )
     role_badge.short_description = 'Role'
-    
-    class Media:
-        css = {
-            'all': ('admin/css/pritechvior_admin.css',)
-        }

@@ -1,11 +1,20 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { User, ChevronDown, LogIn, UserPlus, Settings, LogOut } from "lucide-react";
+import {
+  User,
+  ChevronDown,
+  LogIn,
+  UserPlus,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import Button from "./Button";
+import { useAuth } from "../contexts/AuthContext";
 
 const AccountDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { isAuthenticated, user, logout } = useAuth();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -21,18 +30,13 @@ const AccountDropdown = () => {
     };
   }, []);
 
-  // Example user state - replace with actual auth state
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState({ name: "John Doe", email: "john@example.com" });
-
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
+  const handleLogout = async () => {
+    await logout();
     setIsOpen(false);
-    // Add actual logout logic here
   };
 
   return (
@@ -43,12 +47,16 @@ const AccountDropdown = () => {
         onClick={toggleDropdown}
       >
         <span className="flex items-center gap-2">
-          {isLoggedIn ? user.name.split(' ')[0] : 'Account'}
+          {isAuthenticated
+            ? user?.first_name || user?.email?.split("@")[0] || "Account"
+            : "Account"}
           <User size={18} />
         </span>
-        <ChevronDown 
-          size={16} 
-          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+        <ChevronDown
+          size={16}
+          className={`transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
         />
       </Button>
 
@@ -58,12 +66,16 @@ const AccountDropdown = () => {
         className="flex lg:hidden items-center gap-2 font-code text-lg uppercase text-n-1 transition-colors hover:text-color-1 px-4 py-4 md:py-6"
       >
         <span className="flex items-center gap-2">
-          {isLoggedIn ? user.name.split(' ')[0] : 'Account'}
+          {isAuthenticated
+            ? user?.first_name || user?.email?.split("@")[0] || "Account"
+            : "Account"}
           <User size={18} />
         </span>
-        <ChevronDown 
-          size={16} 
-          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+        <ChevronDown
+          size={16}
+          className={`transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
         />
       </button>
 
@@ -72,9 +84,9 @@ const AccountDropdown = () => {
         <div className="absolute right-0 top-full mt-2 w-64 bg-n-8 border border-n-6 rounded-lg shadow-xl backdrop-blur-sm z-50 overflow-hidden">
           {/* Background gradient effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-color-1/5 to-color-2/5 pointer-events-none"></div>
-          
+
           <div className="relative">
-            {isLoggedIn ? (
+            {isAuthenticated ? (
               // Logged in user menu
               <>
                 {/* User Info */}
@@ -84,8 +96,12 @@ const AccountDropdown = () => {
                       <User size={16} className="text-white" />
                     </div>
                     <div>
-                      <p className="font-medium text-n-1 text-sm">{user.name}</p>
-                      <p className="text-xs text-n-3">{user.email}</p>
+                      <p className="font-medium text-n-1 text-sm">
+                        {user?.first_name && user?.last_name
+                          ? `${user.first_name} ${user.last_name}`
+                          : user?.email?.split("@")[0] || "User"}
+                      </p>
+                      <p className="text-xs text-n-3">{user?.email}</p>
                     </div>
                   </div>
                 </div>
@@ -122,10 +138,14 @@ const AccountDropdown = () => {
               // Guest user menu
               <div className="py-2">
                 <div className="px-3 py-2.5 border-b border-n-6">
-                  <p className="text-n-1 font-medium text-sm">Welcome to PritechVior</p>
-                  <p className="text-xs text-n-3">Sign in to access your account</p>
+                  <p className="text-n-1 font-medium text-sm">
+                    Welcome to PritechVior
+                  </p>
+                  <p className="text-xs text-n-3">
+                    Sign in to access your account
+                  </p>
                 </div>
-                
+
                 <div className="px-3 py-3 space-y-2.5">
                   <Link
                     to="/login"
@@ -135,7 +155,7 @@ const AccountDropdown = () => {
                     <LogIn size={16} />
                     Sign In
                   </Link>
-                  
+
                   <Link
                     to="/signup"
                     onClick={() => setIsOpen(false)}

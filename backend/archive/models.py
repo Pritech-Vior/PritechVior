@@ -114,6 +114,120 @@ class Archive(models.Model):
         return self.title
 
 
+class ArchiveVersion(models.Model):
+    """Multiple versions of an archive"""
+    archive = models.ForeignKey(Archive, on_delete=models.CASCADE, related_name='versions')
+    version = models.CharField(max_length=50, help_text='Version number (e.g., 1.0.0, 2.1.3)')
+    release_date = models.DateTimeField()
+    release_notes = models.TextField(blank=True, help_text='What\'s new in this version')
+    is_latest = models.BooleanField(default=False, help_text='Mark as latest version')
+    is_beta = models.BooleanField(default=False, help_text='Beta/pre-release version')
+    is_deprecated = models.BooleanField(default=False, help_text='Deprecated version')
+    
+    # Version-specific details
+    file_size = models.PositiveIntegerField(help_text='File size in bytes', default=0)
+    file_size_display = models.CharField(max_length=20, blank=True, help_text='Human readable file size')
+    requirements = models.TextField(blank=True, help_text='Version-specific system requirements')
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-release_date']
+        unique_together = ['archive', 'version']
+    
+    def save(self, *args, **kwargs):
+        # Auto-generate file size display
+        if self.file_size and not self.file_size_display:
+            self.file_size_display = self.file_size_formatted
+        
+        # Ensure only one latest version per archive
+        if self.is_latest:
+            ArchiveVersion.objects.filter(archive=self.archive, is_latest=True).exclude(id=self.id).update(is_latest=False)
+        
+        super().save(*args, **kwargs)
+    
+    @property
+    def file_size_formatted(self):
+        """Format file size in human readable format"""
+        if not self.file_size:
+            return "Unknown"
+        
+        size = self.file_size
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if size < 1024.0:
+                return f"{size:.1f} {unit}"
+            size /= 1024.0
+        return f"{size:.1f} TB"
+    
+    def __str__(self):
+        return f"{self.archive.title} v{self.version}"
+
+
+class ArchivePlatformDownload(models.Model):
+    """Platform-specific download links for archive versions"""
+    version = models.ForeignKey(ArchiveVersion, on_delete=models.CASCADE, related_name='platform_downloads')
+    platform = models.CharField(max_length=20, choices=Archive.PLATFORM_CHOICES)
+    
+    # Download options
+    file = models.FileField(upload_to='archives/%Y/%m/platforms/', blank=True, null=True, help_text='Upload file for this platform')
+    download_url = models.URLField(blank=True, help_text='External download URL for this platform')
+    
+    # Platform-specific details
+    file_size = models.PositiveIntegerField(help_text='Platform-specific file size in bytes', default=0)
+    file_size_display = models.CharField(max_length=20, blank=True, help_text='Human readable file size')
+    architecture = models.CharField(max_length=20, blank=True, help_text='e.g., x64, x86, arm64')
+    installer_type = models.CharField(max_length=30, blank=True, help_text='e.g., msi, exe, dmg, deb, rpm')
+    platform_requirements = models.TextField(blank=True, help_text='Platform-specific requirements')
+    
+    # Statistics
+    download_count = models.PositiveIntegerField(default=0)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['platform']
+        unique_together = ['version', 'platform', 'architecture']
+    
+    def save(self, *args, **kwargs):
+        # Auto-generate file size display
+        if self.file_size and not self.file_size_display:
+            self.file_size_display = self.file_size_formatted
+        super().save(*args, **kwargs)
+    
+    @property
+    def file_size_formatted(self):
+        """Format file size in human readable format"""
+        if not self.file_size:
+            return "Unknown"
+        
+        size = self.file_size
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if size < 1024.0:
+                return f"{size:.1f} {unit}"
+            size /= 1024.0
+        return f"{size:.1f} TB"
+    
+    @property
+    def download_link(self):
+        """Get the actual download link (file or external URL)"""
+        if self.file:
+            return self.file.url
+        return self.download_url
+    
+    def increment_download_count(self):
+        """Increment download count for this platform"""
+        self.download_count += 1
+        self.save(update_fields=['download_count'])
+        # Also increment the main archive download count
+        self.version.archive.increment_download_count()
+    
+    def __str__(self):
+        arch_suffix = f" ({self.architecture})" if self.architecture else ""
+        return f"{self.version} - {self.get_platform_display()}{arch_suffix}"
+
+
 class ArchiveComment(models.Model):
     """Comments on archives"""
     archive = models.ForeignKey(Archive, on_delete=models.CASCADE, related_name='comments')

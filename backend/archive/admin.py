@@ -1,5 +1,26 @@
 from django.contrib import admin
-from .models import Archive, ArchiveDownloadRequest, ArchiveComment
+from .models import Archive, ArchiveDownloadRequest, ArchiveComment, ArchiveVersion, ArchivePlatformDownload
+
+
+class ArchivePlatformDownloadInline(admin.TabularInline):
+    model = ArchivePlatformDownload
+    extra = 1
+    readonly_fields = ('file_size_formatted', 'download_count', 'created_at')
+    fields = ('platform', 'architecture', 'installer_type', 'file', 'download_url', 'file_size', 'file_size_display', 'download_count')
+
+
+class ArchiveVersionInline(admin.StackedInline):
+    model = ArchiveVersion
+    extra = 0
+    readonly_fields = ('file_size_formatted', 'created_at', 'updated_at')
+    fields = (
+        ('version', 'is_latest', 'is_beta', 'is_deprecated'),
+        'release_date',
+        'release_notes',
+        ('file_size', 'file_size_display'),
+        'requirements'
+    )
+
 
 class ArchiveCommentInline(admin.TabularInline):
     model = ArchiveComment
@@ -14,7 +35,7 @@ class ArchiveAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description', 'tags', 'archived_by__username')
     date_hierarchy = 'created_at'
     readonly_fields = ('file_size_formatted', 'created_at', 'updated_at')
-    inlines = [ArchiveCommentInline]
+    inlines = [ArchiveVersionInline, ArchiveCommentInline]
     
     fieldsets = (
         ('Archive Information', {
@@ -82,5 +103,68 @@ class ArchiveDownloadRequestAdmin(admin.ModelAdmin):
         }),
         ('Timestamps', {
             'fields': ('created_at',)
+        }),
+    )
+
+
+@admin.register(ArchiveVersion)
+class ArchiveVersionAdmin(admin.ModelAdmin):
+    list_display = ('archive', 'version', 'release_date', 'is_latest', 'is_beta', 'is_deprecated', 'platform_count', 'created_at')
+    list_filter = ('is_latest', 'is_beta', 'is_deprecated', 'release_date', 'archive__category')
+    search_fields = ('archive__title', 'version', 'release_notes')
+    date_hierarchy = 'release_date'
+    readonly_fields = ('file_size_formatted', 'created_at', 'updated_at')
+    inlines = [ArchivePlatformDownloadInline]
+    
+    fieldsets = (
+        ('Version Information', {
+            'fields': ('archive', 'version', 'release_date', 'release_notes')
+        }),
+        ('Version Status', {
+            'fields': ('is_latest', 'is_beta', 'is_deprecated')
+        }),
+        ('File Information', {
+            'fields': ('file_size', 'file_size_display', 'file_size_formatted')
+        }),
+        ('Requirements', {
+            'fields': ('requirements',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def platform_count(self, obj):
+        return obj.platform_downloads.count()
+    platform_count.short_description = 'Platforms'
+
+
+@admin.register(ArchivePlatformDownload)
+class ArchivePlatformDownloadAdmin(admin.ModelAdmin):
+    list_display = ('version', 'platform', 'architecture', 'installer_type', 'file_size_formatted', 'download_count', 'created_at')
+    list_filter = ('platform', 'architecture', 'installer_type', 'version__archive__category')
+    search_fields = ('version__archive__title', 'version__version', 'platform', 'architecture')
+    readonly_fields = ('file_size_formatted', 'download_count', 'created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Platform Information', {
+            'fields': ('version', 'platform', 'architecture', 'installer_type')
+        }),
+        ('Download Options', {
+            'fields': ('file', 'download_url')
+        }),
+        ('File Information', {
+            'fields': ('file_size', 'file_size_display', 'file_size_formatted')
+        }),
+        ('Platform Requirements', {
+            'fields': ('platform_requirements',)
+        }),
+        ('Statistics', {
+            'fields': ('download_count',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
         }),
     )
