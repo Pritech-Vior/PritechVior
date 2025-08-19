@@ -25,7 +25,7 @@ const ArchiveDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const { showSuccess, showError, showWarning } = useToast();
+  const { showSuccess, showError, showWarning, showInfo } = useToast();
   const [archive, setArchive] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -138,7 +138,22 @@ const ArchiveDetailPage = () => {
       setDownloadEmail("");
       setDownloadMessage("");
     } catch (err) {
-      showError("Failed to submit download request. Please try again.");
+      // Handle different error types
+      if (err.status === 409 && err.data) {
+        // Conflict - already requested
+        const { status: requestStatus, error: errorMessage } = err.data;
+
+        if (requestStatus === "pending") {
+          showInfo(errorMessage);
+        } else if (requestStatus === "approved" || requestStatus === "sent") {
+          showSuccess(errorMessage);
+        } else {
+          showWarning(errorMessage);
+        }
+      } else {
+        showError("Failed to submit download request. Please try again.");
+      }
+
       console.error("Error requesting download:", err);
     } finally {
       setDownloadRequesting(false);

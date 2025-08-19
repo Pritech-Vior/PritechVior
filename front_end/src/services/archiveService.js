@@ -108,6 +108,16 @@ class ArchiveService {
       );
 
       if (!response.ok) {
+        const errorData = await response.json();
+
+        // Handle conflict (409) - existing request
+        if (response.status === 409) {
+          const error = new Error(errorData.error || "Request already exists");
+          error.status = response.status;
+          error.data = errorData;
+          throw error;
+        }
+
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 

@@ -96,8 +96,28 @@ class ArchiveViewSet(viewsets.ModelViewSet):
         logger.info(f"Download request from user: {user} (authenticated: {user.is_authenticated})")
         
         # Check if already requested
-        if ArchiveDownloadRequest.objects.filter(user=user, archive=archive).exists():
-            return Response({'error': 'Already requested'}, status=status.HTTP_400_BAD_REQUEST)
+        existing_request = ArchiveDownloadRequest.objects.filter(user=user, archive=archive).first()
+        if existing_request:
+            # Return different messages based on request status
+            status_messages = {
+                'pending': 'Your download request is being processed. We will contact you soon.',
+                'approved': 'Your download request has been approved. Check your email for download instructions.',
+                'sent': 'Download instructions have been sent to your email.',
+                'rejected': 'Your previous download request was rejected. You can submit a new request.'
+            }
+            
+            message = status_messages.get(existing_request.status, 'You have already submitted a download request.')
+            
+            # If rejected, allow new request
+            if existing_request.status == 'rejected':
+                existing_request.delete()
+            else:
+                return Response({
+                    'error': message,
+                    'status': existing_request.status,
+                    'requested_at': existing_request.created_at.isoformat(),
+                    'can_resubmit': existing_request.status == 'rejected'
+                }, status=status.HTTP_409_CONFLICT)
         
         # Create download request
         download_request = ArchiveDownloadRequest.objects.create(
