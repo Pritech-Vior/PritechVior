@@ -50,16 +50,27 @@ const BlogPage = () => {
 
     try {
       setNewsletterLoading(true);
-      await blogService.subscribeNewsletter(newsletterEmail.trim());
-      showSuccess("Successfully subscribed to newsletter!");
+      const response = await blogService.subscribeNewsletter(
+        newsletterEmail.trim()
+      );
+
+      // Handle different response types
+      if (response.already_subscribed) {
+        showSuccess("You are already subscribed to our newsletter!");
+      } else if (response.reactivated) {
+        showSuccess("Welcome back! Your subscription has been reactivated.");
+      } else if (response.subscribed) {
+        showSuccess("Successfully subscribed to newsletter!");
+      } else {
+        showSuccess(
+          response.message || "Successfully subscribed to newsletter!"
+        );
+      }
+
       setNewsletterEmail("");
     } catch (err) {
       console.error("Newsletter subscription error:", err);
-      if (err.message.includes("400")) {
-        showError("This email is already subscribed to our newsletter.");
-      } else {
-        showError("Failed to subscribe. Please try again later.");
-      }
+      showError("Failed to subscribe. Please try again later.");
     } finally {
       setNewsletterLoading(false);
     }

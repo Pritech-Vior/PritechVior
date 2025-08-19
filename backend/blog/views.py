@@ -300,12 +300,28 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
         
         # Check if already subscribed
         if NewsletterSubscription.objects.filter(email=email).exists():
-            return Response({'error': 'Already subscribed'}, status=status.HTTP_400_BAD_REQUEST)
+            existing_subscription = NewsletterSubscription.objects.get(email=email)
+            if existing_subscription.is_active:
+                return Response({
+                    'message': 'You are already subscribed to our newsletter!',
+                    'already_subscribed': True
+                }, status=status.HTTP_200_OK)
+            else:
+                # Reactivate inactive subscription
+                existing_subscription.is_active = True
+                existing_subscription.save()
+                return Response({
+                    'message': 'Welcome back! Your subscription has been reactivated.',
+                    'reactivated': True
+                }, status=status.HTTP_200_OK)
         
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'message': 'Successfully subscribed'}, status=status.HTTP_201_CREATED)
+            return Response({
+                'message': 'Successfully subscribed to our newsletter!',
+                'subscribed': True
+            }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     @action(detail=False, methods=['post'])

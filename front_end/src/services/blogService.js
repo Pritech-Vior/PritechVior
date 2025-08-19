@@ -320,14 +320,12 @@ class BlogService {
         }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || `HTTP error! status: ${response.status}`
-        );
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
       return data;
     } catch (error) {
       console.error("Error subscribing to newsletter:", error);
