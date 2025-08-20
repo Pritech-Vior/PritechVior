@@ -52,14 +52,14 @@ const Toast = ({
 
   const getToastStyles = () => {
     const baseStyles =
-      "fixed z-50 max-w-md w-full mx-4 rounded-lg shadow-xl border transition-all duration-300 transform overflow-hidden";
+      "fixed z-[9999] max-w-md w-full mx-4 rounded-lg shadow-xl border transition-all duration-300 transform overflow-hidden";
 
     const positionStyles = {
-      "top-right": "top-4 right-4",
-      "top-left": "top-4 left-4",
+      "top-right": "top-20 right-4",
+      "top-left": "top-20 left-4",
       "bottom-right": "bottom-4 right-4",
       "bottom-left": "bottom-4 left-4",
-      "top-center": "top-4 left-1/2 -translate-x-1/2",
+      "top-center": "top-20 left-1/2 -translate-x-1/2",
       "bottom-center": "bottom-4 left-1/2 -translate-x-1/2",
       center: "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
     };

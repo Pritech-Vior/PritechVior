@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { disablePageScroll, enablePageScroll } from "scroll-lock";
 import { User, ShoppingCart } from "lucide-react";
 
@@ -6,20 +6,19 @@ import { pritechviorLogo } from "../assets";
 import { navigation } from "../constants";
 import Button from "./Button";
 import AccountDropdown from "./AccountDropdown";
-import CartSidebar from "./CartSidebar";
 import MenuSvg from "../assets/svg/MenuSvg";
 import { HamburgerMenu } from "./design/Header";
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import shopService from "../services/shopService";
+import { useCart } from "../contexts/CartContext";
 
 const Header = () => {
   const pathname = useLocation();
-  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { cartCount } = useCart();
   const [openNavigation, setOpenNavigation] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [cartCount, setCartCount] = useState(0);
-  const [showCartSidebar, setShowCartSidebar] = useState(false);
 
   // Calculate scroll progress
   useEffect(() => {
@@ -36,21 +35,6 @@ const Header = () => {
   }, []);
 
   // Fetch cart count
-  useEffect(() => {
-    const fetchCartCount = async () => {
-      if (isAuthenticated) {
-        try {
-          const cart = await shopService.getCart();
-          setCartCount(cart.items?.length || 0);
-        } catch (error) {
-          console.error("Error fetching cart:", error);
-        }
-      }
-    };
-
-    fetchCartCount();
-  }, [isAuthenticated]);
-
   const toggleNavigation = () => {
     if (openNavigation) {
       setOpenNavigation(false);
@@ -70,7 +54,7 @@ const Header = () => {
 
   return (
     <div
-      className={`fixed top-0 left-0 w-full z-50  border-b border-n-6 lg:bg-n-8/90 lg:backdrop-blur-sm ${
+      className={`fixed top-0 left-0 w-full z-[100] border-b border-n-6 lg:bg-n-8/90 lg:backdrop-blur-sm ${
         openNavigation ? "bg-n-8" : "bg-n-8/90 backdrop-blur-sm"
       }`}
     >
@@ -159,20 +143,18 @@ const Header = () => {
           <HamburgerMenu />
         </nav>
 
-        {/* Cart Icon */}
-        {isAuthenticated && (
-          <button
-            onClick={() => setShowCartSidebar(true)}
-            className="relative p-2 text-n-1 hover:text-color-1 transition-colors hidden lg:block mr-4"
-          >
-            <ShoppingCart size={24} />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-color-1 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
-          </button>
-        )}
+        {/* Cart Icon - Available for all users */}
+        <button
+          onClick={() => navigate("/cart")}
+          className="relative p-2 text-n-1 hover:text-color-1 transition-colors mr-4"
+        >
+          <ShoppingCart size={24} />
+          {cartCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-color-1 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium z-10">
+              {cartCount}
+            </span>
+          )}
+        </button>
 
         <AccountDropdown />
 
@@ -184,12 +166,6 @@ const Header = () => {
           <MenuSvg openNavigation={openNavigation} />
         </Button>
       </div>
-
-      {/* Cart Sidebar */}
-      <CartSidebar
-        isOpen={showCartSidebar}
-        onClose={() => setShowCartSidebar(false)}
-      />
     </div>
   );
 };

@@ -17,12 +17,14 @@ import Section from "../components/Section";
 import Heading from "../components/Heading";
 import shopService from "../services/shopService";
 import { useAuth } from "../contexts/AuthContext";
+import { useCart } from "../contexts/CartContext";
 import { useToast } from "../contexts/ToastContext";
 
 const ViorMartPage = () => {
   // Navigation and context
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const { addToCart } = useCart();
   const { showError, showSuccess } = useToast();
 
   // State management
@@ -121,13 +123,19 @@ const ViorMartPage = () => {
   ]);
 
   const handleAddToCart = async (productId, quantity = 1) => {
-    if (!isAuthenticated) {
-      showError("Please log in to add items to your cart");
-      return;
-    }
-
     try {
-      await shopService.addToCart(productId, quantity);
+      console.log("handleAddToCart called with productId:", productId);
+      // Find the product data to pass to the cart
+      const product = products.find((p) => p.id === productId);
+      console.log("Found product:", product);
+
+      if (!product) {
+        showError("Product not found");
+        return;
+      }
+
+      console.log("Calling addToCart with:", { productId, quantity, product });
+      await addToCart(productId, quantity, {}, product);
       showSuccess("Item added to cart!");
     } catch (err) {
       console.error("Error adding to cart:", err);

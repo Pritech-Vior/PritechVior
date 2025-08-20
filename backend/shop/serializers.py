@@ -127,8 +127,8 @@ class ProductReviewSerializer(serializers.ModelSerializer):
     
     def get_user_avatar(self, obj):
         # Return user avatar if available
-        if hasattr(obj.user, 'profile') and obj.user.profile.avatar:
-            return self.context['request'].build_absolute_uri(obj.user.profile.avatar.url)
+        # Note: UserProfile model doesn't have avatar field, so return None for now
+        # You can implement avatar functionality later by adding avatar field to UserProfile
         return None
 
 
