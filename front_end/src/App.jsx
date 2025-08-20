@@ -17,6 +17,8 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import CustomOrderPage from "./pages/CustomOrderPage";
+import ProductRequestPage from "./pages/ProductRequestPage";
 import ViorXPage from "./pages/ViorXPage";
 import AboutPage from "./pages/AboutPage";
 import ScholarPage from "./pages/ScholarPage";
@@ -63,6 +65,8 @@ const App = () => {
             <Route path="/product/:slug" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/custom-order" element={<CustomOrderPage />} />
+            <Route path="/product-request" element={<ProductRequestPage />} />
             <Route
               path="/order-confirmation"
               element={<OrderConfirmationPage />}

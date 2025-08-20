@@ -10,6 +10,8 @@ import {
   List,
   RefreshCw,
   Eye,
+  Sparkles,
+  Globe,
 } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -486,9 +488,29 @@ const ViorMartPage = () => {
         <div className="container relative z-2">
           <Heading
             tag="ViorMart"
-            title="Your Premier Online Shopping Destination"
-            text="Quality products, fast delivery, and secure shopping experience in Tanzania. Browse our extensive collection of verified products."
+            title="Your Premier Shopping Destination"
+            text="Quality products, fast delivery, and secure shopping in Tanzania."
           />
+
+          {/* Custom Order CTA */}
+          <div className="text-center mb-6">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={() => navigate("/custom-order")}
+                className="inline-flex items-center px-4 py-2 bg-color-1 text-white rounded-lg hover:bg-color-1/90 transition-colors text-sm"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Request Custom Order
+              </button>
+              <button
+                onClick={() => navigate("/product-request")}
+                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              >
+                <Globe className="h-4 w-4 mr-2" />
+                Request from External Site
+              </button>
+            </div>
+          </div>
 
           {/* Search and Filter Bar */}
           <div className="mb-12">
