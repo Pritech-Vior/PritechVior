@@ -32,12 +32,10 @@ const ViorMartPage = () => {
   // State management
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("");
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [sortBy, setSortBy] = useState("-created_at");
   const [viewMode, setViewMode] = useState("grid");
@@ -50,19 +48,13 @@ const ViorMartPage = () => {
   const fetchInitialData = useCallback(async () => {
     try {
       setLoading(true);
-      // Fetch categories and brands (public endpoints)
-      const [categoriesData, brandsData] = await Promise.all([
-        shopService.getCategories(),
-        shopService.getBrands(),
-      ]);
+      // Fetch categories (public endpoint)
+      const categoriesData = await shopService.getCategories();
 
       setCategories(
         Array.isArray(categoriesData)
           ? categoriesData
           : categoriesData.results || []
-      );
-      setBrands(
-        Array.isArray(brandsData) ? brandsData : brandsData.results || []
       );
 
       // Only fetch cart and wishlist if user is authenticated
@@ -101,7 +93,6 @@ const ViorMartPage = () => {
 
         if (searchTerm) params.search = searchTerm;
         if (selectedCategory) params.category = selectedCategory;
-        if (selectedBrand) params.brand = selectedBrand;
         if (priceRange.min) params.min_price = priceRange.min;
         if (priceRange.max) params.max_price = priceRange.max;
 
@@ -115,14 +106,7 @@ const ViorMartPage = () => {
     };
 
     fetchData();
-  }, [
-    searchTerm,
-    selectedCategory,
-    selectedBrand,
-    priceRange,
-    sortBy,
-    currentPage,
-  ]);
+  }, [searchTerm, selectedCategory, priceRange, sortBy, currentPage]);
 
   const handleAddToCart = async (productId, quantity = 1) => {
     try {
@@ -176,7 +160,6 @@ const ViorMartPage = () => {
   const resetFilters = () => {
     setSearchTerm("");
     setSelectedCategory("");
-    setSelectedBrand("");
     setPriceRange({ min: "", max: "" });
     setSortBy("-created_at");
     setCurrentPage(1);
@@ -184,78 +167,158 @@ const ViorMartPage = () => {
 
   // Filter sidebar component
   const FilterSidebar = () => (
-    <div className="bg-n-7 p-6 rounded-lg border border-n-6">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-n-1">Filters</h3>
+    <div className="bg-n-7 p-4 rounded-xl border border-n-6 shadow-lg">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-n-1 flex items-center gap-2">
+          <Filter className="w-4 h-4 text-color-1" />
+          Filters
+        </h3>
         <button
           onClick={resetFilters}
-          className="text-sm text-color-1 hover:text-color-2 flex items-center gap-1"
+          className="text-xs text-color-1 hover:text-color-2 flex items-center gap-1 px-2 py-1 rounded hover:bg-n-6 transition-colors"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-3 h-3" />
           Reset
         </button>
       </div>
 
       {/* Categories */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-n-2 mb-2">
-          Category
-        </label>
-        <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          className="w-full p-2 bg-n-6 border border-n-5 rounded-md text-n-1 focus:ring-2 focus:ring-color-1 focus:border-transparent"
-        >
-          <option value="">All Categories</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
+      <div className="mb-4">
+        <h4 className="text-xs font-semibold text-n-2 mb-2 uppercase tracking-wide">
+          Categories
+        </h4>
+        <div className="space-y-1">
+          <button
+            onClick={() => setSelectedCategory("")}
+            className={`w-full text-left px-3 py-2 rounded text-xs transition-all duration-200 ${
+              selectedCategory === ""
+                ? "bg-color-1 text-white shadow-lg"
+                : "bg-n-6 text-n-2 hover:bg-n-5 hover:text-n-1"
+            }`}
+          >
+            All Categories
+          </button>
+          {categories.slice(0, 6).map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id)}
+              className={`w-full text-left px-3 py-2 rounded text-xs transition-all duration-200 ${
+                selectedCategory === category.id
+                  ? "bg-color-1 text-white shadow-lg"
+                  : "bg-n-6 text-n-2 hover:bg-n-5 hover:text-n-1"
+              }`}
+            >
               {category.name}
-            </option>
+            </button>
           ))}
-        </select>
-      </div>
-
-      {/* Brands */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-n-2 mb-2">Brand</label>
-        <select
-          value={selectedBrand}
-          onChange={(e) => setSelectedBrand(e.target.value)}
-          className="w-full p-2 bg-n-6 border border-n-5 rounded-md text-n-1 focus:ring-2 focus:ring-color-1 focus:border-transparent"
-        >
-          <option value="">All Brands</option>
-          {brands.map((brand) => (
-            <option key={brand.id} value={brand.id}>
-              {brand.name}
-            </option>
-          ))}
-        </select>
+          {categories.length > 6 && (
+            <p className="text-xs text-n-4 px-3 py-1">
+              +{categories.length - 6} more
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Price Range */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-n-2 mb-2">
+      <div className="mb-4">
+        <h4 className="text-xs font-semibold text-n-2 mb-2 uppercase tracking-wide">
           Price Range (TZS)
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="number"
-            placeholder="Min"
-            value={priceRange.min}
-            onChange={(e) =>
-              setPriceRange((prev) => ({ ...prev, min: e.target.value }))
-            }
-            className="w-full p-2 bg-n-6 border border-n-5 rounded-md text-n-1 focus:ring-2 focus:ring-color-1 focus:border-transparent"
-          />
-          <input
-            type="number"
-            placeholder="Max"
-            value={priceRange.max}
-            onChange={(e) =>
-              setPriceRange((prev) => ({ ...prev, max: e.target.value }))
-            }
-            className="w-full p-2 bg-n-6 border border-n-5 rounded-md text-n-1 focus:ring-2 focus:ring-color-1 focus:border-transparent"
-          />
+        </h4>
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <input
+                type="number"
+                placeholder="Min"
+                value={priceRange.min}
+                onChange={(e) =>
+                  setPriceRange((prev) => ({ ...prev, min: e.target.value }))
+                }
+                className="w-full px-2 py-1 text-xs bg-n-6 border border-n-5 rounded text-n-1 placeholder-n-4"
+              />
+            </div>
+            <div className="flex items-center px-1">
+              <span className="text-xs text-n-4">to</span>
+            </div>
+            <div className="flex-1">
+              <input
+                type="number"
+                placeholder="Max"
+                value={priceRange.max}
+                onChange={(e) =>
+                  setPriceRange((prev) => ({ ...prev, max: e.target.value }))
+                }
+                className="w-full px-2 py-1 text-xs bg-n-6 border border-n-5 rounded text-n-1 placeholder-n-4"
+              />
+            </div>
+          </div>
+
+          {/* Quick Price Filters */}
+          <div className="grid grid-cols-2 gap-1">
+            {[
+              { label: "< 50K", min: "", max: "50000" },
+              { label: "50K-100K", min: "50000", max: "100000" },
+              { label: "100K-500K", min: "100000", max: "500000" },
+              { label: "> 500K", min: "500000", max: "" },
+            ].map((range, index) => (
+              <button
+                key={index}
+                onClick={() =>
+                  setPriceRange({ min: range.min, max: range.max })
+                }
+                className="text-xs px-2 py-1 bg-n-6 text-n-3 rounded hover:bg-n-5 hover:text-n-1 transition-colors"
+              >
+                {range.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Sort Options */}
+      <div className="mb-4">
+        <h4 className="text-xs font-semibold text-n-2 mb-2 uppercase tracking-wide">
+          Sort By
+        </h4>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="w-full px-2 py-1 text-xs bg-n-6 border border-n-5 rounded text-n-1"
+        >
+          <option value="-created_at">Newest First</option>
+          <option value="created_at">Oldest First</option>
+          <option value="price">Price: Low to High</option>
+          <option value="-price">Price: High to Low</option>
+          <option value="name">Name: A to Z</option>
+          <option value="-name">Name: Z to A</option>
+          <option value="-rating">Highest Rated</option>
+          <option value="-review_count">Most Reviews</option>
+        </select>
+      </div>
+
+      {/* Product Status Filters */}
+      <div className="mb-4">
+        <h4 className="text-xs font-semibold text-n-2 mb-2 uppercase tracking-wide">
+          Status
+        </h4>
+        <div className="space-y-1">
+          {[
+            { label: "Featured", key: "featured" },
+            { label: "On Sale", key: "on_sale" },
+            { label: "New", key: "new_arrival" },
+            { label: "In Stock", key: "in_stock" },
+          ].map((filter) => (
+            <label
+              key={filter.key}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                className="w-3 h-3 text-color-1 bg-n-6 border-n-5 rounded"
+              />
+              <span className="text-xs text-n-2">{filter.label}</span>
+            </label>
+          ))}
         </div>
       </div>
     </div>
@@ -266,7 +329,7 @@ const ViorMartPage = () => {
     <div className="group bg-n-8 rounded-2xl border border-n-6 overflow-hidden hover:border-color-1 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
       <div className="relative overflow-hidden">
         <img
-          src={product.images?.[0]?.image || "/api/placeholder/400/300"}
+          src={product.primary_image || "/api/placeholder/400/300"}
           alt={product.name}
           className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-700"
         />
