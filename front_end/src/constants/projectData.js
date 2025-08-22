@@ -1,22 +1,9 @@
 // Project templates and data for the project request system
 
-export const projectCategories = [
-  "Web Development",
-  "Mobile Development", 
-  "Desktop Applications",
-  "Database Systems",
-  "E-Commerce",
-  "E-Learning",
-  "Management Systems",
-  "UI/UX Design",
-  "Final Year Projects",
-  "Mini Projects"
-];
-
 export const courseCategories = {
   student: [
     "Computer Science",
-    "Information Technology", 
+    "Information Technology",
     "Software Engineering",
     "Computer Engineering",
     "Information Systems",
@@ -24,31 +11,77 @@ export const courseCategories = {
     "Cybersecurity",
     "Network Administration",
     "Web Development",
-    "Mobile App Development"
-  ]
+    "Mobile App Development",
+    "Biomedical Engineering",
+    "Biomedical Technology",
+    "Medical Informatics",
+    "Health Information Systems",
+    "Mining Engineering",
+    "Geological Engineering",
+    "Mineral Processing",
+    "Mining Technology",
+    "Civil Engineering",
+    "Structural Engineering",
+    "Construction Management",
+    "Environmental Engineering",
+    "Electrical Engineering",
+    "Electronics Engineering",
+    "Power Systems Engineering",
+    "Telecommunications Engineering",
+    "Mechatronics Engineering",
+    "Automation Engineering",
+    "Robotics Engineering",
+    "Control Systems Engineering",
+    "Mechanical Engineering",
+    "Manufacturing Engineering",
+    "Industrial Engineering",
+    "Aerospace Engineering",
+    "Chemical Engineering",
+    "Petroleum Engineering",
+    "Materials Engineering",
+    "Agricultural Engineering",
+    "Food Technology",
+    "Business Information Systems",
+    "Management Information Systems",
+    "E-Commerce Technology",
+    "Digital Marketing Technology",
+  ],
 };
+
+export const projectCategories = [
+  "Web Development",
+  "Mobile Development",
+  "Desktop Applications",
+  "Database Systems",
+  "E-Commerce",
+  "E-Learning",
+  "Management Systems",
+  "UI/UX Design",
+  "Final Year Projects",
+  "Mini Projects",
+];
 
 export const projectTypes = {
   student: [
     "Mini Project",
-    "Final Year Project", 
+    "Final Year Project",
     "Course Assignment",
     "Research Project",
-    "Internship Project"
+    "Internship Project",
   ],
   client: [
     "Personal Website",
     "Small Business System",
     "Portfolio Project",
-    "Custom Application"
+    "Custom Application",
   ],
   business: [
     "Enterprise System",
     "E-Commerce Platform",
     "Management System",
     "Custom Integration",
-    "Mobile Application"
-  ]
+    "Mobile Application",
+  ],
 };
 
 export const technologyStacks = [
@@ -56,82 +89,88 @@ export const technologyStacks = [
     id: "web-basic",
     name: "Web Development (Basic)",
     technologies: ["HTML5", "CSS3", "JavaScript", "Bootstrap"],
-    suitable: ["student", "client"]
+    suitable: ["student", "client"],
   },
   {
-    id: "web-advanced", 
+    id: "web-advanced",
     name: "Web Development (Advanced)",
     technologies: ["React.js", "Node.js", "Express.js", "MongoDB"],
-    suitable: ["student", "client", "business"]
+    suitable: ["student", "client", "business"],
   },
   {
     id: "fullstack-modern",
     name: "Full Stack Modern",
     technologies: ["React.js", "Next.js", "Node.js", "PostgreSQL", "Redis"],
-    suitable: ["business", "client"]
+    suitable: ["business", "client"],
   },
   {
     id: "mobile-hybrid",
     name: "Mobile (Hybrid)",
     technologies: ["React Native", "Expo", "Firebase"],
-    suitable: ["student", "client", "business"]
+    suitable: ["student", "client", "business"],
   },
   {
     id: "mobile-native",
     name: "Mobile (Native)",
     technologies: ["Flutter", "Dart", "Native APIs"],
-    suitable: ["business", "client"]
+    suitable: ["business", "client"],
   },
   {
     id: "desktop-modern",
     name: "Desktop Application",
     technologies: ["Electron", "React", "Node.js"],
-    suitable: ["student", "business"]
+    suitable: ["student", "business"],
   },
   {
     id: "python-stack",
     name: "Python Development",
     technologies: ["Python", "Django", "PostgreSQL", "Redis"],
-    suitable: ["student", "client", "business"]
-  }
+    suitable: ["student", "client", "business"],
+  },
 ];
 
 export const projectTemplates = [
   {
     id: "student-management",
     title: "Student Management System",
-    description: "Comprehensive system for managing student records, grades, attendance, and academic progress with role-based access for students, teachers, and administrators.",
+    description:
+      "Comprehensive system for managing student records, grades, attendance, and academic progress with role-based access for students, teachers, and administrators.",
     category: "Management Systems",
     difficulty: "Advanced",
     timeline: "8-12 weeks",
-    estimatedPrice: 2500000, // TSH
+    estimatedPrice: 800000, // TSH
     technologies: ["React.js", "Node.js", "MySQL", "Express.js", "JWT Auth"],
     features: [
       "Student registration and profile management",
-      "Grade and transcript management", 
+      "Grade and transcript management",
       "Attendance tracking system",
       "Course and class scheduling",
       "Parent portal for progress monitoring",
       "Teacher dashboard for grade entry",
       "Admin panel for system management",
-      "Report generation and analytics"
+      "Report generation and analytics",
     ],
     suitableFor: ["student", "client", "business"],
-    courseAlignment: ["Computer Science", "Information Technology", "Software Engineering"],
+    courseAlignment: [
+      "Computer Science",
+      "Information Technology",
+      "Software Engineering",
+    ],
     projectType: "Final Year Project",
     supportServices: {
       proposal: true,
       implementation: true,
       documentation: true,
       presentation: true,
-      defense: true
-    }
+      defense: true,
+    },
   },
   {
     id: "ecommerce-basic",
     title: "E-Commerce Website",
-    description: "Modern online store with product catalog, shopping cart, payment integration, and order management system suitable for small to medium businesses.",
-    category: "E-Commerce", 
+    description:
+      "Modern online store with product catalog, shopping cart, payment integration, and order management system suitable for small to medium businesses.",
+    category: "E-Commerce",
     difficulty: "Intermediate",
     timeline: "6-10 weeks",
     estimatedPrice: 3500000,
@@ -141,30 +180,35 @@ export const projectTemplates = [
       "Shopping cart and wishlist",
       "User registration and authentication",
       "Payment gateway integration",
-      "Order tracking and management", 
+      "Order tracking and management",
       "Admin dashboard for inventory",
       "Customer reviews and ratings",
-      "Email notifications"
+      "Email notifications",
     ],
     suitableFor: ["student", "client", "business"],
-    courseAlignment: ["Computer Science", "Information Technology", "Web Development"],
+    courseAlignment: [
+      "Computer Science",
+      "Information Technology",
+      "Web Development",
+    ],
     projectType: "Final Year Project",
     supportServices: {
       proposal: true,
       implementation: true,
       documentation: true,
       presentation: true,
-      defense: true
-    }
+      defense: true,
+    },
   },
   {
     id: "library-system",
     title: "Library Management System",
-    description: "Digital library system for managing books, member registrations, borrowing records, and automated fine calculations with search functionality.",
+    description:
+      "Digital library system for managing books, member registrations, borrowing records, and automated fine calculations with search functionality.",
     category: "Management Systems",
-    difficulty: "Intermediate", 
+    difficulty: "Intermediate",
     timeline: "6-8 weeks",
-    estimatedPrice: 1800000,
+    estimatedPrice: 500000,
     technologies: ["Python", "Django", "SQLite", "Bootstrap", "jQuery"],
     features: [
       "Book catalog and search system",
@@ -174,26 +218,31 @@ export const projectTemplates = [
       "Librarian dashboard",
       "Report generation",
       "Book reservation system",
-      "Overdue book notifications"
+      "Overdue book notifications",
     ],
     suitableFor: ["student", "client"],
-    courseAlignment: ["Computer Science", "Information Systems", "Software Engineering"],
+    courseAlignment: [
+      "Computer Science",
+      "Information Systems",
+      "Software Engineering",
+    ],
     projectType: "Final Year Project",
     supportServices: {
       proposal: true,
       implementation: true,
       documentation: true,
       presentation: true,
-      defense: true
-    }
+      defense: true,
+    },
   },
   {
     id: "hospital-management",
     title: "Hospital Management System",
-    description: "Comprehensive healthcare management system for patient records, appointments, doctor schedules, and billing with secure data handling.",
+    description:
+      "Comprehensive healthcare management system for patient records, appointments, doctor schedules, and billing with secure data handling.",
     category: "Management Systems",
     difficulty: "Advanced",
-    timeline: "10-14 weeks", 
+    timeline: "10-14 weeks",
     estimatedPrice: 4500000,
     technologies: ["React.js", "Node.js", "PostgreSQL", "Express.js", "JWT"],
     features: [
@@ -204,10 +253,14 @@ export const projectTemplates = [
       "Prescription management",
       "Laboratory test results",
       "Emergency contact system",
-      "Medical history tracking"
+      "Medical history tracking",
     ],
     suitableFor: ["student", "business"],
-    courseAlignment: ["Computer Science", "Information Technology", "Software Engineering"],
+    courseAlignment: [
+      "Computer Science",
+      "Information Technology",
+      "Software Engineering",
+    ],
     projectType: "Final Year Project",
     supportServices: {
       proposal: true,
@@ -216,17 +269,18 @@ export const projectTemplates = [
       presentation: true,
       defense: true,
       dataCollection: true,
-      simulation: true
-    }
+      simulation: true,
+    },
   },
   {
     id: "inventory-system",
-    title: "Inventory Management System", 
-    description: "Stock management solution for tracking products, suppliers, sales, and generating automated reports with low stock alerts.",
+    title: "Inventory Management System",
+    description:
+      "Stock management solution for tracking products, suppliers, sales, and generating automated reports with low stock alerts.",
     category: "Management Systems",
     difficulty: "Intermediate",
     timeline: "5-7 weeks",
-    estimatedPrice: 2200000,
+    estimatedPrice: 600000,
     technologies: ["PHP", "MySQL", "Bootstrap", "JavaScript", "Chart.js"],
     features: [
       "Product and category management",
@@ -236,23 +290,28 @@ export const projectTemplates = [
       "Low stock alerts",
       "Report generation with charts",
       "Barcode integration",
-      "Multi-location support"
+      "Multi-location support",
     ],
     suitableFor: ["student", "client", "business"],
-    courseAlignment: ["Computer Science", "Information Systems", "Information Technology"],
+    courseAlignment: [
+      "Computer Science",
+      "Information Systems",
+      "Information Technology",
+    ],
     projectType: "Final Year Project",
     supportServices: {
       proposal: true,
       implementation: true,
       documentation: true,
       presentation: true,
-      defense: true
-    }
+      defense: true,
+    },
   },
   {
     id: "online-learning",
     title: "E-Learning Platform",
-    description: "Interactive online education platform with course management, video lectures, quizzes, progress tracking, and certification system.",
+    description:
+      "Interactive online education platform with course management, video lectures, quizzes, progress tracking, and certification system.",
     category: "E-Learning",
     difficulty: "Advanced",
     timeline: "12-16 weeks",
@@ -261,15 +320,19 @@ export const projectTemplates = [
     features: [
       "Course creation and management",
       "Video lecture streaming",
-      "Interactive quizzes and assignments", 
+      "Interactive quizzes and assignments",
       "Student progress tracking",
       "Discussion forums",
       "Certificate generation",
       "Payment integration for courses",
-      "Live session support"
+      "Live session support",
     ],
     suitableFor: ["student", "business"],
-    courseAlignment: ["Computer Science", "Software Engineering", "Information Technology"],
+    courseAlignment: [
+      "Computer Science",
+      "Software Engineering",
+      "Information Technology",
+    ],
     projectType: "Final Year Project",
     supportServices: {
       proposal: true,
@@ -278,18 +341,25 @@ export const projectTemplates = [
       presentation: true,
       defense: true,
       research: true,
-      publication: true
-    }
+      publication: true,
+    },
   },
   {
     id: "mobile-banking",
     title: "Mobile Banking App",
-    description: "Secure mobile banking application with account management, money transfers, bill payments, and transaction history.",
+    description:
+      "Secure mobile banking application with account management, money transfers, bill payments, and transaction history.",
     category: "Mobile Development",
     difficulty: "Advanced",
     timeline: "10-12 weeks",
     estimatedPrice: 6000000,
-    technologies: ["React Native", "Node.js", "PostgreSQL", "JWT", "Encryption"],
+    technologies: [
+      "React Native",
+      "Node.js",
+      "PostgreSQL",
+      "JWT",
+      "Encryption",
+    ],
     features: [
       "Secure user authentication",
       "Account balance and history",
@@ -298,10 +368,14 @@ export const projectTemplates = [
       "Transaction notifications",
       "QR code payments",
       "Loan application tracking",
-      "Customer support chat"
+      "Customer support chat",
     ],
     suitableFor: ["student", "business"],
-    courseAlignment: ["Computer Science", "Software Engineering", "Cybersecurity"],
+    courseAlignment: [
+      "Computer Science",
+      "Software Engineering",
+      "Cybersecurity",
+    ],
     projectType: "Final Year Project",
     supportServices: {
       proposal: true,
@@ -310,17 +384,18 @@ export const projectTemplates = [
       presentation: true,
       defense: true,
       security: true,
-      testing: true
-    }
+      testing: true,
+    },
   },
   {
     id: "task-management",
     title: "Task Management System",
-    description: "Project and task management tool with team collaboration, deadline tracking, and progress visualization for small teams.",
-    category: "Management Systems", 
+    description:
+      "Project and task management tool with team collaboration, deadline tracking, and progress visualization for small teams.",
+    category: "Management Systems",
     difficulty: "Beginner",
     timeline: "4-6 weeks",
-    estimatedPrice: 1200000,
+    estimatedPrice: 400000,
     technologies: ["HTML5", "CSS3", "JavaScript", "PHP", "MySQL"],
     features: [
       "Task creation and assignment",
@@ -330,28 +405,39 @@ export const projectTemplates = [
       "Progress tracking",
       "File attachments",
       "Comment system",
-      "Basic reporting"
+      "Basic reporting",
     ],
     suitableFor: ["student", "client"],
-    courseAlignment: ["Computer Science", "Information Technology", "Web Development"],
+    courseAlignment: [
+      "Computer Science",
+      "Information Technology",
+      "Web Development",
+    ],
     projectType: "Mini Project",
     supportServices: {
       proposal: true,
       implementation: true,
       documentation: true,
       presentation: false,
-      defense: false
-    }
+      defense: false,
+    },
   },
   {
     id: "restaurant-pos",
     title: "Restaurant POS System",
-    description: "Point of sale system for restaurants with menu management, order processing, kitchen display, and sales analytics.",
+    description:
+      "Point of sale system for restaurants with menu management, order processing, kitchen display, and sales analytics.",
     category: "Management Systems",
-    difficulty: "Advanced", 
+    difficulty: "Advanced",
     timeline: "8-10 weeks",
     estimatedPrice: 3800000,
-    technologies: ["React.js", "Node.js", "MongoDB", "Socket.io", "Thermal Printer API"],
+    technologies: [
+      "React.js",
+      "Node.js",
+      "MongoDB",
+      "Socket.io",
+      "Thermal Printer API",
+    ],
     features: [
       "Menu and pricing management",
       "Order taking and processing",
@@ -360,10 +446,14 @@ export const projectTemplates = [
       "Payment processing",
       "Sales analytics and reports",
       "Inventory tracking",
-      "Staff management"
+      "Staff management",
     ],
     suitableFor: ["student", "client", "business"],
-    courseAlignment: ["Computer Science", "Information Technology", "Software Engineering"],
+    courseAlignment: [
+      "Computer Science",
+      "Information Technology",
+      "Software Engineering",
+    ],
     projectType: "Final Year Project",
     supportServices: {
       proposal: true,
@@ -371,17 +461,18 @@ export const projectTemplates = [
       documentation: true,
       presentation: true,
       defense: true,
-      hardware: true
-    }
+      hardware: true,
+    },
   },
   {
     id: "chat-application",
     title: "Real-time Chat Application",
-    description: "Modern messaging app with real-time communication, file sharing, group chats, and multimedia support.",
+    description:
+      "Modern messaging app with real-time communication, file sharing, group chats, and multimedia support.",
     category: "Web Development",
     difficulty: "Intermediate",
-    timeline: "6-8 weeks", 
-    estimatedPrice: 2800000,
+    timeline: "6-8 weeks",
+    estimatedPrice: 700000,
     technologies: ["React.js", "Socket.io", "Node.js", "MongoDB", "WebRTC"],
     features: [
       "Real-time messaging",
@@ -391,67 +482,88 @@ export const projectTemplates = [
       "Message history",
       "Online status indicators",
       "Push notifications",
-      "Message encryption"
+      "Message encryption",
     ],
     suitableFor: ["student", "client"],
-    courseAlignment: ["Computer Science", "Software Engineering", "Network Administration"],
+    courseAlignment: [
+      "Computer Science",
+      "Software Engineering",
+      "Network Administration",
+    ],
     projectType: "Final Year Project",
     supportServices: {
       proposal: true,
       implementation: true,
       documentation: true,
       presentation: true,
-      defense: true
-    }
-  }
+      defense: true,
+    },
+  },
 ];
 
 export const servicePackages = {
   student: [
     {
+      id: "title-presentation",
+      name: "Title & Presentation Only",
+      description: "Basic project title guidance and presentation tips",
+      price: 25000,
+      features: [
+        "Project title suggestion",
+        "Basic presentation outline",
+        "Formatting guidelines",
+        "Email support",
+      ],
+    },
+    {
       id: "basic-support",
       name: "Basic Academic Support",
       description: "Essential support for academic projects",
-      price: 500000,
+      price: 150000,
       features: [
+        "Project title suggestion",
         "Project proposal writing",
-        "Basic implementation guidance",
-        "Documentation templates",
-        "One presentation review",
-        "Email support"
-      ]
-    },
-    {
-      id: "standard-support", 
-      name: "Standard Academic Support",
-      description: "Comprehensive support for final year projects",
-      price: 1200000,
-      features: [
         "Complete proposal development",
         "Implementation with guidance",
-        "Full documentation package",
+        "Documentation templates",
         "Presentation preparation",
         "Defense preparation",
+        "Email support",
+      ],
+    },
+    {
+      id: "standard-support",
+      name: "Standard Academic Support",
+      description: "Comprehensive support for final year projects",
+      price: 300000,
+      features: [
+        "Everything in Basic Support",
+        "Advanced implementation guidance",
+        "Full documentation package",
         "Progress monitoring",
-        "2 revision rounds"
-      ]
+        "2 revision rounds",
+        "Priority support",
+        "Quality assurance",
+        "Technical consultation",
+      ],
     },
     {
       id: "premium-support",
       name: "Premium Academic Support",
       description: "Full academic journey support with publication",
-      price: 2500000,
+      price: 500000,
       features: [
+        "Everything in Standard Support",
         "Research methodology guidance",
-        "Data collection assistance", 
+        "Data collection assistance",
         "Complete implementation",
         "Academic paper writing",
         "Conference presentation prep",
         "Publication support",
-        "Book writing assistance",
-        "Unlimited revisions"
-      ]
-    }
+        "Defense coaching",
+        "Unlimited revisions",
+      ],
+    },
   ],
   client: [
     {
@@ -464,12 +576,12 @@ export const servicePackages = {
         "Basic functionality",
         "Mobile responsive",
         "Basic SEO setup",
-        "3 months support"
-      ]
+        "3 months support",
+      ],
     },
     {
       id: "professional-development",
-      name: "Professional Development", 
+      name: "Professional Development",
       description: "Advanced features with business integration",
       price: 2000000,
       features: [
@@ -478,9 +590,9 @@ export const servicePackages = {
         "Admin dashboard",
         "Analytics setup",
         "6 months support",
-        "Training included"
-      ]
-    }
+        "Training included",
+      ],
+    },
   ],
   business: [
     {
@@ -494,8 +606,8 @@ export const servicePackages = {
         "Integration capabilities",
         "Performance optimization",
         "12 months support",
-        "Staff training"
-      ]
+        "Staff training",
+      ],
     },
     {
       id: "enterprise-premium",
@@ -509,10 +621,10 @@ export const servicePackages = {
         "Cloud deployment",
         "24/7 monitoring",
         "Unlimited support",
-        "Ongoing maintenance"
-      ]
-    }
-  ]
+        "Ongoing maintenance",
+      ],
+    },
+  ],
 };
 
 export const supportServices = {
@@ -520,56 +632,56 @@ export const supportServices = {
     name: "Proposal Writing",
     description: "Complete academic proposal development",
     price: 200000,
-    timeline: "1-2 weeks"
+    timeline: "1-2 weeks",
   },
   implementation: {
-    name: "Full Implementation", 
+    name: "Full Implementation",
     description: "Complete project development and coding",
     price: 1500000,
-    timeline: "6-12 weeks"
+    timeline: "6-12 weeks",
   },
   documentation: {
     name: "Documentation Package",
     description: "User manual, technical docs, and reports",
     price: 300000,
-    timeline: "1-2 weeks"
+    timeline: "1-2 weeks",
   },
   presentation: {
     name: "Presentation Preparation",
     description: "PowerPoint slides and presentation coaching",
     price: 150000,
-    timeline: "3-5 days"
+    timeline: "3-5 days",
   },
   defense: {
     name: "Defense Preparation",
-    description: "Mock defense sessions and Q&A preparation", 
+    description: "Mock defense sessions and Q&A preparation",
     price: 200000,
-    timeline: "1 week"
+    timeline: "1 week",
   },
   dataCollection: {
     name: "Data Collection",
     description: "Research data gathering and analysis",
     price: 400000,
-    timeline: "2-4 weeks"
+    timeline: "2-4 weeks",
   },
   simulation: {
     name: "System Simulation",
     description: "Testing environments and simulation setup",
     price: 350000,
-    timeline: "1-2 weeks"
+    timeline: "1-2 weeks",
   },
   publication: {
     name: "Publication Support",
     description: "Academic paper writing and journal submission",
     price: 600000,
-    timeline: "4-6 weeks"
+    timeline: "4-6 weeks",
   },
   bookWriting: {
     name: "Book Writing",
     description: "Complete book writing and publishing support",
     price: 1000000,
-    timeline: "8-12 weeks"
-  }
+    timeline: "8-12 weeks",
+  },
 };
 
 export const hardwareRequirements = [
@@ -578,34 +690,49 @@ export const hardwareRequirements = [
     name: "Basic Server Setup",
     description: "Basic VPS hosting for small applications",
     price: 100000,
-    specifications: ["2GB RAM", "1 CPU Core", "20GB Storage", "1TB Bandwidth"]
+    specifications: ["2GB RAM", "1 CPU Core", "20GB Storage", "1TB Bandwidth"],
   },
   {
     id: "standard-server",
-    name: "Standard Server Setup", 
+    name: "Standard Server Setup",
     description: "Standard hosting for medium applications",
     price: 250000,
-    specifications: ["4GB RAM", "2 CPU Cores", "50GB Storage", "2TB Bandwidth"]
+    specifications: ["4GB RAM", "2 CPU Cores", "50GB Storage", "2TB Bandwidth"],
   },
   {
     id: "premium-server",
     name: "Premium Server Setup",
     description: "High-performance hosting for enterprise apps",
     price: 500000,
-    specifications: ["8GB RAM", "4 CPU Cores", "100GB Storage", "5TB Bandwidth"]
+    specifications: [
+      "8GB RAM",
+      "4 CPU Cores",
+      "100GB Storage",
+      "5TB Bandwidth",
+    ],
   },
   {
     id: "pos-hardware",
     name: "POS Hardware Package",
     description: "Complete POS hardware setup",
     price: 800000,
-    specifications: ["Thermal Printer", "Cash Drawer", "Barcode Scanner", "Touch Screen"]
+    specifications: [
+      "Thermal Printer",
+      "Cash Drawer",
+      "Barcode Scanner",
+      "Touch Screen",
+    ],
   },
   {
     id: "iot-sensors",
     name: "IoT Sensors Package",
     description: "Sensors for IoT projects",
     price: 300000,
-    specifications: ["Arduino/Raspberry Pi", "Various Sensors", "WiFi Modules", "Development Board"]
-  }
+    specifications: [
+      "Arduino/Raspberry Pi",
+      "Various Sensors",
+      "WiFi Modules",
+      "Development Board",
+    ],
+  },
 ];

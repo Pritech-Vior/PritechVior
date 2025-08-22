@@ -23,6 +23,11 @@ import AboutPage from "./pages/AboutPage";
 import ScholarPage from "./pages/ScholarPage";
 import ContactPage from "./pages/ContactPage";
 import ProjectsPage from "./pages/ProjectsPage";
+import ProjectRequestPage from "./pages/ProjectRequestPage";
+import NewProjectRequestPage from "./pages/NewProjectRequestPage";
+import ProjectCustomizationPage from "./pages/ProjectCustomizationPage";
+import ProjectConfirmationPage from "./pages/ProjectConfirmationPage";
+import ProjectDetailPage from "./pages/ProjectDetailPage";
 
 // New Authentication Pages
 import LoginPage from "./pages/auth/LoginPage";
@@ -65,6 +70,20 @@ const App = () => {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/viorx" element={<ViorXPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/project/:slug" element={<ProjectDetailPage />} />
+            <Route path="/project-request" element={<ProjectRequestPage />} />
+            <Route
+              path="/project-request/new"
+              element={<NewProjectRequestPage />}
+            />
+            <Route
+              path="/project-request/customize"
+              element={<ProjectCustomizationPage />}
+            />
+            <Route
+              path="/project-request/confirmation"
+              element={<ProjectConfirmationPage />}
+            />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/scholar" element={<ScholarPage />} />
             <Route path="/contact" element={<ContactPage />} />
