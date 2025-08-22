@@ -5,6 +5,8 @@ import {
   useEffect,
   useCallback,
 } from "react";
+import shopService from "../services/shopService";
+import { useAuth } from "./AuthContext";
 
 const CartContext = createContext();
 
@@ -36,6 +38,7 @@ const saveLocalCart = (cartItems) => {
 };
 
 export const CartProvider = ({ children }) => {
+  const { isAuthenticated } = useAuth();
   const [cartCount, setCartCount] = useState(0);
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -44,88 +47,69 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     const localCartItems = getLocalCart();
     setCartItems(localCartItems);
-
-    // Calculate total quantity, not just number of items
-    const totalQuantity = localCartItems.reduce(
-      (total, item) => total + item.quantity,
-      0
-    );
-    setCartCount(totalQuantity);
+    setCartCount(localCartItems.length);
   }, []);
 
-  // Function to refresh cart data from localStorage only
+  // Function to refresh cart data
   const refreshCart = useCallback(async () => {
-    // Always use localStorage cart (no server sync)
-    const localCartItems = getLocalCart();
-    setCartItems(localCartItems);
+    if (isAuthenticated) {
+      try {
+        const cart = await shopService.getCart();
+        const items = cart.items || [];
+        setCartItems(items);
+        setCartCount(items.length);
+        saveLocalCart(items);
+      } catch (error) {
+        console.error("Error fetching cart:", error);
+      }
+    } else {
+      const localCartItems = getLocalCart();
+      setCartItems(localCartItems);
+      setCartCount(localCartItems.length);
+    }
+  }, [isAuthenticated]);
 
-    // Calculate total quantity, not just number of items
-    const totalQuantity = localCartItems.reduce(
-      (total, item) => total + item.quantity,
-      0
-    );
-    setCartCount(totalQuantity);
-  }, []);
-
-  // Add to cart with localStorage only (no server sync)
+  // Add to cart with localStorage support
   const addToCart = useCallback(
     async (productId, quantity = 1, options = {}, productData = null) => {
       try {
         setLoading(true);
-        console.log("addToCart called with:", {
-          productId,
-          quantity,
-          options,
-          productData,
-        });
 
-        // Always use localStorage cart (no server sync)
-        // Use provided productData instead of fetching
-        if (!productData) {
-          throw new Error("Product data is required for localStorage cart");
-        }
-
-        const localCartItems = getLocalCart();
-        console.log("Current local cart items:", localCartItems);
-
-        const existingItemIndex = localCartItems.findIndex(
-          (item) => item.product.id === productId
-        );
-
-        if (existingItemIndex >= 0) {
-          // Update existing item
-          localCartItems[existingItemIndex].quantity += quantity;
-          console.log(
-            "Updated existing item:",
-            localCartItems[existingItemIndex]
-          );
+        if (isAuthenticated) {
+          // Add to server cart
+          await shopService.addToCart(productId, quantity, options);
+          await refreshCart();
         } else {
-          // Add new item
-          const newItem = {
-            id: Date.now(), // Temporary ID for localStorage
-            product: productData,
-            quantity: quantity,
-            options: options,
-          };
-          localCartItems.push(newItem);
-          console.log("Added new item:", newItem);
+          // Add to localStorage cart
+          // Use provided productData instead of fetching
+          if (!productData) {
+            throw new Error("Product data is required for localStorage cart");
+          }
+
+          const localCartItems = getLocalCart();
+
+          const existingItemIndex = localCartItems.findIndex(
+            (item) => item.product.id === productId
+          );
+
+          if (existingItemIndex >= 0) {
+            // Update existing item
+            localCartItems[existingItemIndex].quantity += quantity;
+          } else {
+            // Add new item
+            const newItem = {
+              id: Date.now(), // Temporary ID for localStorage
+              product: productData,
+              quantity: quantity,
+              options: options,
+            };
+            localCartItems.push(newItem);
+          }
+
+          saveLocalCart(localCartItems);
+          setCartItems(localCartItems);
+          setCartCount(localCartItems.length);
         }
-
-        saveLocalCart(localCartItems);
-        setCartItems(localCartItems);
-
-        // Calculate total quantity, not just number of items
-        const totalQuantity = localCartItems.reduce(
-          (total, item) => total + item.quantity,
-          0
-        );
-        setCartCount(totalQuantity);
-
-        console.log("Updated cart state:", {
-          cartItems: localCartItems,
-          cartCount: totalQuantity,
-          itemCount: localCartItems.length,
-        });
 
         return true;
       } catch (error) {
@@ -135,77 +119,87 @@ export const CartProvider = ({ children }) => {
         setLoading(false);
       }
     },
-    []
+    [isAuthenticated, refreshCart]
   );
 
-  // Update cart item using localStorage only
-  const updateCartItem = useCallback(async (itemId, quantity) => {
-    try {
-      setLoading(true);
+  // Update cart item
+  const updateCartItem = useCallback(
+    async (itemId, quantity) => {
+      try {
+        setLoading(true);
 
-      // Always use localStorage cart (no server sync)
-      const localCartItems = getLocalCart();
-      const itemIndex = localCartItems.findIndex((item) => item.id === itemId);
-
-      if (itemIndex >= 0) {
-        if (quantity > 0) {
-          localCartItems[itemIndex].quantity = quantity;
+        if (isAuthenticated) {
+          await shopService.updateCartItem(itemId, quantity);
+          await refreshCart();
         } else {
-          localCartItems.splice(itemIndex, 1);
+          const localCartItems = getLocalCart();
+          const itemIndex = localCartItems.findIndex(
+            (item) => item.id === itemId
+          );
+
+          if (itemIndex >= 0) {
+            if (quantity > 0) {
+              localCartItems[itemIndex].quantity = quantity;
+            } else {
+              localCartItems.splice(itemIndex, 1);
+            }
+            saveLocalCart(localCartItems);
+            setCartItems(localCartItems);
+            setCartCount(localCartItems.length);
+          }
         }
-        saveLocalCart(localCartItems);
-        setCartItems(localCartItems);
 
-        // Calculate total quantity, not just number of items
-        const totalQuantity = localCartItems.reduce(
-          (total, item) => total + item.quantity,
-          0
-        );
-        setCartCount(totalQuantity);
+        return true;
+      } catch (error) {
+        console.error("Error updating cart item:", error);
+        throw error;
+      } finally {
+        setLoading(false);
       }
+    },
+    [isAuthenticated, refreshCart]
+  );
 
-      return true;
-    } catch (error) {
-      console.error("Error updating cart item:", error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Remove cart item
+  const removeCartItem = useCallback(
+    async (itemId) => {
+      try {
+        setLoading(true);
 
-  // Remove cart item using localStorage only
-  const removeCartItem = useCallback(async (itemId) => {
-    try {
-      setLoading(true);
+        if (isAuthenticated) {
+          await shopService.removeCartItem(itemId);
+          await refreshCart();
+        } else {
+          const localCartItems = getLocalCart();
+          const filteredItems = localCartItems.filter(
+            (item) => item.id !== itemId
+          );
+          saveLocalCart(filteredItems);
+          setCartItems(filteredItems);
+          setCartCount(filteredItems.length);
+        }
 
-      // Always use localStorage cart (no server sync)
-      const localCartItems = getLocalCart();
-      const filteredItems = localCartItems.filter((item) => item.id !== itemId);
-      saveLocalCart(filteredItems);
-      setCartItems(filteredItems);
+        return true;
+      } catch (error) {
+        console.error("Error removing cart item:", error);
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isAuthenticated, refreshCart]
+  );
 
-      // Calculate total quantity, not just number of items
-      const totalQuantity = filteredItems.reduce(
-        (total, item) => total + item.quantity,
-        0
-      );
-      setCartCount(totalQuantity);
-
-      return true;
-    } catch (error) {
-      console.error("Error removing cart item:", error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Clear cart using localStorage only
+  // Clear cart
   const clearCart = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Always clear localStorage only (no server sync)
+      if (isAuthenticated) {
+        await shopService.clearCart();
+      }
+
+      // Always clear localStorage
       saveLocalCart([]);
       setCartItems([]);
       setCartCount(0);
@@ -217,7 +211,7 @@ export const CartProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const value = {
     cartCount,

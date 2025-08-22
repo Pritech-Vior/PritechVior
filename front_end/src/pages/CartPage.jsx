@@ -83,6 +83,10 @@ const CartPage = () => {
   };
 
   const handleCheckout = () => {
+    if (!isAuthenticated) {
+      navigate("/auth/login");
+      return;
+    }
     navigate("/checkout");
   };
 

@@ -4,7 +4,7 @@ const BASE_URL = `${
 }/api/shop`;
 
 class ShopService {
-  // Generic fetch method with error handling (for authenticated requests)
+  // Generic fetch method with error handling
   async fetchWithAuth(url, options = {}) {
     try {
       const token = localStorage.getItem("access_token");
@@ -35,32 +35,6 @@ class ShopService {
     }
   }
 
-  // Generic fetch method for public endpoints (no authentication required)
-  async fetchPublic(url, options = {}) {
-    try {
-      const defaultHeaders = {
-        "Content-Type": "application/json",
-      };
-
-      const response = await fetch(url, {
-        ...options,
-        headers: {
-          ...defaultHeaders,
-          ...options.headers,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error("Public API request failed:", error);
-      throw error;
-    }
-  }
-
   // Categories
   async getCategories() {
     return this.fetchWithAuth(`${BASE_URL}/categories/`);
@@ -84,9 +58,9 @@ class ShopService {
     return this.fetchWithAuth(`${BASE_URL}/product-types/`);
   }
 
-  // Platforms (public endpoint - no auth required)
+  // Platforms
   async getPlatforms() {
-    return this.fetchPublic(`${BASE_URL}/platforms/`);
+    return this.fetchWithAuth(`${BASE_URL}/platforms/`);
   }
 
   // Products
@@ -190,7 +164,7 @@ class ShopService {
 
   async clearCart() {
     return this.fetchWithAuth(`${BASE_URL}/cart/clear/`, {
-      method: "DELETE",
+      method: "POST",
     });
   }
 

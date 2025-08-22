@@ -1,6 +1,9 @@
 import { Routes, Route } from "react-router-dom";
 import ButtonGradient from "./assets/svg/ButtonGradient";
 import Chatbot from "./components/Chatbot";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
+import OnlineStatusIndicator from "./components/OnlineStatusIndicator";
+import PWAServiceWorker from "./components/PWAServiceWorker";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { CartProvider } from "./contexts/CartContext";
@@ -15,10 +18,6 @@ import ThinkForgePage from "./pages/ThinkForgePage";
 import ViorMartPage from "./pages/ViorMartPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
-import CheckoutPage from "./pages/CheckoutPage";
-import OrderConfirmationPage from "./pages/OrderConfirmationPage";
-import CustomOrderPage from "./pages/CustomOrderPage";
-import ProductRequestPage from "./pages/ProductRequestPage";
 import ViorXPage from "./pages/ViorXPage";
 import AboutPage from "./pages/AboutPage";
 import ScholarPage from "./pages/ScholarPage";
@@ -64,13 +63,6 @@ const App = () => {
             <Route path="/viormart" element={<ViorMartPage />} />
             <Route path="/product/:slug" element={<ProductDetailPage />} />
             <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/custom-order" element={<CustomOrderPage />} />
-            <Route path="/product-request" element={<ProductRequestPage />} />
-            <Route
-              path="/order-confirmation"
-              element={<OrderConfirmationPage />}
-            />
             <Route path="/viorx" element={<ViorXPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/about" element={<AboutPage />} />
@@ -106,6 +98,11 @@ const App = () => {
 
           <ButtonGradient />
           <Chatbot />
+
+          {/* PWA Components */}
+          <PWAServiceWorker />
+          <OnlineStatusIndicator />
+          <PWAInstallPrompt />
         </CartProvider>
       </AuthProvider>
     </ToastProvider>

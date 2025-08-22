@@ -329,54 +329,13 @@ class WishlistViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for orders"""
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
-    
-    def create(self, request, *args, **kwargs):
-        """Create a new order"""
-        try:
-            data = request.data
-            
-            # Create the order
-            order = Order.objects.create(
-                user=request.user,
-                subtotal=data.get('subtotal', 0),
-                shipping_cost=data.get('shipping_cost', 0),
-                tax_amount=data.get('tax', 0),
-                total_amount=data.get('total', 0),
-                shipping_address=data.get('shipping_address', {}),
-                billing_address=data.get('billing_address', {}),
-                status='pending',
-                payment_status='pending'
-            )
-            
-            # Create order items
-            items_data = data.get('items', [])
-            for item_data in items_data:
-                OrderItem.objects.create(
-                    order=order,
-                    product_id=item_data.get('product_id'),
-                    quantity=item_data.get('quantity', 1),
-                    price=item_data.get('price', 0),
-                )
-            
-            # Return the created order
-            serializer = self.get_serializer(order)
-            return Response({
-                'order_id': str(order.id),
-                'order': serializer.data,
-                'message': 'Order created successfully'
-            }, status=status.HTTP_201_CREATED)
-            
-        except Exception as e:
-            return Response({
-                'error': f'Failed to create order: {str(e)}'
-            }, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['post'])
     def checkout(self, request):

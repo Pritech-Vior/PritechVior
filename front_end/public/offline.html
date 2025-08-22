@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>You're Offline - PRITECH VIOR</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+        color: #ffffff;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        text-align: center;
+        max-width: 500px;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(172, 106, 255, 0.3);
+      }
+
+      .logo {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: linear-gradient(45deg, #ac6aff, #ff6ec7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 24px;
+        color: white;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        background: linear-gradient(45deg, #ac6aff, #ff6ec7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      p {
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+        color: #cccccc;
+        line-height: 1.6;
+      }
+
+      .features {
+        margin: 30px 0;
+        text-align: left;
+      }
+
+      .feature {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: rgba(172, 106, 255, 0.1);
+        border-radius: 10px;
+      }
+
+      .feature-icon {
+        width: 12px;
+        height: 12px;
+        background: #ac6aff;
+        border-radius: 50%;
+        margin-right: 15px;
+      }
+
+      .retry-btn {
+        background: linear-gradient(45deg, #ac6aff, #ff6ec7);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        margin-top: 20px;
+      }
+
+      .retry-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(172, 106, 255, 0.3);
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+
+      .pulse {
+        animation: pulse 2s infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo pulse">PV</div>
+      <h1>You're Offline</h1>
+      <p>
+        Don't worry! You can still browse cached content and use many features
+        of PRITECH VIOR.
+      </p>
+
+      <div class="features">
+        <div class="feature">
+          <div class="feature-icon"></div>
+          <span>Browse previously loaded pages</span>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"></div>
+          <span>View cached products and services</span>
+        </div>
+        <div class="feature">
+          <div class="feature-icon"></div>
+          <span>Access saved content</span>
+        </div>
+      </div>
+
+      <p>We'll automatically sync your data when you're back online.</p>
+
+      <button class="retry-btn" onclick="window.location.reload()">
+        Try Again
+      </button>
+    </div>
+
+    <script>
+      // Check if back online and reload
+      window.addEventListener("online", function () {
+        window.location.reload();
+      });
+    </script>
+  </body>
+</html>
