@@ -85,8 +85,8 @@ class ProjectTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('title', 'client', 'status_badge', 'priority_badge', 'progress_bar', 'start_date', 'end_date', 'created_at')
-    list_filter = ('status', 'priority', 'start_date', 'created_at', 'category', 'technologies')
+    list_display = ('title', 'client', 'status_badge', 'priority_badge', 'is_public', 'is_requestable', 'progress_bar', 'start_date', 'end_date', 'created_at')
+    list_filter = ('status', 'priority', 'is_public', 'is_requestable', 'start_date', 'created_at', 'category', 'technologies')
     search_fields = ('title', 'description', 'client__username', 'client__email')
     date_hierarchy = 'created_at'
     filter_horizontal = ('assigned_users', 'technologies')
@@ -97,7 +97,7 @@ class ProjectAdmin(admin.ModelAdmin):
             'fields': ('title', 'description', 'client', 'category')
         }),
         ('Status & Priority', {
-            'fields': ('status', 'priority')
+            'fields': ('status', 'priority', 'is_public', 'is_requestable')
         }),
         ('Team & Technologies', {
             'fields': ('assigned_users', 'technologies')

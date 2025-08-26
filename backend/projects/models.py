@@ -250,6 +250,10 @@ class Project(models.Model):
     contact_phone = models.CharField(max_length=20, blank=True)
     contact_email = models.EmailField(blank=True)
     
+    # Visibility
+    is_public = models.BooleanField(default=False, help_text="Show this project in public showcase")
+    is_requestable = models.BooleanField(default=False, help_text="Allow users to request customization of this project")
+    
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

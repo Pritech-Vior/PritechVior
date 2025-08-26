@@ -182,9 +182,18 @@ class ProjectRequestViewSet(viewsets.ModelViewSet):
     """ViewSet for project requests"""
     queryset = ProjectRequest.objects.all()
     serializer_class = ProjectRequestSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]  # Allow anonymous users to create requests
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = ProjectRequestFilter
+    
+    def get_permissions(self):
+        """Override permissions per action"""
+        if self.action == 'create':
+            # Allow anyone to create project requests
+            return [permissions.AllowAny()]
+        else:
+            # Require authentication for list/retrieve/update/delete
+            return [permissions.IsAuthenticated()]
     
     def get_serializer_class(self):
         if self.action == 'create':
@@ -203,7 +212,25 @@ class ProjectRequestViewSet(viewsets.ModelViewSet):
         return queryset
     
     def perform_create(self, serializer):
-        serializer.save(client=self.request.user)
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        
+        # Handle anonymous users by assigning to guest user
+        if self.request.user.is_authenticated:
+            client = self.request.user
+        else:
+            # Get or create guest user for anonymous requests
+            client, created = User.objects.get_or_create(
+                username='guest',
+                defaults={
+                    'email': 'guest@pritechvior.com',
+                    'first_name': 'Guest',
+                    'last_name': 'User',
+                    'is_active': False
+                }
+            )
+        
+        serializer.save(client=client)
     
     @action(detail=True, methods=['post'])
     def add_communication(self, request, pk=None):
@@ -276,7 +303,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     """ViewSet for projects"""
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     lookup_field = 'slug'
     
     def get_serializer_class(self):
@@ -286,13 +313,20 @@ class ProjectViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         queryset = super().get_queryset()
-        if not self.request.user.is_staff:
-            # Regular users can only see their own projects
-            queryset = queryset.filter(
-                Q(client=self.request.user) | 
-                Q(assigned_users=self.request.user)
-            ).distinct()
-        return queryset
+        
+        # For anonymous users, show only public projects
+        if not self.request.user.is_authenticated:
+            return queryset.filter(is_public=True)
+        
+        # For authenticated staff users, show all projects
+        if self.request.user.is_staff:
+            return queryset
+            
+        # For authenticated regular users, show only their own projects
+        return queryset.filter(
+            Q(client=self.request.user) | 
+            Q(assigned_users=self.request.user)
+        ).distinct()
 
 
 class DashboardStatsAPIView(APIView):

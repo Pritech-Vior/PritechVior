@@ -1,19 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  Plus,
   X,
-  Upload,
-  FileText,
   DollarSign,
-  Clock,
   User,
   Building,
   GraduationCap,
-  Code,
   Database,
   Smartphone,
   Globe,
@@ -22,19 +17,15 @@ import {
   ShoppingCart,
   BookOpen,
   Briefcase,
+  Loader2,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Section from "../components/Section";
 import Heading from "../components/Heading";
 import SimpleButton from "../components/SimpleButton";
-import {
-  technologyStacks,
-  courseCategories,
-  projectTypes,
-  supportServices,
-  hardwareRequirements,
-} from "../constants/projectData";
+import { projectsService } from "../services/projectsService";
 
 const NewProjectRequestPage = () => {
   const navigate = useNavigate();
@@ -42,7 +33,16 @@ const NewProjectRequestPage = () => {
   const { userType } = location.state || { userType: "student" };
 
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = userType === "student" ? 6 : 5;
+  const totalSteps = userType === "student" ? 8 : 7; // Added template selection step
+
+  // Backend data
+  const [categories, setCategories] = useState([]);
+  const [technologies, setTechnologies] = useState([]);
+  const [servicePackages, setServicePackages] = useState([]);
+  const [courseCategories, setCourseCategories] = useState([]);
+  const [requestableProjects, setRequestableProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     // Basic Information
@@ -50,6 +50,7 @@ const NewProjectRequestPage = () => {
     projectDescription: "",
     projectCategory: "",
     userType: userType,
+    selectedTemplate: "", // Selected project template ID
 
     // Student-specific fields
     course: "",
@@ -88,11 +89,49 @@ const NewProjectRequestPage = () => {
 
   const [estimatedCost, setEstimatedCost] = useState(0);
 
+  // Load backend data
   useEffect(() => {
-    calculateEstimatedCost();
-  }, [formData, userType]);
+    const loadBackendData = async () => {
+      try {
+        setLoading(true);
 
-  const calculateEstimatedCost = () => {
+        const [
+          categoriesData,
+          technologiesData,
+          servicePackagesData,
+          courseCategoriesData,
+          requestableProjectsData,
+        ] = await Promise.all([
+          projectsService.getProjectCategories(),
+          projectsService.getTechnologyStacks(),
+          projectsService.getServicePackages(userType),
+          userType === "student"
+            ? projectsService.getCourseCategories()
+            : Promise.resolve([]),
+          projectsService.getRequestableProjects(),
+        ]);
+
+        setCategories(categoriesData.results || categoriesData);
+        setTechnologies(technologiesData.results || technologiesData);
+        setServicePackages(servicePackagesData.results || servicePackagesData);
+        setCourseCategories(
+          courseCategoriesData.results || courseCategoriesData
+        );
+        setRequestableProjects(
+          requestableProjectsData.results || requestableProjectsData
+        );
+      } catch (error) {
+        console.error("Error loading backend data:", error);
+        toast.error("Failed to load form data. Please refresh the page.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBackendData();
+  }, [userType]);
+
+  const calculateEstimatedCost = useCallback(() => {
     let baseCost = 0;
 
     // Base cost by category and complexity
@@ -109,18 +148,23 @@ const NewProjectRequestPage = () => {
 
     baseCost = categoryCosts[formData.projectCategory] || 2000000;
 
-    // Add service costs
+    // Add service costs from backend data
     const serviceCosts = formData.selectedServices.reduce(
       (total, serviceId) => {
-        const service = supportServices[serviceId];
-        return total + (service ? service.price : 0);
+        const service = servicePackages.find((s) => s.id === serviceId);
+        return total + (service ? parseInt(service.price) : 0);
       },
       0
     );
 
-    // Add hardware costs
+    // Add hardware costs (static for now)
+    const hardwareList = [
+      { id: "laptop", price: 50000 },
+      { id: "server", price: 25000 },
+      { id: "software", price: 15000 },
+    ];
     const hardwareCosts = formData.hardwareNeeds.reduce((total, hardwareId) => {
-      const hardware = hardwareRequirements.find((h) => h.id === hardwareId);
+      const hardware = hardwareList.find((h) => h.id === hardwareId);
       return total + (hardware ? hardware.price : 0);
     }, 0);
 
@@ -131,7 +175,11 @@ const NewProjectRequestPage = () => {
 
     const totalCost = (baseCost + serviceCosts + hardwareCosts) * multiplier;
     setEstimatedCost(totalCost);
-  };
+  }, [formData, userType, servicePackages]);
+
+  useEffect(() => {
+    calculateEstimatedCost();
+  }, [calculateEstimatedCost]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -177,16 +225,53 @@ const NewProjectRequestPage = () => {
     }
   };
 
-  const handleSubmit = () => {
-    // Here you would typically send the data to your backend
-    console.log("Project Request Data:", formData);
-    navigate("/project-request/confirmation", {
-      state: {
-        formData,
-        estimatedCost,
-        userType,
-      },
-    });
+  const handleSubmit = async () => {
+    try {
+      setSubmitting(true);
+
+      // Format the data for the backend
+      const requestData = projectsService.formatProjectRequestData(
+        {
+          title: formData.projectTitle,
+          description: formData.projectDescription,
+          requirements: formData.specificRequirements,
+          additionalFeatures: formData.additionalFeatures.join(", "),
+          budget: formData.budgetRange,
+          deadline: formData.timeline,
+          timelineFlexibility: "flexible", // Default value
+          phone: formData.contactPhone,
+          email: formData.contactEmail,
+          technologies: formData.technologies,
+          features: formData.coreFeatures,
+          academicLevel: formData.academicLevel,
+          institution: formData.institution,
+          courseCategory: formData.courseCategory,
+          servicePackage: formData.selectedServices[0], // Assuming first selected service
+          technologyNotes: formData.additionalNotes,
+        },
+        userType
+      );
+
+      // Submit the project request
+      const response = await projectsService.createProjectRequest(requestData);
+
+      toast.success("Project request submitted successfully!");
+
+      // Navigate to confirmation page with the response data
+      navigate("/project-request/confirmation", {
+        state: {
+          formData,
+          estimatedCost,
+          userType,
+          requestId: response.id || response.request_id,
+        },
+      });
+    } catch (error) {
+      console.error("Error submitting project request:", error);
+      toast.error("Failed to submit project request. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getUserTypeIcon = () => {
@@ -214,6 +299,15 @@ const NewProjectRequestPage = () => {
   };
 
   const renderStepContent = () => {
+    if (loading) {
+      return (
+        <div className="max-w-3xl mx-auto text-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-color-1" />
+          <p className="text-n-4">Loading project requirements...</p>
+        </div>
+      );
+    }
+
     switch (currentStep) {
       case 1:
         return (
@@ -287,6 +381,122 @@ const NewProjectRequestPage = () => {
         );
 
       case 2:
+        return (
+          <div className="bg-n-7 p-8 rounded-xl border border-n-6">
+            <h3 className="h4 mb-4">Project Templates (Optional)</h3>
+            <p className="text-n-3 mb-6">
+              Choose from our existing projects as a starting point, or start
+              from scratch.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="flex items-center p-4 rounded-lg border border-n-6 hover:bg-n-6/50 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="templateChoice"
+                    value=""
+                    checked={formData.selectedTemplate === ""}
+                    onChange={() => handleInputChange("selectedTemplate", "")}
+                    className="w-4 h-4 text-color-1 bg-n-7 border-n-6 focus:ring-color-1"
+                  />
+                  <div className="ml-3">
+                    <span className="text-n-2 font-medium">
+                      Start from scratch
+                    </span>
+                    <p className="text-n-4 text-sm">
+                      Create a completely custom project
+                    </p>
+                  </div>
+                </label>
+              </div>
+
+              {requestableProjects.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-n-2 font-medium">
+                    Use existing project as template:
+                  </h4>
+                  {requestableProjects.map((project) => (
+                    <label
+                      key={project.id}
+                      className="flex items-start p-4 rounded-lg border border-n-6 hover:bg-n-6/50 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="templateChoice"
+                        value={project.id}
+                        checked={formData.selectedTemplate === project.id}
+                        onChange={() =>
+                          handleInputChange("selectedTemplate", project.id)
+                        }
+                        className="w-4 h-4 text-color-1 bg-n-7 border-n-6 focus:ring-color-1 mt-1"
+                      />
+                      <div className="ml-3 flex-1">
+                        <span className="text-n-2 font-medium">
+                          {project.title}
+                        </span>
+                        <p className="text-n-4 text-sm mt-1">
+                          {project.description}
+                        </p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 bg-color-1 rounded-full"></span>
+                            <span className="text-n-4 text-xs">
+                              {project.category?.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 bg-color-2 rounded-full"></span>
+                            <span className="text-n-4 text-xs">
+                              {project.user_type}
+                            </span>
+                          </div>
+                          {project.budget && (
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 bg-n-4 rounded-full"></span>
+                              <span className="text-n-4 text-xs">
+                                TSH {parseInt(project.budget).toLocaleString()}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        {project.technologies &&
+                          project.technologies.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {project.technologies.slice(0, 3).map((tech) => (
+                                <span
+                                  key={tech.id}
+                                  className="text-xs px-2 py-1 bg-n-6 text-n-3 rounded"
+                                >
+                                  {tech.name}
+                                </span>
+                              ))}
+                              {project.technologies.length > 3 && (
+                                <span className="text-xs px-2 py-1 bg-n-6 text-n-3 rounded">
+                                  +{project.technologies.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {requestableProjects.length === 0 && (
+                <div className="text-center py-8 text-n-4">
+                  <p>No project templates available at the moment.</p>
+                  <p className="text-sm">
+                    You can still create a custom project from scratch.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 3:
         return userType === "student" ? (
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
@@ -330,11 +540,16 @@ const NewProjectRequestPage = () => {
                     className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 focus:border-color-1 focus:outline-none"
                   >
                     <option value="">Select project type</option>
-                    {projectTypes.student.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
+                    {categories
+                      .filter(
+                        (cat) =>
+                          cat.user_type === userType || cat.user_type === "all"
+                      )
+                      .map((category) => (
+                        <option key={category.id} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
                   </select>
                 </div>
               </div>
@@ -382,16 +597,75 @@ const NewProjectRequestPage = () => {
           renderTechnicalRequirements()
         );
 
-      case 3:
-        return renderTechnicalRequirements();
-
       case 4:
-        return renderFeaturesAndFunctionality();
+        return (
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <h3 className="h4 mb-4">Choose a Project Template (Optional)</h3>
+              <p className="body-1 text-n-4">
+                Start with one of our existing projects or create from scratch
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div
+                onClick={() => handleInputChange("selectedTemplate", null)}
+                className={`p-6 rounded-xl border cursor-pointer transition-all duration-300 ${
+                  !formData.selectedTemplate
+                    ? "border-color-1 bg-color-1/10"
+                    : "border-n-6 hover:border-n-4 hover:bg-n-7/50"
+                }`}
+              >
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-n-6 rounded-lg flex items-center justify-center mx-auto mb-4">
+                    <span className="text-2xl">✨</span>
+                  </div>
+                  <h4 className="font-medium text-n-1 mb-2">
+                    Start from Scratch
+                  </h4>
+                  <p className="text-sm text-n-4">
+                    Create a completely custom project based on your
+                    requirements
+                  </p>
+                </div>
+              </div>
+
+              {requestableProjects.map((project) => (
+                <div
+                  key={project.id}
+                  onClick={() =>
+                    handleInputChange("selectedTemplate", project.id)
+                  }
+                  className={`p-6 rounded-xl border cursor-pointer transition-all duration-300 ${
+                    formData.selectedTemplate === project.id
+                      ? "border-color-1 bg-color-1/10"
+                      : "border-n-6 hover:border-n-4 hover:bg-n-7/50"
+                  }`}
+                >
+                  <h4 className="font-medium text-n-1 mb-2">{project.title}</h4>
+                  <p className="text-sm text-n-4 mb-4 line-clamp-3">
+                    {project.description}
+                  </p>
+                  <div className="flex items-center justify-between text-xs text-n-3">
+                    <span>{project.category?.name}</span>
+                    <span className="text-color-1">Customize</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
 
       case 5:
-        return renderBudgetAndTimeline();
+        return renderTechnicalRequirements();
 
       case 6:
+        return renderFeaturesAndFunctionality();
+
+      case 7:
+        return renderBudgetAndTimeline();
+
+      case 8:
         return renderSupportServices();
 
       default:
@@ -414,39 +688,33 @@ const NewProjectRequestPage = () => {
             Technology Stack *
           </label>
           <div className="space-y-3">
-            {technologyStacks
-              .filter((stack) => stack.suitable.includes(userType))
-              .map((stack) => (
+            {technologies
+              .filter(
+                (tech) =>
+                  tech.user_type === userType || tech.user_type === "all"
+              )
+              .map((tech) => (
                 <div
-                  key={stack.id}
+                  key={tech.id}
                   onClick={() =>
-                    handleInputChange("selectedTechStack", stack.id)
+                    handleInputChange("selectedTechStack", tech.id)
                   }
                   className={`p-4 rounded-lg border cursor-pointer transition-all duration-300 ${
-                    formData.selectedTechStack === stack.id
+                    formData.selectedTechStack === tech.id
                       ? "border-color-1 bg-color-1/10"
                       : "border-n-6 hover:border-n-4 hover:bg-n-7/50"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium text-n-1 mb-1">
-                        {stack.name}
-                      </h4>
-                      <div className="flex flex-wrap gap-1">
-                        {stack.technologies.map((tech, index) => (
-                          <span
-                            key={index}
-                            className="text-xs px-2 py-1 bg-n-6 text-n-3 rounded"
-                          >
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
+                      <h4 className="font-medium text-n-1 mb-1">{tech.name}</h4>
+                      <p className="text-sm text-n-3 mb-2">
+                        {tech.description}
+                      </p>
                     </div>
                     <CheckCircle2
                       className={`w-5 h-5 ${
-                        formData.selectedTechStack === stack.id
+                        formData.selectedTechStack === tech.id
                           ? "text-color-1"
                           : "text-n-6"
                       }`}
@@ -790,28 +1058,22 @@ const NewProjectRequestPage = () => {
               : "Additional Services"}
           </label>
           <div className="space-y-3">
-            {Object.entries(supportServices)
-              .filter(([key]) => {
-                if (userType === "student") return true;
-                return ![
-                  "proposal",
-                  "defense",
-                  "dataCollection",
-                  "publication",
-                  "bookWriting",
-                ].includes(key);
-              })
-              .map(([key, service]) => (
+            {servicePackages
+              .filter(
+                (service) =>
+                  service.user_type === userType || service.user_type === "all"
+              )
+              .map((service) => (
                 <label
-                  key={key}
+                  key={service.id}
                   className="flex items-center justify-between p-4 rounded-lg border border-n-6 hover:bg-n-7/50 cursor-pointer"
                 >
                   <div className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={formData.selectedServices.includes(key)}
+                      checked={formData.selectedServices.includes(service.id)}
                       onChange={() =>
-                        handleArrayToggle("selectedServices", key)
+                        handleArrayToggle("selectedServices", service.id)
                       }
                       className="w-4 h-4 text-color-1 bg-n-7 border-n-6 rounded focus:ring-color-1"
                     />
@@ -824,7 +1086,7 @@ const NewProjectRequestPage = () => {
                   </div>
                   <div className="text-right">
                     <span className="text-color-1 font-medium">
-                      TSH {service.price.toLocaleString()}
+                      TSH {parseInt(service.price).toLocaleString()}
                     </span>
                     <p className="text-n-4 text-xs">{service.timeline}</p>
                   </div>
@@ -839,7 +1101,26 @@ const NewProjectRequestPage = () => {
             Hardware Requirements (Optional)
           </label>
           <div className="space-y-3">
-            {hardwareRequirements.map((hardware) => (
+            {[
+              {
+                id: "laptop",
+                name: "Laptop/Computer",
+                description: "Development workstation",
+                price: 50000,
+              },
+              {
+                id: "server",
+                name: "Server Access",
+                description: "Cloud server for deployment",
+                price: 25000,
+              },
+              {
+                id: "software",
+                name: "Software Licenses",
+                description: "Professional development tools",
+                price: 15000,
+              },
+            ].map((hardware) => (
               <label
                 key={hardware.id}
                 className="flex items-center justify-between p-4 rounded-lg border border-n-6 hover:bg-n-7/50 cursor-pointer"
@@ -858,16 +1139,6 @@ const NewProjectRequestPage = () => {
                       {hardware.name}
                     </span>
                     <p className="text-n-4 text-sm">{hardware.description}</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {hardware.specifications.map((spec, index) => (
-                        <span
-                          key={index}
-                          className="text-xs px-2 py-1 bg-n-6 text-n-3 rounded"
-                        >
-                          {spec}
-                        </span>
-                      ))}
-                    </div>
                   </div>
                 </div>
                 <span className="text-color-1 font-medium">
@@ -1037,10 +1308,20 @@ const NewProjectRequestPage = () => {
               {currentStep === totalSteps ? (
                 <SimpleButton
                   onClick={handleSubmit}
-                  className="bg-color-1 hover:bg-color-1/90"
+                  disabled={submitting}
+                  className="bg-color-1 hover:bg-color-1/90 disabled:opacity-50"
                 >
-                  Submit Request
-                  <CheckCircle2 className="w-4 h-4 ml-2" />
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      Submit Request
+                      <CheckCircle2 className="w-4 h-4 ml-2" />
+                    </>
+                  )}
                 </SimpleButton>
               ) : (
                 <SimpleButton

@@ -7,7 +7,9 @@ import {
   User,
   Tag,
   Building,
+  Clock,
   Search,
+  Filter,
   Loader2,
 } from "lucide-react";
 import { projectsService } from "../services/projectsService";
@@ -26,42 +28,35 @@ const ProjectsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const statuses = [
-    "All",
-    "Planning",
-    "In Progress",
-    "Review",
-    "Completed",
-    "On Hold",
-    "Cancelled",
-  ];
+  const statuses = ["All", "Planning", "In Progress", "Review", "Completed", "On Hold", "Cancelled"];
 
   // Load data from API
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-
+        
         // Load projects and categories in parallel
         const [projectsData, categoriesData] = await Promise.all([
           projectsService.getProjects(),
-          projectsService.getProjectCategories(),
+          projectsService.getProjectCategories()
         ]);
 
         setProjects(projectsData.results || projectsData);
-
+        
         // Build categories list
         const categoryList = ["All"];
         if (categoriesData.results || categoriesData) {
           const apiCategories = (categoriesData.results || categoriesData)
-            .filter((cat) => cat.is_active)
-            .map((cat) => cat.name);
+            .filter(cat => cat.is_active)
+            .map(cat => cat.name);
           categoryList.push(...apiCategories);
         }
         setCategories(categoryList);
+        
       } catch (err) {
-        console.error("Error loading projects data:", err);
-        setError("Failed to load projects. Please try again later.");
+        console.error('Error loading projects data:', err);
+        setError('Failed to load projects. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -74,61 +69,55 @@ const ProjectsPage = () => {
     const matchesSearch =
       project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (project.client &&
-        project.client.username &&
-        project.client.username
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()));
+      (project.client && project.client.username && project.client.username.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory =
-      selectedCategory === "All" ||
-      (project.category && project.category.name === selectedCategory);
+      selectedCategory === "All" || (project.category && project.category.name === selectedCategory);
     const matchesStatus =
-      selectedStatus === "All" ||
-      project.status === selectedStatus.toLowerCase().replace(" ", "_");
+      selectedStatus === "All" || project.status === selectedStatus.toLowerCase().replace(" ", "_");
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
   useEffect(() => {
     // Update page title and meta description for SEO
     document.title =
-      "Project Portfolio - PritechVior | Professional Development Services";
-
+      "Projects - PRITECH VIOR | Software Development & IT Solutions";
     const metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
       metaDescription.setAttribute(
         "content",
-        "Explore our diverse project portfolio featuring web development, mobile applications, and enterprise solutions. Professional development services in Tanzania."
+        "Explore our portfolio of innovative software solutions including ThinkForge e-learning platform, ViorMart e-commerce system, and enterprise management solutions."
       );
     }
 
-    // Add structured data for better SEO
-    const structuredData = {
+    // Add breadcrumb schema
+    const breadcrumbSchema = {
       "@context": "https://schema.org",
-      "@type": "CollectionPage",
-      name: "Project Portfolio",
-      description: "Professional software development projects and solutions",
-      url: "https://pritechvior.com/projects",
-      mainEntity: {
-        "@type": "ItemList",
-        itemListElement: projects.map((project, index) => ({
-          "@type": "CreativeWork",
-          position: index + 1,
-          name: project.title,
-          description: project.description,
-          url: `/project/${project.slug}`,
-        })),
-      },
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: "https://pritechvior.co.tz/",
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Projects",
+          item: "https://pritechvior.co.tz/projects",
+        },
+      ],
     };
 
     const script = document.createElement("script");
     script.type = "application/ld+json";
-    script.textContent = JSON.stringify(structuredData);
+    script.text = JSON.stringify(breadcrumbSchema);
     document.head.appendChild(script);
 
     return () => {
       document.head.removeChild(script);
     };
-  }, [projects]);
+  }, []);
 
   return (
     <div className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
@@ -139,10 +128,10 @@ const ProjectsPage = () => {
           <Heading
             className="md:max-w-md lg:max-w-2xl text-center mx-auto"
             title="Our Project Portfolio"
-            text="Discover our diverse range of projects spanning web development, mobile applications, and enterprise solutions. Each project showcases our commitment to quality, innovation, and client satisfaction."
+            text="Discover innovative software solutions we've developed for clients across Tanzania and beyond"
           />
 
-          {/* CTA Banner */}
+          {/* Call to Action Section */}
           <div className="text-center mb-12">
             <div className="bg-gradient-to-r from-color-1/10 to-color-2/10 rounded-xl border border-color-1/20 p-8 max-w-4xl mx-auto">
               <h3 className="h4 mb-4">Need a Custom Project?</h3>
@@ -152,7 +141,10 @@ const ProjectsPage = () => {
                 ideas to life.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <SimpleButton href="/project-request">
+                <SimpleButton
+                  href="/project-request"
+                  className="bg-color-1 hover:bg-color-1/90"
+                >
                   Request Custom Project
                 </SimpleButton>
                 <SimpleButton href="/project-request" white>
@@ -166,16 +158,20 @@ const ProjectsPage = () => {
           <div className="mb-12">
             <div className="flex flex-col lg:flex-row gap-4 mb-6">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-n-4 w-5 h-5" />
+                <Search
+                  size={20}
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-n-4"
+                />
                 <input
                   type="text"
-                  placeholder="Search projects..."
+                  placeholder="Search projects by name, description, or client..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none transition-colors"
+                  className="w-full pl-10 pr-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none transition-colors"
                 />
               </div>
-              <div className="flex gap-4">
+              <div className="flex items-center gap-3">
+                <Filter size={20} className="text-n-4" />
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
@@ -239,9 +235,7 @@ const ProjectsPage = () => {
                         <div className="flex items-center gap-2 mt-1">
                           <Calendar className="w-4 h-4 text-n-4" />
                           <span className="text-n-4 text-sm">
-                            {project.created_at
-                              ? new Date(project.created_at).getFullYear()
-                              : "N/A"}
+                            {project.created_at ? new Date(project.created_at).getFullYear() : 'N/A'}
                           </span>
                         </div>
                       </div>
@@ -261,9 +255,7 @@ const ProjectsPage = () => {
                           : "bg-red-500/20 text-red-400"
                       }`}
                     >
-                      {project.status
-                        ?.replace("_", " ")
-                        .replace(/\b\w/g, (l) => l.toUpperCase()) || "Unknown"}
+                      {project.status?.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown'}
                     </span>
                   </div>
 
@@ -284,7 +276,7 @@ const ProjectsPage = () => {
                       <div className="flex items-center gap-2 px-3 py-1 bg-n-6 rounded-full">
                         <User className="w-4 h-4 text-n-3" />
                         <span className="text-n-3 text-sm">
-                          {project.client.first_name && project.client.last_name
+                          {project.client.first_name && project.client.last_name 
                             ? `${project.client.first_name} ${project.client.last_name}`
                             : project.client.username}
                         </span>
@@ -302,9 +294,7 @@ const ProjectsPage = () => {
 
                   {project.technologies && project.technologies.length > 0 && (
                     <div className="mb-6">
-                      <h4 className="text-sm font-medium text-n-2 mb-2">
-                        Technologies:
-                      </h4>
+                      <h4 className="text-sm font-medium text-n-2 mb-2">Technologies:</h4>
                       <div className="flex flex-wrap gap-2">
                         {project.technologies.map((tech) => (
                           <span
@@ -322,9 +312,7 @@ const ProjectsPage = () => {
                     <div className="mb-6">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-n-3">Progress</span>
-                        <span className="text-sm text-n-2">
-                          {project.progress_percentage}%
-                        </span>
+                        <span className="text-sm text-n-2">{project.progress_percentage}%</span>
                       </div>
                       <div className="w-full bg-n-6 rounded-full h-2">
                         <div
@@ -335,9 +323,10 @@ const ProjectsPage = () => {
                     </div>
                   )}
 
-                  <div className="flex gap-4 flex-wrap">
+                  <div className="flex gap-4">
                     {project.live_demo_url && (
-                      <SimpleButton
+                      <SimpleButton 
+                        className="flex-1" 
                         href={project.live_demo_url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -346,14 +335,11 @@ const ProjectsPage = () => {
                         View Demo
                       </SimpleButton>
                     )}
-                    {project.is_requestable && (
-                      <SimpleButton
-                        href={`/project-request?project=${project.slug}`}
-                      >
-                        Request Project
-                      </SimpleButton>
-                    )}
-                    <SimpleButton href="/contact" white>
+                    <SimpleButton 
+                      className="flex-1" 
+                      href="/contact"
+                      white
+                    >
                       Contact Us
                     </SimpleButton>
                   </div>
@@ -361,8 +347,44 @@ const ProjectsPage = () => {
               ))}
             </div>
           )}
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1 bg-n-6 rounded-full">
+                    <Building className="w-4 h-4 text-n-3" />
+                    <span className="text-n-3 text-sm">{project.client}</span>
+                  </div>
+                </div>
 
-          {filteredProjects.length === 0 && !loading && !error && (
+                <div className="mb-6">
+                  <h4 className="text-n-1 font-semibold mb-3">
+                    Key Technologies:
+                  </h4>
+                  <div className="grid grid-cols-1 gap-2">
+                    {project.technologies.slice(0, 4).map((tech, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Star className="w-3 h-3 text-color-2" />
+                        <span className="text-n-3 text-sm">{tech}</span>
+                      </div>
+                    ))}
+                    {project.technologies.length > 4 && (
+                      <span className="text-color-1 text-sm ml-5">
+                        +{project.technologies.length - 4} more features
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  {project.link && project.link !== "#" ? (
+                    <Button className="flex-1" href={project.link}>
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      View Project
+                    </Button>
+                  ) : (
+                    <Button className="flex-1" href="/contact">
+                      <ExternalLink className="w-4 h-4 mr-2" />
+                      Get Similar Solution
+                    </Button>
+          {filteredProjects.length === 0 && (
             <div className="text-center py-12 mb-20">
               <Folder size={64} className="mx-auto text-n-4 mb-4" />
               <h3 className="text-xl font-semibold text-n-1 mb-2">
@@ -389,14 +411,13 @@ const ProjectsPage = () => {
                   Web Development
                 </h3>
                 <p className="text-n-3 text-sm">
-                  Modern web applications, responsive websites, and progressive
-                  web apps built with the latest technologies.
+                  Modern web applications, responsive websites, and progressive web apps
+                  built with the latest technologies.
                 </p>
                 <p className="text-color-1 text-xs mt-2 font-medium">
                   {
-                    projects.filter(
-                      (p) => p.category?.name === "Web Development"
-                    ).length
+                    projects.filter((p) => p.category?.name === "Web Development")
+                      .length
                   }{" "}
                   projects
                 </p>
@@ -432,14 +453,13 @@ const ProjectsPage = () => {
                   Mobile Development
                 </h3>
                 <p className="text-n-3 text-sm">
-                  Cross-platform mobile apps, native iOS and Android
-                  applications for modern businesses.
+                  Cross-platform mobile apps, native iOS and Android applications
+                  for modern businesses.
                 </p>
                 <p className="text-color-1 text-xs mt-2 font-medium">
                   {
-                    projects.filter(
-                      (p) => p.category?.name === "Mobile Development"
-                    ).length
+                    projects.filter((p) => p.category?.name === "Mobile Development")
+                      .length
                   }{" "}
                   projects
                 </p>
@@ -455,8 +475,8 @@ const ProjectsPage = () => {
               </h3>
               <p className="text-n-3 mb-6 max-w-2xl mx-auto">
                 Whether you need an academic project, business solution, or
-                enterprise system, we&apos;re here to bring your ideas to life
-                with cutting-edge technology.
+                enterprise system, we&apos;re here to bring your ideas to life with
+                cutting-edge technology.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <SimpleButton href="/contact">Start Your Project</SimpleButton>

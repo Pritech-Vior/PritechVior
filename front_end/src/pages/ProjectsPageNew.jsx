@@ -152,7 +152,10 @@ const ProjectsPage = () => {
                 ideas to life.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <SimpleButton href="/project-request">
+                <SimpleButton
+                  href="/project-request"
+                  className="bg-color-1 hover:bg-color-1/90"
+                >
                   Request Custom Project
                 </SimpleButton>
                 <SimpleButton href="/project-request" white>
@@ -335,9 +338,10 @@ const ProjectsPage = () => {
                     </div>
                   )}
 
-                  <div className="flex gap-4 flex-wrap">
+                  <div className="flex gap-4">
                     {project.live_demo_url && (
                       <SimpleButton
+                        className="flex-1"
                         href={project.live_demo_url}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -346,14 +350,7 @@ const ProjectsPage = () => {
                         View Demo
                       </SimpleButton>
                     )}
-                    {project.is_requestable && (
-                      <SimpleButton
-                        href={`/project-request?project=${project.slug}`}
-                      >
-                        Request Project
-                      </SimpleButton>
-                    )}
-                    <SimpleButton href="/contact" white>
+                    <SimpleButton className="flex-1" href="/contact" white>
                       Contact Us
                     </SimpleButton>
                   </div>

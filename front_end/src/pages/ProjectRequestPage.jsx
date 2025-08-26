@@ -19,17 +19,15 @@ import {
   Briefcase,
   ArrowRight,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Section from "../components/Section";
 import Heading from "../components/Heading";
 import SimpleButton from "../components/SimpleButton";
-import {
-  projectTemplates,
-  projectCategories,
-  servicePackages,
-} from "../constants/projectData";
+import { projectsService } from "../services/projectsService";
+import { toast } from "react-hot-toast";
 
 const ProjectRequestPage = () => {
   const navigate = useNavigate();
@@ -37,6 +35,161 @@ const ProjectRequestPage = () => {
   const [userType, setUserType] = useState("student"); // "student", "client", "business"
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  // Backend data state
+  const [projectTemplates, setProjectTemplates] = useState([]);
+  const [projectCategories, setProjectCategories] = useState([]);
+  const [servicePackages, setServicePackages] = useState({
+    student: [],
+    business: [],
+    enterprise: [],
+  });
+  const [loading, setLoading] = useState(true);
+
+  // Load data from backend
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+
+        // Load project templates from ProjectTemplate model
+        const templatesResponse = await projectsService.getProjectTemplates();
+
+        // Ensure we have an array
+        if (Array.isArray(templatesResponse)) {
+          setProjectTemplates(templatesResponse);
+        } else if (
+          templatesResponse?.results &&
+          Array.isArray(templatesResponse.results)
+        ) {
+          // Handle paginated response
+          setProjectTemplates(templatesResponse.results);
+        } else {
+          setProjectTemplates([]);
+        }
+
+        // Load categories (use backend data or fallback to defaults)
+        try {
+          const categoriesResponse = await projectsService.getCategories();
+
+          // Ensure we have an array
+          if (Array.isArray(categoriesResponse)) {
+            setProjectCategories(categoriesResponse);
+          } else if (
+            categoriesResponse?.results &&
+            Array.isArray(categoriesResponse.results)
+          ) {
+            // Handle paginated response
+            setProjectCategories(categoriesResponse.results);
+          } else {
+            // Fallback categories if API doesn't exist yet
+            setProjectCategories([
+              { id: 1, name: "Web Development" },
+              { id: 2, name: "Mobile Development" },
+              { id: 3, name: "Desktop Applications" },
+              { id: 4, name: "Database Systems" },
+              { id: 5, name: "E-Commerce" },
+              { id: 6, name: "E-Learning" },
+              { id: 7, name: "Management Systems" },
+              { id: 8, name: "UI/UX Design" },
+              { id: 9, name: "Final Year Projects" },
+              { id: 10, name: "Mini Projects" },
+            ]);
+          }
+        } catch (error) {
+          // Fallback categories if API doesn't exist yet
+          setProjectCategories([
+            { id: 1, name: "Web Development" },
+            { id: 2, name: "Mobile Development" },
+            { id: 3, name: "Desktop Applications" },
+            { id: 4, name: "Database Systems" },
+            { id: 5, name: "E-Commerce" },
+            { id: 6, name: "E-Learning" },
+            { id: 7, name: "Management Systems" },
+            { id: 8, name: "UI/UX Design" },
+            { id: 9, name: "Final Year Projects" },
+            { id: 10, name: "Mini Projects" },
+          ]);
+        }
+
+        // Load service packages from backend
+        try {
+          const servicePackagesResponse =
+            await projectsService.getServicePackages();
+
+          // Group by user type
+          const groupedPackages = {
+            student: [],
+            business: [],
+            enterprise: [],
+          };
+
+          // Handle paginated response or direct array
+          const servicePackagesArray = Array.isArray(servicePackagesResponse)
+            ? servicePackagesResponse
+            : servicePackagesResponse?.results || [];
+
+          if (Array.isArray(servicePackagesArray)) {
+            servicePackagesArray.forEach((pkg) => {
+              const userType = pkg.user_type?.toLowerCase() || "student";
+
+              if (userType === "student") {
+                groupedPackages.student.push({
+                  id: pkg.id,
+                  name: pkg.name,
+                  description: pkg.description,
+                  price: `TSH ${parseFloat(pkg.price).toLocaleString()}`,
+                  features: pkg.features || [],
+                  isPopular: pkg.is_popular || false,
+                });
+              } else if (
+                userType === "business" ||
+                userType === "individual client"
+              ) {
+                groupedPackages.business.push({
+                  id: pkg.id,
+                  name: pkg.name,
+                  description: pkg.description,
+                  price: `TSH ${parseFloat(pkg.price).toLocaleString()}`,
+                  features: pkg.features || [],
+                  isPopular: pkg.is_popular || false,
+                });
+              } else if (userType === "enterprise") {
+                groupedPackages.enterprise.push({
+                  id: pkg.id,
+                  name: pkg.name,
+                  description: pkg.description,
+                  price: `TSH ${parseFloat(pkg.price).toLocaleString()}`,
+                  features: pkg.features || [],
+                  isPopular: pkg.is_popular || false,
+                });
+              }
+            });
+          }
+
+          setServicePackages(groupedPackages);
+        } catch (error) {
+          console.error("Error loading service packages:", error);
+          // Use empty arrays instead of fallback data to see the real issue
+          setServicePackages({
+            student: [],
+            business: [],
+            enterprise: [],
+          });
+        }
+      } catch (error) {
+        console.error("Error loading data:", error);
+        toast.error("Failed to load project data");
+        // Fallback to empty arrays
+        setProjectTemplates([]);
+        setProjectCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   useEffect(() => {
     document.title =
@@ -63,15 +216,21 @@ const ProjectRequestPage = () => {
     "Mini Projects": Code,
   };
 
-  const filteredProjects = projectTemplates.filter((project) => {
-    const matchesSearch =
-      project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || project.category === selectedCategory;
-    const matchesUserType = project.suitableFor.includes(userType);
-    return matchesSearch && matchesCategory && matchesUserType;
-  });
+  const filteredProjects = Array.isArray(projectTemplates)
+    ? projectTemplates.filter((project) => {
+        const matchesSearch =
+          project.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          project.description?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory =
+          selectedCategory === "All" ||
+          project.category === selectedCategory ||
+          project.category?.name === selectedCategory;
+        // For backend projects, we'll assume they're suitable for all user types since they're requestable
+        const matchesUserType = true; // All requestable projects are suitable for requests
+        return matchesSearch && matchesCategory && matchesUserType;
+      })
+    : [];
 
   const handleProjectSelect = (project) => {
     navigate("/project-request/customize", {
@@ -106,7 +265,18 @@ const ProjectRequestPage = () => {
   };
 
   const getPriceRange = (project, userType) => {
-    const basePrice = project.estimatedPrice;
+    // If project has explicit price_range, use it
+    if (project.price_range) {
+      return project.price_range;
+    }
+
+    // Try to get base price from various possible fields
+    const basePrice =
+      project.estimatedPrice ||
+      project.estimated_price ||
+      project.price ||
+      50000;
+
     if (userType === "student") {
       return `TSH ${(basePrice * 0.7).toLocaleString()} - ${(
         basePrice * 0.8
@@ -312,11 +482,15 @@ const ProjectRequestPage = () => {
                         className="appearance-none bg-n-7 border border-n-6 rounded-lg px-4 py-3 pr-10 text-n-1 focus:border-color-1 focus:outline-none min-w-[180px]"
                       >
                         <option value="All">All Categories</option>
-                        {projectCategories.map((category) => (
-                          <option key={category} value={category}>
-                            {category}
-                          </option>
-                        ))}
+                        {Array.isArray(projectCategories) &&
+                          projectCategories.map((category) => (
+                            <option
+                              key={category.id || category.name || category}
+                              value={category.name || category}
+                            >
+                              {category.name || category}
+                            </option>
+                          ))}
                       </select>
                       <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-n-4 w-5 h-5 pointer-events-none" />
                     </div>
@@ -339,74 +513,112 @@ const ProjectRequestPage = () => {
 
               {/* Project Templates Grid */}
               <div className="max-w-6xl mx-auto">
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredProjects.map((project) => {
-                    const IconComponent =
-                      categoryIcons[project.category] || Code;
-                    return (
-                      <div
-                        key={project.id}
-                        className="group p-6 bg-n-7 rounded-xl border border-n-6 hover:border-color-1 hover:bg-n-6/50 transition-all duration-300 cursor-pointer"
-                        onClick={() => handleProjectSelect(project)}
-                      >
-                        <div className="flex items-start justify-between mb-4">
-                          <IconComponent className="w-8 h-8 text-color-1 flex-shrink-0" />
-                          <div className="flex items-center space-x-2">
-                            <span className="text-xs px-2 py-1 bg-color-1/20 text-color-1 rounded-full">
-                              {project.difficulty}
-                            </span>
-                          </div>
-                        </div>
-
-                        <h3 className="h6 mb-2 group-hover:text-color-1 transition-colors">
-                          {project.title}
-                        </h3>
-
-                        <p className="body-2 text-n-4 mb-4 line-clamp-3">
-                          {project.description}
-                        </p>
-
-                        <div className="space-y-2 mb-4">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-n-4">Timeline:</span>
-                            <span className="text-n-2">{project.timeline}</span>
-                          </div>
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="text-n-4">Price Range:</span>
-                            <span className="text-green-400 font-medium">
-                              {getPriceRange(project, userType)}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap gap-1 mb-4">
-                          {project.technologies
-                            .slice(0, 3)
-                            .map((tech, index) => (
-                              <span
-                                key={index}
-                                className="text-xs px-2 py-1 bg-n-6 text-n-3 rounded"
-                              >
-                                {tech}
+                {loading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-color-1" />
+                    <span className="ml-2 text-n-3">Loading templates...</span>
+                  </div>
+                ) : filteredProjects.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-n-6 rounded-full flex items-center justify-center">
+                      <Code className="w-8 h-8 text-n-4" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-n-2 mb-2">
+                      No templates found
+                    </h3>
+                    <p className="text-n-4 mb-6">
+                      {searchTerm || selectedCategory !== "All"
+                        ? "Try adjusting your search criteria or browse all templates"
+                        : "No project templates are currently available"}
+                    </p>
+                    <SimpleButton
+                      onClick={() => {
+                        setSearchTerm("");
+                        setSelectedCategory("All");
+                      }}
+                      variant="secondary"
+                    >
+                      Clear Filters
+                    </SimpleButton>
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredProjects.map((project) => {
+                      const categoryName =
+                        project.category?.name || project.category || "General";
+                      const IconComponent = categoryIcons[categoryName] || Code;
+                      return (
+                        <div
+                          key={project.id}
+                          className="group p-6 bg-n-7 rounded-xl border border-n-6 hover:border-color-1 hover:bg-n-6/50 transition-all duration-300 cursor-pointer"
+                          onClick={() => handleProjectSelect(project)}
+                        >
+                          <div className="flex items-start justify-between mb-4">
+                            <IconComponent className="w-8 h-8 text-color-1 flex-shrink-0" />
+                            <div className="flex items-center space-x-2">
+                              <span className="text-xs px-2 py-1 bg-color-1/20 text-color-1 rounded-full">
+                                {project.difficulty ||
+                                  project.complexity ||
+                                  "Medium"}
                               </span>
-                            ))}
-                          {project.technologies.length > 3 && (
-                            <span className="text-xs px-2 py-1 bg-n-6 text-n-3 rounded">
-                              +{project.technologies.length - 3} more
-                            </span>
-                          )}
+                            </div>
+                          </div>
+
+                          <h3 className="h6 mb-2 group-hover:text-color-1 transition-colors">
+                            {project.name || project.title}
+                          </h3>
+
+                          <p className="body-2 text-n-4 mb-4 line-clamp-3">
+                            {project.description}
+                          </p>
+
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-n-4">Timeline:</span>
+                              <span className="text-n-2">
+                                {project.timeline ||
+                                  project.estimated_duration ||
+                                  "2-4 weeks"}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-n-4">Price Range:</span>
+                              <span className="text-green-400 font-medium">
+                                {project.price_range ||
+                                  getPriceRange(project, userType)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap gap-1 mb-4">
+                            {(project.technologies || [])
+                              .slice(0, 3)
+                              .map((tech, index) => (
+                                <span
+                                  key={index}
+                                  className="text-xs px-2 py-1 bg-n-6 text-n-3 rounded"
+                                >
+                                  {tech.name || tech}
+                                </span>
+                              ))}
+                            {(project.technologies || []).length > 3 && (
+                              <span className="text-xs px-2 py-1 bg-n-6 text-n-3 rounded">
+                                +{(project.technologies || []).length - 3} more
+                              </span>
+                            )}
+                          </div>
+
+                          <SimpleButton className="w-full" variant="secondary">
+                            Customize This Project
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                          </SimpleButton>
                         </div>
+                      );
+                    })}
+                  </div>
+                )}
 
-                        <SimpleButton className="w-full" variant="secondary">
-                          Customize This Project
-                          <ArrowRight className="w-4 h-4 ml-2" />
-                        </SimpleButton>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {filteredProjects.length === 0 && (
+                {!loading && filteredProjects.length === 0 && (
                   <div className="text-center py-12">
                     <Search className="w-16 h-16 text-n-4 mx-auto mb-4" />
                     <h3 className="h5 mb-2">No projects found</h3>
@@ -440,32 +652,49 @@ const ProjectRequestPage = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                {servicePackages.student.map((pkg) => (
-                  <div
-                    key={pkg.id}
-                    className="p-6 bg-n-7 rounded-xl border border-n-6"
-                  >
-                    <div className="flex items-center mb-4">
-                      <GraduationCap className="w-6 h-6 text-color-1 mr-2" />
-                      <h4 className="h6">{pkg.name}</h4>
+                {servicePackages.student &&
+                servicePackages.student.length > 0 ? (
+                  servicePackages.student.map((pkg, index) => (
+                    <div
+                      key={pkg.id || `student-package-${index}`}
+                      className="p-6 bg-n-7 rounded-xl border border-n-6"
+                    >
+                      <div className="flex items-center mb-4">
+                        <GraduationCap className="w-6 h-6 text-color-1 mr-2" />
+                        <h4 className="h6">{pkg.name}</h4>
+                      </div>
+                      <p className="body-2 text-n-4 mb-4">{pkg.description}</p>
+                      <div className="text-2xl font-bold text-color-1 mb-4">
+                        {pkg.price}
+                      </div>
+                      <ul className="space-y-2">
+                        {pkg.features &&
+                          pkg.features.length > 0 &&
+                          pkg.features
+                            .slice(0, 4)
+                            .map((feature, featureIndex) => (
+                              <li
+                                key={`${pkg.id}-feature-${featureIndex}`}
+                                className="flex items-center text-sm text-n-4"
+                              >
+                                <CheckCircle2 className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />
+                                {feature}
+                              </li>
+                            ))}
+                      </ul>
                     </div>
-                    <p className="body-2 text-n-4 mb-4">{pkg.description}</p>
-                    <div className="text-2xl font-bold text-color-1 mb-4">
-                      TSH {pkg.price.toLocaleString()}
-                    </div>
-                    <ul className="space-y-2">
-                      {pkg.features.slice(0, 4).map((feature, index) => (
-                        <li
-                          key={index}
-                          className="flex items-center text-sm text-n-4"
-                        >
-                          <CheckCircle2 className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-8">
+                    <p className="text-n-4">
+                      {loading
+                        ? "Loading packages..."
+                        : `No student packages available (${
+                            servicePackages.student?.length || 0
+                          } found)`}
+                    </p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           )}

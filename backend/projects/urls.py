@@ -12,7 +12,7 @@ router.register(r'requests', views.ProjectRequestViewSet)
 router.register(r'projects', views.ProjectViewSet)
 
 urlpatterns = [
-    path('api/', include(router.urls)),
-    path('api/dashboard/stats/', views.DashboardStatsAPIView.as_view(), name='dashboard-stats'),
-    path('api/public-data/', views.PublicDataAPIView.as_view(), name='public-data'),
+    path('', include(router.urls)),
+    path('dashboard/stats/', views.DashboardStatsAPIView.as_view(), name='dashboard-stats'),
+    path('public-data/', views.PublicDataAPIView.as_view(), name='public-data'),
 ]

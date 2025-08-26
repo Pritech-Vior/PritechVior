@@ -22,10 +22,13 @@ import Footer from "../components/Footer";
 import Section from "../components/Section";
 import Heading from "../components/Heading";
 import SimpleButton from "../components/SimpleButton";
+import projectsService from "../services/projectsService";
+import { useAuth } from "../contexts/AuthContext";
 
 const ProjectConfirmationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated, user } = useAuth();
   const { formData, requestData, isCustomization, estimatedCost, userType } =
     location.state || {};
 
@@ -39,6 +42,12 @@ const ProjectConfirmationPage = () => {
       return;
     }
 
+    // Check if user is authenticated for submitting requests
+    if (!isAuthenticated) {
+      // Allow viewing the confirmation page but will redirect when trying to submit
+      console.log("User not authenticated, will require login for submission");
+    }
+
     // Generate reference number
     const ref = `PV-${userType?.toUpperCase()}-${Date.now()
       .toString()
@@ -46,7 +55,7 @@ const ProjectConfirmationPage = () => {
     setReferenceNumber(ref);
 
     document.title = "Project Request Confirmation - PRITECH VIOR";
-  }, [formData, requestData, navigate, userType]);
+  }, [formData, requestData, navigate, userType, isAuthenticated]);
 
   const data = isCustomization
     ? requestData
@@ -55,34 +64,98 @@ const ProjectConfirmationPage = () => {
   const finalFormData = isCustomization ? data.customizations : data.formData;
 
   const handleSubmit = async () => {
+    // Check authentication before submitting
+    if (!isAuthenticated) {
+      // Redirect to login page
+      alert("Please login to submit your project request.");
+      navigate("/login", {
+        state: {
+          returnUrl: "/project-confirmation",
+          returnState: {
+            formData,
+            requestData,
+            isCustomization,
+            estimatedCost,
+            userType,
+          },
+        },
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Here you would typically send the data to your backend
+      // Prepare data for backend API
       const submissionData = {
-        referenceNumber,
-        timestamp: new Date().toISOString(),
-        userType,
-        estimatedCost,
-        isCustomization,
-        ...(isCustomization
-          ? {
-              baseProject: projectInfo,
-              customizations: finalFormData,
-            }
-          : {
-              projectData: finalFormData,
-            }),
+        // Basic Information
+        title: finalFormData?.projectTitle || projectInfo?.title,
+        description:
+          finalFormData?.customDescription ||
+          finalFormData?.projectDescription ||
+          projectInfo?.description ||
+          "",
+        requirements: finalFormData?.additionalRequirements || "",
+
+        // Request Details
+        request_type: isCustomization ? "template" : "new",
+        user_type: userType || "client",
+
+        // Academic Information (for students)
+        academic_level: finalFormData?.academicLevel || "",
+        institution: finalFormData?.institution || "",
+
+        // Template Customization (if applicable)
+        template: isCustomization ? projectInfo?.id : null,
+        customizations: isCustomization ? finalFormData : {},
+
+        // Technical Requirements
+        technology_notes: finalFormData?.selectedTechStack || "",
+
+        // Project Scope
+        features_required: [
+          ...(finalFormData?.coreFeatures || []),
+          ...(finalFormData?.additionalFeatures || []),
+        ],
+        additional_features:
+          finalFormData?.additionalFeatures?.join(", ") || "",
+
+        // Timeline & Budget
+        budget_range: estimatedCost || "",
+        preferred_deadline: finalFormData?.preferredDeadline || null,
+        timeline_flexibility: finalFormData?.timelineFlexibility || "flexible",
+
+        // Client Information
+        contact_phone: finalFormData?.phone || "",
+        contact_email: finalFormData?.email || "",
+
+        // Estimated cost
+        estimated_cost: estimatedCost
+          ? parseFloat(estimatedCost.replace(/[^\d.]/g, ""))
+          : null,
+
+        // Notes
+        client_notes:
+          finalFormData?.specialRequirements || finalFormData?.notes || "",
+
+        // Reference number for tracking (frontend generated)
+        reference_number: referenceNumber,
       };
 
       console.log("Submitting project request:", submissionData);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Submit to backend
+      const response = await projectsService.createProjectRequest(
+        submissionData
+      );
+
+      console.log("Backend response:", response);
 
       setIsSubmitted(true);
     } catch (error) {
       console.error("Submission error:", error);
+      // Optionally show error message to user
+      alert("Failed to submit project request. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -250,6 +323,7 @@ const ProjectConfirmationPage = () => {
                       </h4>
                       <p className="text-n-1">
                         {finalFormData?.projectCategory ||
+                          projectInfo?.category?.name ||
                           projectInfo?.category}
                       </p>
                     </div>
@@ -299,7 +373,7 @@ const ProjectConfirmationPage = () => {
                               key={index}
                               className="px-2 py-1 bg-n-6 text-n-3 rounded text-sm"
                             >
-                              {tech}
+                              {tech?.name || tech}
                             </span>
                           ))}
                         </div>
@@ -339,7 +413,7 @@ const ProjectConfirmationPage = () => {
                               className="flex items-center text-sm text-n-3"
                             >
                               <CheckCircle2 className="w-3 h-3 text-green-400 mr-2 flex-shrink-0" />
-                              {feature}
+                              {feature?.name || feature}
                             </div>
                           ))}
                         </div>
@@ -359,7 +433,7 @@ const ProjectConfirmationPage = () => {
                                 className="flex items-center text-sm text-n-3"
                               >
                                 <CheckCircle2 className="w-3 h-3 text-color-1 mr-2 flex-shrink-0" />
-                                {feature}
+                                {feature?.name || feature}
                               </div>
                             )
                           )}
@@ -378,7 +452,7 @@ const ProjectConfirmationPage = () => {
                               key={index}
                               className="px-2 py-1 bg-color-1/20 text-color-1 rounded text-sm"
                             >
-                              {role}
+                              {role?.name || role}
                             </span>
                           ))}
                         </div>
@@ -426,7 +500,7 @@ const ProjectConfirmationPage = () => {
                                 key={index}
                                 className="px-2 py-1 bg-green-400/20 text-green-400 rounded text-sm"
                               >
-                                {component}
+                                {component?.name || component}
                               </span>
                             )
                           )}
@@ -448,7 +522,9 @@ const ProjectConfirmationPage = () => {
                             key={index}
                             className="flex items-center justify-between p-3 bg-n-8 rounded-lg"
                           >
-                            <span className="text-n-2">{serviceId}</span>
+                            <span className="text-n-2">
+                              {serviceId?.name || serviceId}
+                            </span>
                             <span className="text-color-1 font-medium text-sm">
                               Included
                             </span>

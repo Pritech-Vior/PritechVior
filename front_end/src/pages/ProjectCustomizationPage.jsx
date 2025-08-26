@@ -242,7 +242,8 @@ const ProjectCustomizationPage = () => {
   };
 
   const renderProjectOverview = () => {
-    const CategoryIcon = categoryIcons[project?.category] || Code;
+    const CategoryIcon =
+      categoryIcons[project?.category?.name || project?.category] || Code;
 
     return (
       <div className="max-w-4xl mx-auto">
@@ -259,20 +260,32 @@ const ProjectCustomizationPage = () => {
             <div className="flex items-center">
               <CategoryIcon className="w-8 h-8 text-color-1 mr-3" />
               <div>
-                <h4 className="h5 mb-1">{project?.title}</h4>
+                <h4 className="h5 mb-1">{project?.title || project?.name}</h4>
                 <span className="text-sm px-3 py-1 bg-color-1/20 text-color-1 rounded-full">
-                  {project?.category}
+                  {project?.category?.name || project?.category}
                 </span>
               </div>
             </div>
             <div className="text-right">
               <div className="flex items-center text-n-4 text-sm mb-1">
                 <Clock className="w-4 h-4 mr-1" />
-                {project?.timeline}
+                {project?.timeline ||
+                  project?.estimated_duration ||
+                  "2-4 weeks"}
               </div>
               <div className="flex items-center text-green-400 text-sm">
                 <DollarSign className="w-4 h-4 mr-1" />
-                Base: TSH {project?.estimatedPrice?.toLocaleString()}
+                Base: TSH{" "}
+                {(() => {
+                  const price =
+                    project?.estimatedPrice ||
+                    project?.estimated_price ||
+                    project?.price ||
+                    50000;
+                  return typeof price === "number"
+                    ? price.toLocaleString()
+                    : parseFloat(price || 0).toLocaleString();
+                })()}
               </div>
             </div>
           </div>
@@ -290,7 +303,7 @@ const ProjectCustomizationPage = () => {
                     key={index}
                     className="text-xs px-2 py-1 bg-n-6 text-n-3 rounded"
                   >
-                    {tech}
+                    {tech?.name || tech}
                   </span>
                 ))}
               </div>
@@ -605,7 +618,7 @@ const ProjectCustomizationPage = () => {
                 key={index}
                 className="px-3 py-1 bg-n-6 text-n-3 rounded text-sm"
               >
-                {tech}
+                {tech?.name || tech}
               </span>
             ))}
           </div>
@@ -996,7 +1009,17 @@ const ProjectCustomizationPage = () => {
             <div className="flex justify-between">
               <span className="text-n-4">Base Project Cost:</span>
               <span className="text-n-2">
-                TSH {project?.estimatedPrice?.toLocaleString()}
+                TSH{" "}
+                {(() => {
+                  const price =
+                    project?.estimatedPrice ||
+                    project?.estimated_price ||
+                    project?.price ||
+                    50000;
+                  return typeof price === "number"
+                    ? price.toLocaleString()
+                    : parseFloat(price || 0).toLocaleString();
+                })()}
               </span>
             </div>
             {customizations.additionalFeatures.length > 0 && (
@@ -1004,11 +1027,22 @@ const ProjectCustomizationPage = () => {
                 <span className="text-n-4">Additional Features:</span>
                 <span className="text-n-2">
                   + TSH{" "}
-                  {(
-                    customizations.additionalFeatures.length *
-                    project?.estimatedPrice *
-                    0.2
-                  ).toLocaleString()}
+                  {(() => {
+                    const basePrice =
+                      project?.estimatedPrice ||
+                      project?.estimated_price ||
+                      project?.price ||
+                      50000;
+                    const price =
+                      typeof basePrice === "number"
+                        ? basePrice
+                        : parseFloat(basePrice || 0);
+                    return (
+                      customizations.additionalFeatures.length *
+                      price *
+                      0.2
+                    ).toLocaleString();
+                  })()}
                 </span>
               </div>
             )}

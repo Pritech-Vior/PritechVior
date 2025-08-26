@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import ButtonGradient from "./assets/svg/ButtonGradient";
 import Chatbot from "./components/Chatbot";
 import PWAInstallPrompt from "./components/PWAInstallPrompt";
@@ -117,6 +118,24 @@ const App = () => {
 
           <ButtonGradient />
           <Chatbot />
+
+          {/* Toast Notifications */}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: "#363636",
+                color: "#fff",
+              },
+              success: {
+                duration: 3000,
+                theme: {
+                  primary: "#4aed88",
+                },
+              },
+            }}
+          />
 
           {/* PWA Components */}
           <PWAServiceWorker />

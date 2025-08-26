@@ -41,7 +41,7 @@ urlpatterns = [
     path('elearning/', include('elearning.urls')),
     path('archive/', include('archive.urls')),
     path('blog/', include('blog.urls')),
-    path('projects/', include('projects.urls')),
+    path('api/projects/', include('projects.urls')),
     
     # Main API
     path('api/', include(router.urls)),

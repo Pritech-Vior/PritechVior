@@ -101,7 +101,8 @@ class ProjectSerializer(serializers.ModelSerializer):
             'client', 'budget', 'estimated_cost', 'start_date', 'end_date',
             'deadline', 'technologies', 'service_package', 'progress_percentage',
             'repository_url', 'live_demo_url', 'contact_phone', 'contact_email',
-            'is_overdue', 'days_remaining', 'team_size', 'created_at', 'updated_at'
+            'is_public', 'is_requestable', 'is_overdue', 'days_remaining', 'team_size', 
+            'created_at', 'updated_at'
         ]
 
 
