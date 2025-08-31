@@ -16,9 +16,7 @@ const BlogPage = () => {
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const { showError, showSuccess } = useToast();
 
-  useEffect(() => {
-    fetchBlogPosts();
-  }, []);
+ 
 
   const fetchBlogPosts = async () => {
     try {
@@ -26,7 +24,7 @@ const BlogPage = () => {
       console.log(
         "Fetching blog posts from:",
         `${
-          import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+          import.meta.env.VITE_API_BASE_URL || "http://localhost:800"
         }/blog/api/posts/`
       );
       const posts = await blogService.getBlogPosts();
@@ -40,6 +38,9 @@ const BlogPage = () => {
       setLoading(false);
     }
   };
+   useEffect(() => {
+     fetchBlogPosts();
+   }, []);
 
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();

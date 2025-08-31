@@ -16,10 +16,27 @@ class CategorySerializer(serializers.ModelSerializer):
 class BlogImageSerializer(serializers.ModelSerializer):
     """Serializer for blog images"""
     image_source = serializers.ReadOnlyField()
-    
+    image_file = serializers.ImageField(write_only=True, required=False)
+
     class Meta:
         model = BlogImage
-        fields = ['id', 'image', 'image_url', 'image_source', 'caption', 'order']
+        fields = ['id', 'image', 'image_url', 'image_source', 'caption', 'order', 'image_file']
+
+    def create(self, validated_data):
+        image_file = validated_data.pop('image_file', None)
+        if image_file:
+            import cloudinary.uploader
+            result = cloudinary.uploader.upload(image_file)
+            validated_data['image'] = result['secure_url']
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        image_file = validated_data.pop('image_file', None)
+        if image_file:
+            import cloudinary.uploader
+            result = cloudinary.uploader.upload(image_file)
+            validated_data['image'] = result['secure_url']
+        return super().update(instance, validated_data)
 
 
 class BlogDownloadSerializer(serializers.ModelSerializer):
@@ -77,15 +94,33 @@ class BlogPostSerializer(serializers.ModelSerializer):
     comments = BlogCommentSerializer(many=True, read_only=True)
     user_has_liked = serializers.SerializerMethodField()
     
+    image_file = serializers.ImageField(write_only=True, required=False)
+
     class Meta:
         model = BlogPost
         fields = [
             'id', 'title', 'slug', 'content', 'excerpt', 'author',
-            'category', 'tags', 'image', 'status', 'featured',
+            'category', 'tags', 'image', 'image_file', 'video_url', 'status', 'featured',
             'read_time', 'views', 'like_count', 'comment_count', 
             'download_count', 'user_has_liked', 'images', 'downloads',
             'comments', 'created_at', 'updated_at', 'published_at'
         ]
+
+    def create(self, validated_data):
+        image_file = validated_data.pop('image_file', None)
+        if image_file:
+            import cloudinary.uploader
+            result = cloudinary.uploader.upload(image_file)
+            validated_data['image'] = result['secure_url']
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        image_file = validated_data.pop('image_file', None)
+        if image_file:
+            import cloudinary.uploader
+            result = cloudinary.uploader.upload(image_file)
+            validated_data['image'] = result['secure_url']
+        return super().update(instance, validated_data)
     
     def get_user_has_liked(self, obj):
         request = self.context.get('request')

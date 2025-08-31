@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-27ss%5-rqlrvev)zcva5c52&qs47n6**sleynb&585j_cw0b4(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["api.pritechvior.co.tz", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["thinkforge.pritechvior.co.tz", "127.0.0.1", "localhost"]
 
 
 # Application definition
@@ -39,6 +39,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    # Cloudinary storage
+    "cloudinary_storage",
+    "cloudinary",
 
     # Third-party apps
     "rest_framework",
@@ -237,3 +241,24 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For developm
 # Media files (for user avatars)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Cloudinary storage settings
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Cloudinary configuration
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dixmf4bcw',
+    'API_KEY': '847859448165282',
+    'API_SECRET': 'zyyV0rn5pR6EksQWY2teoJT2t-4',  # Replace with your actual API secret
+}
+
+cloudinary.config(
+    cloud_name = CLOUDINARY_STORAGE['CLOUD_NAME'],
+    api_key = CLOUDINARY_STORAGE['API_KEY'],
+    api_secret = CLOUDINARY_STORAGE['API_SECRET'],
+    secure = True
+)

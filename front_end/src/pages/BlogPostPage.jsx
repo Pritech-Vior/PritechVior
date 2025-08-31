@@ -11,9 +11,6 @@ import {
   MessageCircle,
   Download,
   Eye,
-  Send,
-  MoreHorizontal,
-  Image as ImageIcon,
   FileText,
 } from "lucide-react";
 import Section from "../components/Section";
@@ -29,7 +26,7 @@ const BlogPostPage = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const { showSuccess, showError, showWarning, showInfo } = useToast();
+  const { showSuccess, showError, showWarning } = useToast();
 
   console.log("BlogPostPage rendered with slug:", slug);
 
@@ -40,16 +37,16 @@ const BlogPostPage = () => {
 
   // Interactive features
   const [liked, setLiked] = useState(false);
-  const [comment, setComment] = useState("");
+  // const [comment, setComment] = useState("");
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState([]);
   const [images, setImages] = useState([]);
   const [downloads, setDownloads] = useState([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [setCurrentImageIndex] = useState(0);
 
   // UI states
   const [showComments, setShowComments] = useState(true);
-  const [commenting, setCommenting] = useState(false);
+  // const [setCommenting] = useState(false);
   const [isAddingComment, setIsAddingComment] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
@@ -146,41 +143,6 @@ const BlogPostPage = () => {
     }
   };
 
-  const handleCommentSubmit = async (e) => {
-    e.preventDefault();
-    if (!comment.trim()) return;
-
-    if (!isAuthenticated) {
-      showWarning("Please log in to comment.");
-      return;
-    }
-
-    try {
-      setCommenting(true);
-      const { accessToken } = authService.getTokens();
-      const newComment = await blogService.addComment(
-        slug,
-        comment,
-        null,
-        accessToken
-      );
-
-      setComments((prev) => [...prev, newComment]);
-      setComment("");
-      setPost((prev) => ({
-        ...prev,
-        comment_count: prev.comment_count + 1,
-      }));
-
-      showSuccess("Comment added successfully!");
-    } catch (err) {
-      showError("Failed to add comment. Please try again.");
-      console.error("Error adding comment:", err);
-    } finally {
-      setCommenting(false);
-    }
-  };
-
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -215,32 +177,28 @@ const BlogPostPage = () => {
     try {
       setIsAddingComment(true);
       const { accessToken } = authService.getTokens();
-      console.log(
-        "Access token for comment:",
-        accessToken ? "Token exists" : "No token"
-      );
-      console.log(
-        "Token preview:",
-        accessToken ? `${accessToken.substring(0, 20)}...` : "null"
-      );
-
       const comment = await blogService.addComment(
         slug,
         newComment,
         null,
         accessToken
       );
-
       setComments((prev) => [...prev, comment]);
       setNewComment("");
       setPost((prev) => ({
         ...prev,
         comment_count: prev.comment_count + 1,
       }));
-
       showSuccess("Comment added successfully!");
     } catch (err) {
-      showError("Failed to add comment. Please try again.");
+      if (
+        err?.response?.status === 401 ||
+        (err?.message && err.message.toLowerCase().includes("unauthorized"))
+      ) {
+        showWarning("You must be logged in to add a comment.");
+      } else {
+        showError("Failed to add comment. Please try again.");
+      }
       console.error("Error adding comment:", err);
     } finally {
       setIsAddingComment(false);
@@ -402,16 +360,45 @@ const BlogPostPage = () => {
               )}
             </header>
 
-            {/* Featured Image */}
-            {post.image && (
-              <div className="mb-8">
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="w-full h-64 md:h-96 object-cover rounded-xl border border-n-6"
-                />
-              </div>
-            )}
+            {/* Featured Image (Main) */}
+            {(() => {
+              let mainImage = null;
+              let altText = post?.title || "Main image";
+              if (post?.image_file) {
+                mainImage = post.image_file.startsWith("/")
+                  ? `${import.meta.env.VITE_API_BASE_URL}${post.image_file}`
+                  : post.image_file;
+              } else if (post?.image) {
+                mainImage = post.image.startsWith("/")
+                  ? `${import.meta.env.VITE_API_BASE_URL}${post.image}`
+                  : post.image;
+              } else if (images && images.length > 0) {
+                // Use first image from images array
+                const imgObj = images[0];
+                if (imgObj.image_source) {
+                  mainImage = imgObj.image_source.startsWith("/")
+                    ? `${import.meta.env.VITE_API_BASE_URL}${
+                        imgObj.image_source
+                      }`
+                    : imgObj.image_source;
+                  altText = imgObj.caption || altText;
+                } else if (imgObj.image) {
+                  mainImage = imgObj.image.startsWith("/")
+                    ? `${import.meta.env.VITE_API_BASE_URL}${imgObj.image}`
+                    : imgObj.image;
+                  altText = imgObj.caption || altText;
+                }
+              }
+              return mainImage ? (
+                <div className="mb-8">
+                  <img
+                    src={mainImage}
+                    alt={altText}
+                    className="w-full h-64 md:h-96 object-cover rounded-xl border border-n-6"
+                  />
+                </div>
+              ) : null;
+            })()}
 
             {/* Additional Images Gallery (Instagram-like) */}
             {images && images.length > 0 && (
@@ -420,10 +407,17 @@ const BlogPostPage = () => {
                   {images.map((image, index) => (
                     <div key={image.id} className="relative group">
                       <img
-                        src={image.image_source}
+                        src={
+                          image.image_source &&
+                          image.image_source.startsWith("/")
+                            ? `${import.meta.env.VITE_API_BASE_URL}${
+                                image.image_source
+                              }`
+                            : image.image_source
+                        }
                         alt={image.caption || `Image ${index + 1}`}
                         className="w-full h-48 object-cover rounded-xl border border-n-6 cursor-pointer
-                                 group-hover:opacity-90 transition-opacity"
+                                   group-hover:opacity-90 transition-opacity"
                         onClick={() => setCurrentImageIndex(index)}
                       />
                       {image.caption && (
@@ -540,31 +534,34 @@ const BlogPostPage = () => {
                 </h3>
 
                 {/* Add Comment Form */}
-                {user && (
-                  <form
-                    onSubmit={handleAddComment}
-                    className="mb-6 p-4 bg-n-8 rounded-xl border border-n-6"
-                  >
-                    <textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Write a comment..."
-                      className="w-full p-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 
-                               focus:border-color-1 focus:outline-none resize-none"
-                      rows="3"
-                    />
-                    <div className="flex justify-end mt-3">
-                      <button
-                        type="submit"
-                        disabled={!newComment.trim() || isAddingComment}
-                        className="px-4 py-2 bg-color-1 text-n-8 rounded-lg hover:bg-color-2 
-                                 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                      >
-                        {isAddingComment ? "Posting..." : "Post Comment"}
-                      </button>
+                <form
+                  onSubmit={handleAddComment}
+                  className="mb-6 p-4 bg-n-8 rounded-xl border border-n-6"
+                >
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Write a comment..."
+                    className="w-full p-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 
+                             focus:border-color-1 focus:outline-none resize-none"
+                    rows="3"
+                  />
+                  <div className="flex justify-end mt-3">
+                    <button
+                      type="submit"
+                      disabled={!newComment.trim() || isAddingComment}
+                      className="px-4 py-2 bg-color-1 text-n-8 rounded-lg hover:bg-color-2 
+                               disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {isAddingComment ? "Posting..." : "Post Comment"}
+                    </button>
+                  </div>
+                  {!isAuthenticated && (
+                    <div className="text-sm text-red-500 mt-2 text-center">
+                      You must be logged in to post a comment.
                     </div>
-                  </form>
-                )}
+                  )}
+                </form>
 
                 {/* Comments List */}
                 <div className="space-y-4">

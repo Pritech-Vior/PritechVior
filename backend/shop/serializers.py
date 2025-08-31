@@ -42,9 +42,27 @@ class PlatformSerializer(serializers.ModelSerializer):
 
 class ProductImageSerializer(serializers.ModelSerializer):
     """Serializer for product images"""
+    image_file = serializers.ImageField(write_only=True, required=False)
+
     class Meta:
         model = ProductImage
-        fields = ['id', 'image', 'alt_text', 'is_primary', 'order']
+        fields = ['id', 'image', 'image_file', 'alt_text', 'is_primary', 'order']
+
+    def create(self, validated_data):
+        image_file = validated_data.pop('image_file', None)
+        if image_file:
+            import cloudinary.uploader
+            result = cloudinary.uploader.upload(image_file)
+            validated_data['image'] = result['secure_url']
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        image_file = validated_data.pop('image_file', None)
+        if image_file:
+            import cloudinary.uploader
+            result = cloudinary.uploader.upload(image_file)
+            validated_data['image'] = result['secure_url']
+        return super().update(instance, validated_data)
 
 
 class ShippingMethodSerializer(serializers.ModelSerializer):
@@ -69,6 +87,10 @@ class ProductSerializer(serializers.ModelSerializer):
     brand_detail = BrandSerializer(source='brand', read_only=True)
     product_type_detail = ProductTypeSerializer(source='product_type', read_only=True)
     
+    image_file = serializers.ImageField(write_only=True, required=False)
+    video_file = serializers.FileField(write_only=True, required=False)
+    video_thumbnail_file = serializers.ImageField(write_only=True, required=False)
+
     class Meta:
         model = Product
         fields = [
@@ -79,11 +101,43 @@ class ProductSerializer(serializers.ModelSerializer):
             'featured', 'trending', 'new_arrival', 'best_seller',
             'stock_quantity', 'is_low_stock', 'is_in_stock', 'weight', 'dimensions',
             'rating', 'review_count', 'tags', 'specifications',
-            'youtube_video_id', 'youtube_embed_url', 'video_thumbnail',
+            'youtube_video_id', 'youtube_embed_url', 'video_url', 'product_video', 'video_file', 'video_thumbnail', 'video_thumbnail_file',
             'is_affiliate', 'affiliate_source', 'affiliate_url',
             'accepts_custom_orders', 'custom_order_lead_time', 'custom_order_min_quantity',
             'external_sources', 'primary_image', 'created_at', 'updated_at'
         ]
+
+    def create(self, validated_data):
+        image_file = validated_data.pop('image_file', None)
+        video_file = validated_data.pop('video_file', None)
+        video_thumbnail_file = validated_data.pop('video_thumbnail_file', None)
+        import cloudinary.uploader
+        if image_file:
+            result = cloudinary.uploader.upload(image_file)
+            validated_data['image'] = result['secure_url']
+        if video_file:
+            result = cloudinary.uploader.upload(video_file, resource_type="video")
+            validated_data['product_video'] = result['secure_url']
+        if video_thumbnail_file:
+            result = cloudinary.uploader.upload(video_thumbnail_file)
+            validated_data['video_thumbnail'] = result['secure_url']
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        image_file = validated_data.pop('image_file', None)
+        video_file = validated_data.pop('video_file', None)
+        video_thumbnail_file = validated_data.pop('video_thumbnail_file', None)
+        import cloudinary.uploader
+        if image_file:
+            result = cloudinary.uploader.upload(image_file)
+            validated_data['image'] = result['secure_url']
+        if video_file:
+            result = cloudinary.uploader.upload(video_file, resource_type="video")
+            validated_data['product_video'] = result['secure_url']
+        if video_thumbnail_file:
+            result = cloudinary.uploader.upload(video_thumbnail_file)
+            validated_data['video_thumbnail'] = result['secure_url']
+        return super().update(instance, validated_data)
     
     def get_primary_image(self, obj):
         primary_image = obj.images.filter(is_primary=True).first()

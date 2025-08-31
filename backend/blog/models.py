@@ -56,8 +56,10 @@ class BlogPost(models.Model):
     featured = models.BooleanField(default=False)
     
     # SEO & Media
-    image = models.URLField(blank=True, help_text='Featured image URL')
+    image = models.URLField(blank=True, help_text='Featured image URL (external)')
+    image_file = models.ImageField(upload_to='blog/images/', blank=True, null=True)
     meta_description = models.CharField(max_length=160, blank=True)
+    video_url = models.URLField(blank=True, help_text='Embedded video URL (YouTube, Vimeo, etc.)')
     
     # Analytics
     views = models.PositiveIntegerField(default=0)

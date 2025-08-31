@@ -58,7 +58,7 @@ class BlogPostAdmin(admin.ModelAdmin):
             'fields': ('category', 'categories', 'tags')
         }),
         ('Media', {
-            'fields': ('image',)
+            'fields': ('image_file', 'image')
         }),
         ('SEO', {
             'fields': ('meta_description', 'read_time'),

@@ -163,6 +163,7 @@ class Product(models.Model):
     youtube_video_id = models.CharField(max_length=50, blank=True, help_text="YouTube video ID")
     product_video = models.FileField(upload_to='products/videos/', blank=True, null=True)
     video_thumbnail = models.ImageField(upload_to='products/video_thumbnails/', blank=True, null=True)
+    video_url = models.URLField(blank=True, help_text='Embedded video URL (YouTube, Vimeo, etc.)')
     
     # Ratings & Reviews
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.00)
@@ -236,7 +237,7 @@ class Product(models.Model):
 class ProductImage(models.Model):
     """Model for product images"""
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = models.ImageField(upload_to='products/images/')
+    image = models.ImageField(upload_to='products/images/', blank=True, null=True)
     alt_text = models.CharField(max_length=200, blank=True)
     is_primary = models.BooleanField(default=False)
     order = models.PositiveIntegerField(default=0)
