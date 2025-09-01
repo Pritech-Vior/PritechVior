@@ -1,408 +1,356 @@
-from rest_framework import viewsets, filters, status
+from rest_framework import viewsets, status, permissions, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
-from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q, Avg
-from django.shortcuts import get_object_or_404
-from .models import (
-    Category, Brand, ProductType, Platform, Product, ProductReview, ProductImage, 
-    Order, OrderItem, Cart, CartItem, Wishlist, WishlistItem, 
-    CustomOrderRequest, ProductRequest, ShippingMethod
-)
-from .serializers import (
-    CategorySerializer, BrandSerializer, ProductTypeSerializer, PlatformSerializer,
-    ProductSerializer, ProductDetailSerializer, ProductReviewSerializer,
-    OrderSerializer, CartSerializer, CartItemSerializer, WishlistSerializer,
-    CustomOrderRequestSerializer, ProductRequestSerializer, ShippingMethodSerializer,
-    AddToCartSerializer, UpdateCartItemSerializer, CheckoutSerializer
-)
+from rest_framework.views import APIView
+from django.db.models import Q, Count, Sum, Avg
+from django.utils import timezone
+from datetime import timedelta
+import django_filters.rest_framework as django_filters
+from .models import Product, Order, Category, OrderItem
+from .serializers import ProductSerializer, OrderSerializer, CategorySerializer
 
 
-class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet for product categories"""
-    queryset = Category.objects.filter(is_active=True).order_by('sort_order', 'name')
-    serializer_class = CategorySerializer
-    permission_classes = [AllowAny]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name', 'description']
-    lookup_field = 'slug'
-
-    @action(detail=True, methods=['get'])
-    def products(self, request, slug=None):
-        """Get products in this category"""
-        category = self.get_object()
-        products = Product.objects.filter(category=category, status='active')
-        serializer = ProductSerializer(products, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class BrandViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet for product brands"""
-    queryset = Brand.objects.filter(is_active=True).order_by('sort_order', 'name')
-    serializer_class = BrandSerializer
-    permission_classes = [AllowAny]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name', 'description']
-    lookup_field = 'slug'
-
-    @action(detail=True, methods=['get'])
-    def products(self, request, slug=None):
-        """Get products from this brand"""
-        brand = self.get_object()
-        products = Product.objects.filter(brand=brand, status='active')
-        serializer = ProductSerializer(products, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class ProductTypeViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet for product types"""
-    queryset = ProductType.objects.filter(is_active=True).order_by('sort_order', 'name')
-    serializer_class = ProductTypeSerializer
-    permission_classes = [AllowAny]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name', 'description']
-    lookup_field = 'slug'
-
-    @action(detail=True, methods=['get'])
-    def products(self, request, slug=None):
-        """Get products of this type"""
-        product_type = self.get_object()
-        products = Product.objects.filter(product_type=product_type, status='active')
-        serializer = ProductSerializer(products, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class PlatformViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet for platforms"""
-    queryset = Platform.objects.filter(is_active=True).order_by('sort_order', 'name')
-    serializer_class = PlatformSerializer
-    permission_classes = [AllowAny]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name', 'description', 'website']
-    lookup_field = 'slug'
-
-    @action(detail=True, methods=['get'])
-    def requests(self, request, slug=None):
-        """Get product requests from this platform"""
-        platform = self.get_object()
-        product_requests = ProductRequest.objects.filter(platform=platform)
-        serializer = ProductRequestSerializer(product_requests, many=True, context={'request': request})
-        return Response(serializer.data)
-
-
-class ProductViewSet(viewsets.ReadOnlyModelViewSet):
+class IsAdminUser(permissions.BasePermission):
     """
-    ViewSet for ViorMart products
-    Provides list and detail views with filtering and search
+    Custom permission to only allow admin users.
     """
-    queryset = Product.objects.filter(status='active')
+    def has_permission(self, request, view):
+        return (
+            request.user and 
+            request.user.is_authenticated and 
+            (request.user.is_staff or request.user.is_superuser or 
+             getattr(request.user, 'role', None) in ['admin', 'ceo'])
+        )
+
+
+def log_activity(user, action, action_type='system', description='', request=None):
+    """
+    Utility function to log user activities
+    """
+    try:
+        # You can implement activity logging here if needed
+        print(f"Activity: {action} by {user.username}")
+    except Exception as e:
+        print(f"Error logging activity: {e}")
+
+
+class ProductFilter(django_filters.FilterSet):
+    """Filter for products"""
+    category = django_filters.CharFilter(field_name='category__name', lookup_expr='icontains')
+    price_min = django_filters.NumberFilter(field_name='price', lookup_expr='gte')
+    price_max = django_filters.NumberFilter(field_name='price', lookup_expr='lte')
+    search = django_filters.CharFilter(method='filter_search')
+    in_stock = django_filters.BooleanFilter(method='filter_in_stock')
+    
+    class Meta:
+        model = Product
+        fields = ['category', 'status', 'featured']
+    
+    def filter_search(self, queryset, name, value):
+        return queryset.filter(
+            Q(name__icontains=value) |
+            Q(description__icontains=value) |
+            Q(category__name__icontains=value)
+        )
+    
+    def filter_in_stock(self, queryset, name, value):
+        if value:
+            return queryset.filter(stock_quantity__gt=0)
+        return queryset.filter(stock_quantity=0)
+
+
+class OrderFilter(django_filters.FilterSet):
+    """Filter for orders"""
+    customer = django_filters.CharFilter(field_name='user__username', lookup_expr='icontains')
+    date_from = django_filters.DateFilter(field_name='created_at', lookup_expr='gte')
+    date_to = django_filters.DateFilter(field_name='created_at', lookup_expr='lte')
+    search = django_filters.CharFilter(method='filter_search')
+    
+    class Meta:
+        model = Order
+        fields = ['status', 'payment_status']
+    
+    def filter_search(self, queryset, name, value):
+        return queryset.filter(
+            Q(id__icontains=value) |
+            Q(user__username__icontains=value) |
+            Q(user__email__icontains=value)
+        )
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    """ViewSet for product management"""
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [AllowAny]
-    lookup_field = 'slug'
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = [
-        'category', 'brand', 'featured', 'trending', 'new_arrival', 'best_seller',
-        'is_affiliate', 'product_type', 'availability', 'accepts_custom_orders'
-    ]
-    search_fields = ['name', 'description', 'short_description', 'tags']
-    ordering_fields = ['price', 'rating', 'created_at', 'review_count', 'name']
-    ordering = ['-featured', '-created_at']
-
-    def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return ProductDetailSerializer
-        return ProductSerializer
-
+    permission_classes = [IsAdminUser]
+    filter_backends = [django_filters.DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = ProductFilter
+    ordering_fields = ['name', 'price', 'stock_quantity', 'created_at']
+    ordering = ['-created_at']
+    
+    def perform_create(self, serializer):
+        product = serializer.save()
+        log_activity(
+            user=self.request.user,
+            action=f"Created product: {product.name}",
+            action_type="shop",
+            request=self.request
+        )
+    
+    def perform_update(self, serializer):
+        product = serializer.save()
+        log_activity(
+            user=self.request.user,
+            action=f"Updated product: {product.name}",
+            action_type="shop",
+            request=self.request
+        )
+    
+    def perform_destroy(self, instance):
+        log_activity(
+            user=self.request.user,
+            action=f"Deleted product: {instance.name}",
+            action_type="shop",
+            request=self.request
+        )
+        instance.delete()
+    
     @action(detail=False, methods=['get'])
     def featured(self, request):
         """Get featured products"""
-        featured_products = self.queryset.filter(featured=True)
+        featured_products = self.get_queryset().filter(featured=True, status='active')
         serializer = self.get_serializer(featured_products, many=True)
         return Response(serializer.data)
-
+    
     @action(detail=False, methods=['get'])
-    def trending(self, request):
-        """Get trending products"""
-        trending_products = self.queryset.filter(trending=True)
-        serializer = self.get_serializer(trending_products, many=True)
+    def low_stock(self, request):
+        """Get products with low stock"""
+        low_stock_threshold = int(request.query_params.get('threshold', 10))
+        low_stock_products = self.get_queryset().filter(
+            stock_quantity__lte=low_stock_threshold,
+            status='active'
+        )
+        serializer = self.get_serializer(low_stock_products, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['get'])
-    def new_arrivals(self, request):
-        """Get new arrival products"""
-        new_products = self.queryset.filter(new_arrival=True)
-        serializer = self.get_serializer(new_products, many=True)
-        return Response(serializer.data)
 
-    @action(detail=False, methods=['get'])
-    def best_sellers(self, request):
-        """Get best selling products"""
-        best_sellers = self.queryset.filter(best_seller=True)
-        serializer = self.get_serializer(best_sellers, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=['get'])
-    def categories(self, request):
-        """Get available categories with product counts"""
-        categories = {}
-        for choice in Product.CATEGORY_CHOICES:
-            category_key, category_label = choice
-            count = self.queryset.filter(category=category_key).count()
-            categories[category_key] = {
-                'label': category_label,
-                'count': count
-            }
-        return Response(categories)
-
-    @action(detail=False, methods=['get'])
-    def brands(self, request):
-        """Get available brands with product counts"""
-        brands = {}
-        for choice in Product.BRAND_CHOICES:
-            brand_key, brand_label = choice
-            count = self.queryset.filter(brand=brand_key).count()
-            if count > 0:  # Only include brands that have products
-                brands[brand_key] = {
-                    'label': brand_label,
-                    'count': count
-                }
-        return Response(brands)
-
-    @action(detail=True, methods=['get'])
-    def similar(self, request, pk=None):
-        """Get similar products"""
-        product = self.get_object()
-        similar_products = self.queryset.filter(
-            Q(category=product.category) | Q(brand=product.brand)
-        ).exclude(id=product.id)[:8]
-        serializer = self.get_serializer(similar_products, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=['get'])
-    def search_suggestions(self, request):
-        """Get search suggestions based on query"""
-        query = request.query_params.get('q', '')
-        if len(query) < 2:
-            return Response([])
+class OrderViewSet(viewsets.ModelViewSet):
+    """ViewSet for order management"""
+    queryset = Order.objects.select_related('user').all()
+    serializer_class = OrderSerializer
+    permission_classes = [IsAdminUser]
+    filter_backends = [django_filters.DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = OrderFilter
+    ordering_fields = ['created_at', 'total_amount', 'status']
+    ordering = ['-created_at']
+    
+    def perform_update(self, serializer):
+        order = serializer.save()
+        log_activity(
+            user=self.request.user,
+            action=f"Updated order: {str(order.id)[:8]}",
+            action_type="order",
+            request=self.request
+        )
+    
+    @action(detail=True, methods=['patch'])
+    def update_status(self, request, pk=None):
+        """Update order status"""
+        order = self.get_object()
+        new_status = request.data.get('status')
         
-        products = self.queryset.filter(
-            Q(name__icontains=query) | Q(tags__icontains=query)
-        )[:10]
-        
-        suggestions = [{'name': p.name, 'slug': p.slug} for p in products]
-        return Response(suggestions)
-
-
-class ProductReviewViewSet(viewsets.ModelViewSet):
-    """ViewSet for product reviews"""
-    queryset = ProductReview.objects.all()
-    serializer_class = ProductReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
-    
-    def get_queryset(self):
-        product_slug = self.kwargs.get('product_slug')
-        if product_slug:
-            return ProductReview.objects.filter(product__slug=product_slug)
-        return ProductReview.objects.all()
-    
-    def perform_create(self, serializer):
-        product_slug = self.kwargs.get('product_slug')
-        product = Product.objects.get(slug=product_slug)
-        serializer.save(user=self.request.user, product=product)
-        
-        # Update product rating
-        avg_rating = product.reviews.aggregate(avg_rating=Avg('rating'))['avg_rating']
-        product.rating = round(avg_rating, 2) if avg_rating else 0
-        product.review_count = product.reviews.count()
-        product.save()
-
-    @action(detail=True, methods=['post'])
-    def mark_helpful(self, request, pk=None, product_slug=None):
-        """Mark review as helpful"""
-        review = self.get_object()
-        review.helpful_count += 1
-        review.save()
-        return Response({'helpful_count': review.helpful_count})
-
-
-class CartViewSet(viewsets.ModelViewSet):
-    """ViewSet for shopping cart"""
-    serializer_class = CartSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        return Cart.objects.filter(user=self.request.user)
-    
-    def get_object(self):
-        cart, created = Cart.objects.get_or_create(user=self.request.user)
-        return cart
-
-    @action(detail=False, methods=['post'])
-    def add_item(self, request):
-        """Add item to cart"""
-        serializer = AddToCartSerializer(data=request.data)
-        if serializer.is_valid():
-            cart, created = Cart.objects.get_or_create(user=request.user)
-            product = get_object_or_404(Product, id=serializer.validated_data['product_id'])
-            
-            cart_item, created = CartItem.objects.get_or_create(
-                cart=cart,
-                product=product,
-                defaults={
-                    'quantity': serializer.validated_data['quantity'],
-                    'custom_specifications': serializer.validated_data.get('custom_specifications', {})
-                }
+        if new_status not in dict(Order.STATUS_CHOICES):
+            return Response(
+                {'error': 'Invalid status'}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
-            
-            if not created:
-                cart_item.quantity += serializer.validated_data['quantity']
-                cart_item.save()
-            
-            return Response(CartItemSerializer(cart_item).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=False, methods=['put'])
-    def update_item(self, request):
-        """Update cart item quantity"""
-        item_id = request.data.get('item_id')
-        cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
         
-        serializer = UpdateCartItemSerializer(data=request.data)
-        if serializer.is_valid():
-            cart_item.quantity = serializer.validated_data['quantity']
-            cart_item.save()
-            return Response(CartItemSerializer(cart_item).data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=False, methods=['delete'])
-    def remove_item(self, request):
-        """Remove item from cart"""
-        item_id = request.data.get('item_id')
-        cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
-        cart_item.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=False, methods=['delete'])
-    def clear(self, request):
-        """Clear all items from cart"""
-        cart = self.get_object()
-        cart.items.all().delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class WishlistViewSet(viewsets.ModelViewSet):
-    """ViewSet for wishlist"""
-    serializer_class = WishlistSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        return Wishlist.objects.filter(user=self.request.user)
-    
-    def get_object(self):
-        wishlist, created = Wishlist.objects.get_or_create(user=self.request.user)
-        return wishlist
-
-    @action(detail=False, methods=['post'])
-    def add_item(self, request):
-        """Add item to wishlist"""
-        product_id = request.data.get('product_id')
-        product = get_object_or_404(Product, id=product_id)
-        wishlist = self.get_object()
+        old_status = order.status
+        order.status = new_status
+        order.save()
         
-        wishlist_item, created = WishlistItem.objects.get_or_create(
-            wishlist=wishlist,
-            product=product
+        log_activity(
+            user=request.user,
+            action=f"Changed order {str(order.id)[:8]} status from {old_status} to {new_status}",
+            action_type="order",
+            request=request
         )
         
-        if created:
-            return Response({'message': 'Product added to wishlist'}, status=status.HTTP_201_CREATED)
-        return Response({'message': 'Product already in wishlist'}, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['delete'])
-    def remove_item(self, request):
-        """Remove item from wishlist"""
-        product_id = request.data.get('product_id')
-        wishlist = self.get_object()
-        wishlist_item = get_object_or_404(WishlistItem, wishlist=wishlist, product_id=product_id)
-        wishlist_item.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class OrderViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet for orders"""
-    serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated]
+        serializer = self.get_serializer(order)
+        return Response(serializer.data)
     
-    def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
-
-    @action(detail=False, methods=['post'])
-    def checkout(self, request):
-        """Process checkout"""
-        serializer = CheckoutSerializer(data=request.data)
-        if serializer.is_valid():
-            cart = get_object_or_404(Cart, user=request.user)
-            if not cart.items.exists():
-                return Response({'error': 'Cart is empty'}, status=status.HTTP_400_BAD_REQUEST)
-            
-            # Create order logic here
-            # This would typically involve payment processing
-            
-            return Response({'message': 'Order created successfully'}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class CustomOrderRequestViewSet(viewsets.ModelViewSet):
-    """ViewSet for custom order requests"""
-    serializer_class = CustomOrderRequestSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        return CustomOrderRequest.objects.filter(user=self.request.user)
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class ProductRequestViewSet(viewsets.ModelViewSet):
-    """ViewSet for product requests from external sites"""
-    serializer_class = ProductRequestSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        return ProductRequest.objects.filter(user=self.request.user)
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-
-class ShippingMethodViewSet(viewsets.ReadOnlyModelViewSet):
-    """ViewSet for shipping methods"""
-    queryset = ShippingMethod.objects.filter(is_active=True)
-    serializer_class = ShippingMethodSerializer
-    permission_classes = [AllowAny]
-    
-    @action(detail=False, methods=['post'])
-    def calculate_shipping(self, request):
-        """Calculate shipping cost for cart"""
-        total_weight = request.data.get('total_weight', 0)
-        total_amount = request.data.get('total_amount', 0)
+    @action(detail=False, methods=['get'])
+    def stats(self, request):
+        """Get order statistics"""
+        # Total orders
+        total_orders = Order.objects.count()
         
-        shipping_costs = []
-        for method in self.queryset:
-            cost = method.base_cost + (method.cost_per_kg * total_weight)
+        # Orders by status
+        status_stats = Order.objects.values('status').annotate(count=Count('id'))
+        by_status = {item['status']: item['count'] for item in status_stats}
+        
+        # Revenue statistics
+        total_revenue = Order.objects.filter(
+            payment_status='completed'
+        ).aggregate(total=Sum('total_amount'))['total'] or 0
+        
+        # This month's statistics
+        this_month = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        this_month_orders = Order.objects.filter(created_at__gte=this_month).count()
+        this_month_revenue = Order.objects.filter(
+            created_at__gte=this_month,
+            payment_status='completed'
+        ).aggregate(total=Sum('total_amount'))['total'] or 0
+        
+        return Response({
+            'total_orders': total_orders,
+            'by_status': by_status,
+            'total_revenue': total_revenue,
+            'this_month_orders': this_month_orders,
+            'this_month_revenue': this_month_revenue,
+            'average_order_value': total_revenue / max(total_orders, 1)
+        })
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    """ViewSet for category management"""
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminUser]
+    ordering = ['name']
+    
+    def perform_create(self, serializer):
+        category = serializer.save()
+        log_activity(
+            user=self.request.user,
+            action=f"Created category: {category.name}",
+            action_type="shop",
+            request=self.request
+        )
+    
+    def perform_update(self, serializer):
+        category = serializer.save()
+        log_activity(
+            user=self.request.user,
+            action=f"Updated category: {category.name}",
+            action_type="shop",
+            request=self.request
+        )
+    
+    def perform_destroy(self, instance):
+        log_activity(
+            user=self.request.user,
+            action=f"Deleted category: {instance.name}",
+            action_type="shop",
+            request=self.request
+        )
+        instance.delete()
+
+
+class ShopAnalyticsAPIView(APIView):
+    """API view for shop analytics"""
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        try:
+            # Product statistics
+            total_products = Product.objects.count()
+            active_products = Product.objects.filter(status='active').count()
+            out_of_stock = Product.objects.filter(stock_quantity=0).count()
             
-            # Check for free shipping
-            if method.free_shipping_threshold and total_amount >= method.free_shipping_threshold:
-                cost = 0
+            # Order statistics
+            total_orders = Order.objects.count()
+            completed_orders = Order.objects.filter(payment_status='completed').count()
+            pending_orders = Order.objects.filter(status='pending').count()
             
-            shipping_costs.append({
-                'id': method.id,
-                'name': method.name,
-                'cost': cost,
-                'estimated_days': f"{method.estimated_days_min}-{method.estimated_days_max}",
-                'free_shipping': cost == 0
+            # Revenue statistics
+            total_revenue = Order.objects.filter(
+                payment_status='completed'
+            ).aggregate(total=Sum('total_amount'))['total'] or 0
+            
+            # This month's revenue
+            this_month = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            this_month_revenue = Order.objects.filter(
+                created_at__gte=this_month,
+                payment_status='completed'
+            ).aggregate(total=Sum('total_amount'))['total'] or 0
+            
+            # Top selling products
+            top_products = Product.objects.annotate(
+                order_count=Count('orderitem')
+            ).order_by('-order_count')[:5]
+            
+            top_products_data = []
+            for product in top_products:
+                revenue = OrderItem.objects.filter(
+                    product=product,
+                    order__payment_status='completed'
+                ).aggregate(
+                    total=Sum('price')
+                )['total'] or 0
+                
+                top_products_data.append({
+                    'name': product.name,
+                    'sales': product.order_count,
+                    'revenue': revenue
+                })
+            
+            # Monthly sales data (last 6 months)
+            monthly_sales = []
+            for i in range(6):
+                month_start = (timezone.now().replace(day=1) - timedelta(days=30*i)).replace(day=1)
+                month_end = (month_start + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+                
+                month_orders = Order.objects.filter(
+                    created_at__range=[month_start, month_end],
+                    payment_status='completed'
+                ).count()
+                
+                month_revenue = Order.objects.filter(
+                    created_at__range=[month_start, month_end],
+                    payment_status='completed'
+                ).aggregate(total=Sum('total_amount'))['total'] or 0
+                
+                monthly_sales.append({
+                    'month': month_start.strftime('%b'),
+                    'sales': month_orders,
+                    'revenue': month_revenue
+                })
+            
+            # Conversion rate (completed orders / total orders)
+            conversion_rate = (completed_orders / max(total_orders, 1)) * 100
+            
+            return Response({
+                'total_revenue': total_revenue,
+                'total_orders': total_orders,
+                'total_products': total_products,
+                'conversion_rate': round(conversion_rate, 1),
+                'active_products': active_products,
+                'out_of_stock': out_of_stock,
+                'completed_orders': completed_orders,
+                'pending_orders': pending_orders,
+                'this_month_revenue': this_month_revenue,
+                'top_products': top_products_data,
+                'monthly_sales': list(reversed(monthly_sales))
             })
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to fetch shop analytics: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class PublicShopStatsAPIView(APIView):
+    """Public API for basic shop statistics"""
+    permission_classes = [permissions.AllowAny]
+    
+    def get(self, request):
+        total_products = Product.objects.filter(status='active').count()
+        featured_products = Product.objects.filter(status='active', featured=True).count()
         
-        return Response(shipping_costs)
+        return Response({
+            'total_products': total_products,
+            'featured_products': featured_products,
+            'message': 'Discover our amazing products!'
+        })

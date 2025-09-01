@@ -16,6 +16,37 @@ const AccountDropdown = () => {
   const dropdownRef = useRef(null);
   const { isAuthenticated, user, logout } = useAuth();
 
+  // Helper to get dashboard path by role
+  const getDashboardPath = () => {
+    if (!user) return "/dashboard/guest";
+    if (user.role) {
+      switch (user.role) {
+        case "admin":
+          return "/dashboard/admin";
+        case "writer":
+          return "/dashboard/writer";
+        case "treasury":
+          return "/dashboard/treasury";
+        case "technician":
+          return "/dashboard/technician";
+        case "student":
+          return "/dashboard/student";
+        case "parent":
+          return "/dashboard/parent";
+        case "client":
+          return "/dashboard/client";
+        default:
+          return "/dashboard/guest";
+      }
+    }
+    // fallback for multi-role or missing role
+    if (user.roles && user.roles.length > 0) {
+      // Pick first role or use MultiRoleDashboard
+      const mainRole = user.roles[0];
+      return `/dashboard/${mainRole}`;
+    }
+    return "/dashboard/guest";
+  };
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -108,6 +139,14 @@ const AccountDropdown = () => {
 
                 {/* Menu Items */}
                 <div className="py-1">
+                  <Link
+                    to={getDashboardPath()}
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2.5 text-n-1 hover:bg-n-7 hover:text-color-1 transition-colors text-sm"
+                  >
+                    <Settings size={16} />
+                    <span>Dashboard</span>
+                  </Link>
                   <Link
                     to="/profile"
                     onClick={() => setIsOpen(false)}

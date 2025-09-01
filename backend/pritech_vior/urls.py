@@ -37,11 +37,16 @@ urlpatterns = [
     
     # App APIs
     path('users/', include('users.urls')),
+    path('users/', include('users.debug_urls')),
     path('api/shop/', include('shop.urls')),
     path('elearning/', include('elearning.urls')),
     path('archive/', include('archive.urls')),
     path('blog/', include('blog.urls')),
     path('api/projects/', include('projects.urls')),
+    
+    # Admin Dashboard APIs
+    path('api/admin/', include('projects.admin_urls_simple')),
+    path('api/admin/', include('users.admin_urls')),
     
     # Main API
     path('api/', include(router.urls)),

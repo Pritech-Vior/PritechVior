@@ -39,6 +39,19 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 
 // Dashboard Imports
 import AdminDashboard from "./pages/dashboard/admin/AdminDashboardSimple";
+import Profile from "./pages/dashboard/admin/profile/Profile";
+import ProjectsManagement from "./pages/dashboard/admin/projects/ProjectsManagement";
+import UsersManagement from "./pages/dashboard/admin/users/UsersManagement";
+import CoursesManagement from "./pages/dashboard/admin/courses/CoursesManagement";
+import ShopManagement from "./pages/dashboard/admin/shop/ShopManagement";
+import ContentManagement from "./pages/dashboard/admin/content/ContentManagement";
+import Analytics from "./pages/dashboard/admin/analytics/Analytics";
+import Payments from "./pages/dashboard/admin/payments/Payments";
+import Settings from "./pages/dashboard/admin/settings/Settings";
+import ArchiveManagement from "./pages/dashboard/admin/archive/ArchiveManagement";
+import BlogManagement from "./pages/dashboard/admin/blog/BlogManagement";
+import CreatePost from "./pages/dashboard/admin/blog/CreatePost";
+import UpdatePost from "./pages/dashboard/admin/blog/UpdatePost";
 import CEODashboard from "./pages/dashboard/ceo/CEODashboardSimple";
 import TreasuryDashboard from "./pages/dashboard/treasury/TreasuryDashboardSimple";
 import TrainerDashboard from "./pages/dashboard/trainer/TrainerDashboardSimple";
@@ -99,7 +112,41 @@ const App = () => {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             {/* Dashboard Routes */}
-            <Route path="/admin/*" element={<AdminDashboard />} />
+            <Route path="/dashboard/admin" element={<AdminDashboard />} />
+            <Route
+              path="/dashboard/admin/users"
+              element={<UsersManagement />}
+            />
+            <Route
+              path="/dashboard/admin/courses"
+              element={<CoursesManagement />}
+            />
+            <Route path="/dashboard/admin/shop" element={<ShopManagement />} />
+            <Route
+              path="/dashboard/admin/content"
+              element={<ContentManagement />}
+            />
+            <Route path="/dashboard/admin/analytics" element={<Analytics />} />
+            <Route path="/dashboard/admin/payments" element={<Payments />} />
+            <Route path="/dashboard/admin/settings" element={<Settings />} />
+            <Route
+              path="/dashboard/admin/archive"
+              element={<ArchiveManagement />}
+            />
+            <Route path="/dashboard/admin/blog" element={<BlogManagement />} />
+            <Route
+              path="/dashboard/admin/blog/createpost"
+              element={<CreatePost />}
+            />
+            <Route
+              path="/dashboard/admin/blog/update/:slug"
+              element={<UpdatePost />}
+            />
+            <Route path="/dashboard/admin/profile" element={<Profile />} />
+            <Route
+              path="/dashboard/admin/projects"
+              element={<ProjectsManagement />}
+            />
             <Route path="/ceo/*" element={<CEODashboard />} />
             <Route path="/treasury/*" element={<TreasuryDashboard />} />
             <Route path="/trainer/*" element={<TrainerDashboard />} />

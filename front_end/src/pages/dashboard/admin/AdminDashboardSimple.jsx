@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Users, 
   BookOpen, 
@@ -20,65 +20,118 @@ import {
   Download
 } from "lucide-react";
 import DashboardLayout from "../../../components/dashboard/DashboardLayout";
+import dashboardStats from "../../../services/admin/dashboard/dashboardStats";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [timeframe, setTimeframe] = useState("month");
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [systemHealth, setSystemHealth] = useState(null);
+  const [recentActivities, setRecentActivities] = useState([]);
 
-  const stats = [
-    {
-      title: "Total Users",
-      value: "45,672",
-      change: "+12.5%",
-      changeType: "positive",
-      icon: Users,
-      color: "blue"
-    },
-    {
-      title: "Active Courses",
-      value: "1,234",
-      change: "+8.3%",
-      changeType: "positive",
-      icon: BookOpen,
-      color: "green"
-    },
-    {
-      title: "Revenue",
-      value: "$245,670",
-      change: "+15.7%",
-      changeType: "positive",
-      icon: DollarSign,
-      color: "yellow"
-    },
-    {
-      title: "Orders",
-      value: "2,847",
-      change: "+5.2%",
-      changeType: "positive",
-      icon: ShoppingBag,
-      color: "purple"
+  // Load dashboard data
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        const [statsData, healthData, activityData] = await Promise.all([
+          dashboardStats.getStats(),
+          dashboardStats.getSystemHealth(),
+          dashboardStats.getRecentActivity()
+        ]);
+        
+        setDashboardData(statsData);
+        setSystemHealth(healthData);
+        setRecentActivities(activityData);
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, [timeframe]);
+
+  // Refresh data
+  const handleRefresh = async () => {
+    setLoading(true);
+    try {
+      const [statsData, healthData, activityData] = await Promise.all([
+        dashboardStats.getStats(),
+        dashboardStats.getSystemHealth(),
+        dashboardStats.getRecentActivity()
+      ]);
+      
+      setDashboardData(statsData);
+      setSystemHealth(healthData);
+      setRecentActivities(activityData);
+    } catch (error) {
+      console.error('Failed to refresh dashboard data:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const recentActivities = [
-    { id: 1, action: "New user registered", user: "John Doe", time: "2 minutes ago", type: "user" },
-    { id: 2, action: "Course published", user: "Dr. Smith", time: "15 minutes ago", type: "course" },
-    { id: 3, action: "Order completed", user: "Jane Wilson", time: "1 hour ago", type: "order" },
-    { id: 4, action: "Blog post published", user: "Admin", time: "2 hours ago", type: "content" },
-    { id: 5, action: "Payment processed", user: "Mike Johnson", time: "3 hours ago", type: "payment" }
-  ];
+  // Generate stats from API data
+  const getStatsCards = () => {
+    if (!dashboardData) {
+      return [
+        { title: "Total Users", value: "Loading...", change: "", icon: Users, color: "blue" },
+        { title: "Active Projects", value: "Loading...", change: "", icon: BookOpen, color: "green" },
+        { title: "Pending Requests", value: "Loading...", change: "", icon: Clock, color: "yellow" },
+        { title: "Templates", value: "Loading...", change: "", icon: FileText, color: "purple" }
+      ];
+    }
+
+    return [
+      {
+        title: "Total Projects",
+        value: dashboardData.total_projects?.toString() || "0",
+        change: "+12.5%",
+        changeType: "positive",
+        icon: BookOpen,
+        color: "blue"
+      },
+      {
+        title: "Active Projects",
+        value: dashboardData.active_projects?.toString() || "0",
+        change: "+8.3%",
+        changeType: "positive",
+        icon: Activity,
+        color: "green"
+      },
+      {
+        title: "Pending Requests",
+        value: dashboardData.pending_requests?.toString() || "0",
+        change: "+15.7%",
+        changeType: "positive",
+        icon: Clock,
+        color: "yellow"
+      },
+      {
+        title: "Templates",
+        value: dashboardData.total_templates?.toString() || "0",
+        change: "+5.2%",
+        changeType: "positive",
+        icon: FileText,
+        color: "purple"
+      }
+    ];
+  };
 
   const pendingTasks = [
-    { id: 1, title: "Review course submissions", count: 12, priority: "high", due: "Today" },
+    { id: 1, title: "Review project requests", count: dashboardData?.pending_requests || 0, priority: "high", due: "Today" },
     { id: 2, title: "Approve blog posts", count: 5, priority: "medium", due: "Tomorrow" },
     { id: 3, title: "Process refunds", count: 3, priority: "high", due: "Today" },
     { id: 4, title: "Update user permissions", count: 8, priority: "low", due: "This week" }
   ];
 
   const systemAlerts = [
-    { id: 1, type: "warning", message: "Server load is high", time: "5 min ago" },
-    { id: 2, type: "info", message: "Backup completed successfully", time: "1 hour ago" },
-    { id: 3, type: "error", message: "Payment gateway timeout", time: "2 hours ago" }
+    { id: 1, type: "info", message: `System uptime: ${systemHealth?.uptime || "99.9%"}`, time: "Live" },
+    { id: 2, type: "info", message: `Response time: ${systemHealth?.response_time || "1.2s"}`, time: "Live" },
+    { id: 3, type: systemHealth?.server_load > 80 ? "warning" : "info", message: `Server load: ${systemHealth?.server_load || 65}%`, time: "Live" }
   ];
 
   const getStatColor = (color) => {
@@ -128,8 +181,12 @@ const AdminDashboard = () => {
               <option value="month">This Month</option>
               <option value="quarter">This Quarter</option>
             </select>
-            <button className="bg-gradient-to-r from-color-1 to-color-2 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
-              <RefreshCw size={16} />
+            <button 
+              onClick={handleRefresh}
+              disabled={loading}
+              className="bg-gradient-to-r from-color-1 to-color-2 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm disabled:opacity-50"
+            >
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
               Refresh
             </button>
           </div>
@@ -137,7 +194,7 @@ const AdminDashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat, index) => (
+          {getStatsCards().map((stat, index) => (
             <div key={index} className="bg-n-8 rounded-xl p-6 border border-n-6">
               <div className="flex items-center justify-between mb-4">
                 <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${getStatColor(stat.color)} flex items-center justify-center`}>

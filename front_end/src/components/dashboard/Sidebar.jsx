@@ -1,14 +1,15 @@
 import React from "react";
+import { useAuth } from "../../contexts/AuthContext";
 import { Link, useLocation } from "react-router-dom";
 import pritechviorLogo from "../../assets/pritechvior-logo.svg";
-import { 
-  Home, 
-  User, 
-  BookOpen, 
-  GraduationCap, 
-  Users, 
-  Settings, 
-  LogOut, 
+import {
+  Home,
+  User,
+  BookOpen,
+  GraduationCap,
+  Users,
+  Settings,
+  LogOut,
   ShoppingBag,
   FileText,
   Award,
@@ -20,12 +21,19 @@ import {
   Menu,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Box,
 } from "lucide-react";
 
-const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles = [] }) => {
+const Sidebar = ({
+  userRole = "student",
+  collapsed = false,
+  onToggle,
+  userRoles = [],
+}) => {
   const location = useLocation();
   const hasMultipleRoles = userRoles.length > 1;
+  const { user, logout } = useAuth();
 
   const menuItems = {
     ceo: [
@@ -35,28 +43,92 @@ const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles 
       { icon: CreditCard, label: "Financial Overview", path: "/ceo/finance" },
       { icon: BookOpen, label: "Strategic Goals", path: "/ceo/goals" },
       { icon: FileText, label: "Reports", path: "/ceo/reports" },
-      { icon: MessageSquare, label: "Executive Messages", path: "/ceo/messages" },
+      {
+        icon: MessageSquare,
+        label: "Executive Messages",
+        path: "/ceo/messages",
+      },
       { icon: Settings, label: "Company Settings", path: "/ceo/settings" },
     ],
     treasury: [
       { icon: Home, label: "Treasury Dashboard", path: "/treasury" },
-      { icon: CreditCard, label: "Financial Management", path: "/treasury/finance" },
-      { icon: BarChart3, label: "Revenue Analytics", path: "/treasury/revenue" },
+      {
+        icon: CreditCard,
+        label: "Financial Management",
+        path: "/treasury/finance",
+      },
+      {
+        icon: BarChart3,
+        label: "Revenue Analytics",
+        path: "/treasury/revenue",
+      },
       { icon: FileText, label: "Financial Reports", path: "/treasury/reports" },
-      { icon: ShoppingBag, label: "Payment Processing", path: "/treasury/payments" },
+      {
+        icon: ShoppingBag,
+        label: "Payment Processing",
+        path: "/treasury/payments",
+      },
       { icon: Users, label: "Budget Management", path: "/treasury/budget" },
-      { icon: Calendar, label: "Financial Calendar", path: "/treasury/calendar" },
-      { icon: Settings, label: "Treasury Settings", path: "/treasury/settings" },
+      {
+        icon: Calendar,
+        label: "Financial Calendar",
+        path: "/treasury/calendar",
+      },
+      {
+        icon: Settings,
+        label: "Treasury Settings",
+        path: "/treasury/settings",
+      },
     ],
     admin: [
-      { icon: Home, label: "Dashboard", path: "/admin" },
-      { icon: Users, label: "Users Management", path: "/admin/users" },
-      { icon: BookOpen, label: "Courses Management", path: "/admin/courses" },
-      { icon: ShoppingBag, label: "Shop Management", path: "/admin/shop" },
-      { icon: FileText, label: "Content Management", path: "/admin/content" },
-      { icon: BarChart3, label: "Analytics", path: "/admin/analytics" },
-      { icon: CreditCard, label: "Payments", path: "/admin/payments" },
-      { icon: Settings, label: "Settings", path: "/admin/settings" },
+      { icon: Home, label: "Dashboard", path: "/dashboard/admin" },
+      { icon: User, label: "Profile", path: "/dashboard/admin/profile" },
+      {
+        icon: Users,
+        label: "Users Management",
+        path: "/dashboard/admin/users",
+      },
+      {
+        icon: BookOpen,
+        label: "Courses Management",
+        path: "/dashboard/admin/courses",
+      },
+      {
+        icon: ShoppingBag,
+        label: "Shop Management",
+        path: "/dashboard/admin/shop",
+      },
+      {
+        icon: FileText,
+        label: "Content Management",
+        path: "/dashboard/admin/content",
+      },
+      {
+        icon: BarChart3,
+        label: "Analytics",
+        path: "/dashboard/admin/analytics",
+      },
+      {
+        icon: CreditCard,
+        label: "Payments",
+        path: "/dashboard/admin/payments",
+      },
+      {
+        icon: FileText,
+        label: "Projects Management",
+        path: "/dashboard/admin/projects",
+      },
+      { icon: Settings, label: "Settings", path: "/dashboard/admin/settings" },
+      {
+        icon: MessageSquare,
+        label: "Blog Management",
+        path: "/dashboard/admin/blog",
+      },
+      {
+        icon: Box,
+        label: "Archive Management",
+        path: "/dashboard/admin/archive",
+      },
     ],
     trainer: [
       { icon: Home, label: "Dashboard", path: "/trainer" },
@@ -100,7 +172,11 @@ const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles 
     client: [
       { icon: Home, label: "Dashboard", path: "/client" },
       { icon: FileText, label: "My Projects", path: "/client/projects" },
-      { icon: MessageSquare, label: "Project Requests", path: "/client/requests" },
+      {
+        icon: MessageSquare,
+        label: "Project Requests",
+        path: "/client/requests",
+      },
       { icon: BarChart3, label: "Progress Reports", path: "/client/reports" },
       { icon: CreditCard, label: "Billing", path: "/client/billing" },
       { icon: Calendar, label: "Meetings", path: "/client/meetings" },
@@ -109,49 +185,95 @@ const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles 
     ],
     technician: [
       { icon: Home, label: "Dashboard", path: "/technician" },
-      { icon: Users, label: "System Monitoring", path: "/technician/monitoring" },
+      {
+        icon: Users,
+        label: "System Monitoring",
+        path: "/technician/monitoring",
+      },
       { icon: Bell, label: "Alerts & Issues", path: "/technician/alerts" },
-      { icon: BookOpen, label: "Maintenance Tasks", path: "/technician/maintenance" },
-      { icon: BarChart3, label: "Performance Reports", path: "/technician/reports" },
+      {
+        icon: BookOpen,
+        label: "Maintenance Tasks",
+        path: "/technician/maintenance",
+      },
+      {
+        icon: BarChart3,
+        label: "Performance Reports",
+        path: "/technician/reports",
+      },
       { icon: Calendar, label: "Scheduled Jobs", path: "/technician/schedule" },
-      { icon: MessageSquare, label: "Support Tickets", path: "/technician/support" },
-      { icon: Settings, label: "System Settings", path: "/technician/settings" },
+      {
+        icon: MessageSquare,
+        label: "Support Tickets",
+        path: "/technician/support",
+      },
+      {
+        icon: Settings,
+        label: "System Settings",
+        path: "/technician/settings",
+      },
     ],
     designer: [
       { icon: Home, label: "Dashboard", path: "/designer" },
       { icon: FileText, label: "Design Projects", path: "/designer/projects" },
       { icon: BookOpen, label: "Asset Library", path: "/designer/assets" },
       { icon: Users, label: "Client Reviews", path: "/designer/reviews" },
-      { icon: BarChart3, label: "Portfolio Analytics", path: "/designer/analytics" },
+      {
+        icon: BarChart3,
+        label: "Portfolio Analytics",
+        path: "/designer/analytics",
+      },
       { icon: Calendar, label: "Design Schedule", path: "/designer/schedule" },
-      { icon: MessageSquare, label: "Creative Feedback", path: "/designer/feedback" },
+      {
+        icon: MessageSquare,
+        label: "Creative Feedback",
+        path: "/designer/feedback",
+      },
       { icon: Settings, label: "Design Settings", path: "/designer/settings" },
     ],
     writer: [
       { icon: Home, label: "Dashboard", path: "/writer" },
       { icon: FileText, label: "Writing Projects", path: "/writer/projects" },
       { icon: BookOpen, label: "Content Ideas", path: "/writer/ideas" },
-      { icon: BarChart3, label: "Analytics & Goals", path: "/writer/analytics" },
+      {
+        icon: BarChart3,
+        label: "Analytics & Goals",
+        path: "/writer/analytics",
+      },
       { icon: Users, label: "Client Feedback", path: "/writer/feedback" },
       { icon: Calendar, label: "Writing Schedule", path: "/writer/schedule" },
-      { icon: MessageSquare, label: "Editorial Messages", path: "/writer/messages" },
+      {
+        icon: MessageSquare,
+        label: "Editorial Messages",
+        path: "/writer/messages",
+      },
       { icon: Settings, label: "Writing Settings", path: "/writer/settings" },
-    ]
+    ],
   };
 
   const currentMenuItems = menuItems[userRole] || menuItems.student;
 
   return (
-    <div className={`h-screen bg-gradient-to-b from-n-8 to-n-8/95 border-r border-n-6/50 flex flex-col shadow-xl backdrop-blur-sm transition-all duration-300 ${
-      collapsed ? 'w-16' : 'w-64'
-    }`}>
+    <div
+      className={`h-screen bg-gradient-to-b from-n-8 to-n-8/95 border-r border-n-6/50 flex flex-col shadow-xl backdrop-blur-sm transition-all duration-300 ${
+        collapsed ? "w-16" : "w-64"
+      }`}
+    >
       {/* Header */}
-      <div className={`flex items-center p-4 border-b border-n-6/50 flex-shrink-0 relative ${collapsed ? 'justify-center' : 'justify-between'}`}>
-        <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
+      <div
+        className={`flex items-center p-4 border-b border-n-6/50 flex-shrink-0 relative ${
+          collapsed ? "justify-center" : "justify-between"
+        }`}
+      >
+        <div
+          className={`flex items-center gap-3 ${
+            collapsed ? "justify-center" : ""
+          }`}
+        >
           <div className="w-8 h-8 bg-gradient-to-r from-color-1 to-color-2 rounded-lg flex items-center justify-center shadow-lg p-1">
-            <img 
-              src={pritechviorLogo} 
-              alt="PritechVior Logo" 
+            <img
+              src={pritechviorLogo}
+              alt="PritechVior Logo"
               className="w-full h-full object-contain"
             />
           </div>
@@ -159,26 +281,36 @@ const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles 
             <div>
               <h2 className="text-n-1 font-semibold text-sm">PritechVior</h2>
               <p className="text-n-4 text-xs">
-                {userRoles?.length > 1 ? 'Staff Portal' : `${userRole.charAt(0).toUpperCase() + userRole.slice(1)} Portal`}
+                {userRoles?.length > 1
+                  ? "Staff Portal"
+                  : `${
+                      userRole.charAt(0).toUpperCase() + userRole.slice(1)
+                    } Portal`}
               </p>
             </div>
           )}
         </div>
-        
+
         {/* Collapse/Expand Button */}
         <button
           onClick={onToggle}
           className={`rounded-lg hover:bg-n-7/50 transition-all duration-200 group hover:scale-105 ${
-            collapsed 
-              ? 'absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-n-7 border border-n-6 shadow-lg z-20' 
-              : 'p-2'
+            collapsed
+              ? "absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-n-7 border border-n-6 shadow-lg z-20"
+              : "p-2"
           }`}
           title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
-            <ChevronRight size={14} className="text-n-3 group-hover:text-color-1 transition-colors" />
+            <ChevronRight
+              size={14}
+              className="text-n-3 group-hover:text-color-1 transition-colors"
+            />
           ) : (
-            <ChevronLeft size={18} className="text-n-3 group-hover:text-color-1 transition-colors" />
+            <ChevronLeft
+              size={18}
+              className="text-n-3 group-hover:text-color-1 transition-colors"
+            />
           )}
         </button>
       </div>
@@ -188,7 +320,7 @@ const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles 
         {currentMenuItems.map((item, index) => {
           const isActive = location.pathname === item.path;
           const Icon = item.icon;
-          
+
           return (
             <div key={index} className="relative group">
               <Link
@@ -200,28 +332,39 @@ const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles 
                   }
                 }}
                 className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 relative overflow-hidden ${
-                  isActive 
-                    ? 'bg-gradient-to-r from-color-1/20 to-color-2/20 border border-color-1/30 text-color-1 shadow-lg' 
-                    : 'text-n-3 hover:text-n-1 hover:bg-n-7/80 hover:shadow-md hover:scale-[1.02]'
-                } ${collapsed ? 'justify-center' : ''}`}
+                  isActive
+                    ? "bg-gradient-to-r from-color-1/20 to-color-2/20 border border-color-1/30 text-color-1 shadow-lg"
+                    : "text-n-3 hover:text-n-1 hover:bg-n-7/80 hover:shadow-md hover:scale-[1.02]"
+                } ${collapsed ? "justify-center" : ""}`}
               >
                 {/* Cool active indicator line */}
                 {isActive && (
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-color-1 to-color-2 rounded-r-full shadow-lg animate-pulse" />
                 )}
-                
+
                 {/* Background highlight for active state */}
                 {isActive && (
                   <div className="absolute inset-0 bg-gradient-to-r from-color-1/5 to-color-2/5 rounded-xl" />
                 )}
-                
-                <div className={`flex items-center justify-center relative z-10 ${
-                  isActive ? 'text-color-1' : 'text-n-3 group-hover:text-color-1'
-                } transition-all duration-300 ${collapsed ? 'w-6 h-6' : ''} ${isActive ? 'ml-2' : ''}`}>
-                  <Icon size={collapsed ? 20 : 18} strokeWidth={isActive ? 2.5 : 2} />
+
+                <div
+                  className={`flex items-center justify-center relative z-10 ${
+                    isActive
+                      ? "text-color-1"
+                      : "text-n-3 group-hover:text-color-1"
+                  } transition-all duration-300 ${collapsed ? "w-6 h-6" : ""} ${
+                    isActive ? "ml-2" : ""
+                  }`}
+                >
+                  <Icon
+                    size={collapsed ? 20 : 18}
+                    strokeWidth={isActive ? 2.5 : 2}
+                  />
                 </div>
                 {!collapsed && (
-                  <span className="font-medium text-sm transition-all duration-300 relative z-10">{item.label}</span>
+                  <span className="font-medium text-sm transition-all duration-300 relative z-10">
+                    {item.label}
+                  </span>
                 )}
                 {isActive && !collapsed && (
                   <>
@@ -232,7 +375,7 @@ const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles 
                   </>
                 )}
               </Link>
-              
+
               {/* Tooltip for collapsed state */}
               {collapsed && (
                 <>
@@ -256,20 +399,27 @@ const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles 
         <div className="px-4 py-3 border-t border-n-6/50">
           {!collapsed ? (
             <div>
-              <h3 className="text-n-4 text-xs font-semibold uppercase tracking-wider mb-3">Other Roles</h3>
+              <h3 className="text-n-4 text-xs font-semibold uppercase tracking-wider mb-3">
+                Other Roles
+              </h3>
               <div className="space-y-1">
-                {userRoles.filter(role => role !== userRole).slice(0, 3).map((role) => (
-                  <Link
-                    key={role}
-                    to={`/${role}`}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-n-3 hover:text-n-1 hover:bg-n-7/50 transition-all duration-300 group"
-                  >
-                    <div className="w-6 h-6 bg-gradient-to-r from-color-1/50 to-color-2/50 rounded-md flex items-center justify-center">
-                      <span className="text-white font-bold text-xs">{role.charAt(0).toUpperCase()}</span>
-                    </div>
-                    <span className="text-sm capitalize">{role}</span>
-                  </Link>
-                ))}
+                {userRoles
+                  .filter((role) => role !== userRole)
+                  .slice(0, 3)
+                  .map((role) => (
+                    <Link
+                      key={role}
+                      to={`/${role}`}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-n-3 hover:text-n-1 hover:bg-n-7/50 transition-all duration-300 group"
+                    >
+                      <div className="w-6 h-6 bg-gradient-to-r from-color-1/50 to-color-2/50 rounded-md flex items-center justify-center">
+                        <span className="text-white font-bold text-xs">
+                          {role.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <span className="text-sm capitalize">{role}</span>
+                    </Link>
+                  ))}
                 {userRoles.length > 4 && (
                   <Link
                     to="/multirole"
@@ -285,16 +435,21 @@ const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles 
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
-              {userRoles.filter(role => role !== userRole).slice(0, 2).map((role) => (
-                <Link
-                  key={role}
-                  to={`/${role}`}
-                  className="w-8 h-8 bg-gradient-to-r from-color-1/30 to-color-2/30 rounded-lg flex items-center justify-center hover:scale-110 transition-all duration-300 group"
-                  title={`Switch to ${role}`}
-                >
-                  <span className="text-white font-bold text-xs">{role.charAt(0).toUpperCase()}</span>
-                </Link>
-              ))}
+              {userRoles
+                .filter((role) => role !== userRole)
+                .slice(0, 2)
+                .map((role) => (
+                  <Link
+                    key={role}
+                    to={`/${role}`}
+                    className="w-8 h-8 bg-gradient-to-r from-color-1/30 to-color-2/30 rounded-lg flex items-center justify-center hover:scale-110 transition-all duration-300 group"
+                    title={`Switch to ${role}`}
+                  >
+                    <span className="text-white font-bold text-xs">
+                      {role.charAt(0).toUpperCase()}
+                    </span>
+                  </Link>
+                ))}
               {userRoles.length > 3 && (
                 <Link
                   to="/multirole"
@@ -311,25 +466,46 @@ const Sidebar = ({ userRole = "student", collapsed = false, onToggle, userRoles 
 
       {/* User Info & Logout */}
       <div className="p-4 border-t border-n-6 flex-shrink-0">
-        <div className={`flex items-center gap-3 mb-3 ${collapsed ? 'justify-center' : ''}`}>
+        <div
+          className={`flex items-center gap-3 mb-3 ${
+            collapsed ? "justify-center" : ""
+          }`}
+        >
           <div className="w-8 h-8 bg-gradient-to-r from-color-1 to-color-2 rounded-full flex items-center justify-center shadow-lg">
             <User size={16} className="text-white" />
           </div>
-          {!collapsed && (
+          {!collapsed && user && (
             <div className="flex-1 min-w-0">
-              <p className="text-n-1 font-medium text-sm truncate">John Doe</p>
-              <p className="text-n-4 text-xs truncate">john@example.com</p>
+              <p className="text-n-1 font-medium text-sm truncate">
+                {user.first_name || user.username || user.name || "Admin"}
+              </p>
+              <p className="text-n-4 text-xs truncate">
+                {user.email || "admin@email.com"}
+              </p>
+              <p className="text-n-4 text-xs truncate mt-1">
+                Role:{" "}
+                <span className="font-semibold">
+                  {user.role || (user.roles ? user.roles.join(", ") : "admin")}
+                </span>
+              </p>
             </div>
           )}
         </div>
-        
-        <button 
+
+        <button
           className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-n-4 hover:text-red-400 hover:bg-red-500/10 transition-all duration-300 group ${
-            collapsed ? 'justify-center' : ''
+            collapsed ? "justify-center" : ""
           }`}
-          title={collapsed ? 'Logout' : ''}
+          title={collapsed ? "Logout" : ""}
+          onClick={async () => {
+            await logout();
+            window.location.href = "/";
+          }}
         >
-          <LogOut size={16} className="group-hover:scale-110 transition-transform duration-300" />
+          <LogOut
+            size={16}
+            className="group-hover:scale-110 transition-transform duration-300"
+          />
           {!collapsed && <span className="text-sm font-medium">Logout</span>}
         </button>
       </div>
