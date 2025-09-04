@@ -37,7 +37,7 @@ const OnlineStatusIndicator = () => {
   return (
     <>
       {/* Status indicator dot */}
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed bottom-4 left-4 z-50">
         <div className="flex items-center gap-2 bg-n-8/90 backdrop-blur-sm border border-n-6 rounded-full px-3 py-2 shadow-lg">
           <div
             className={`w-2 h-2 rounded-full ${
@@ -52,7 +52,7 @@ const OnlineStatusIndicator = () => {
 
       {/* Toast notification */}
       {showToast && (
-        <div className="fixed top-16 right-4 z-50 animate-slideInRight">
+        <div className="fixed bottom-16 left-4 z-50 animate-slideInRight">
           <div
             className={`bg-n-8 border rounded-xl p-4 shadow-2xl backdrop-blur-sm ${
               isOnline ? "border-green-500/50" : "border-red-500/50"

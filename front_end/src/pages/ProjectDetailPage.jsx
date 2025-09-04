@@ -94,7 +94,7 @@ const ProjectDetailPage = () => {
   };
 
   const handleNewProject = () => {
-    navigate("/project-request/new", {
+    navigate("/project-request", {
       state: {
         userType: selectedUserType,
         requestType: "new",

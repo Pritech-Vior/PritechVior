@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import authService from "../services/authService";
 import {
   Plus,
   Search,
@@ -20,6 +21,8 @@ import {
   ArrowRight,
   CheckCircle2,
   Loader2,
+  X,
+  Send,
 } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -39,6 +42,7 @@ const ProjectRequestPage = () => {
   // Backend data state
   const [projectTemplates, setProjectTemplates] = useState([]);
   const [projectCategories, setProjectCategories] = useState([]);
+  const [courseCategories, setCourseCategories] = useState([]);
   const [servicePackages, setServicePackages] = useState({
     student: [],
     business: [],
@@ -46,42 +50,77 @@ const ProjectRequestPage = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  // Load data from backend
+  // Form state for new project requests
+  const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    requirements: "",
+    budget_range: "",
+    preferred_deadline: "",
+    contact_email: "",
+    contact_phone: "",
+    client_notes: "",
+    // Student-specific fields
+    course_category: "",
+    academic_level: "",
+    institution: "",
+  });
+
+  // Remove mandatory authentication
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-
-        // Load project templates from ProjectTemplate model
-        const templatesResponse = await projectsService.getProjectTemplates();
-
-        // Ensure we have an array
-        if (Array.isArray(templatesResponse)) {
-          setProjectTemplates(templatesResponse);
-        } else if (
-          templatesResponse?.results &&
-          Array.isArray(templatesResponse.results)
-        ) {
-          // Handle paginated response
-          setProjectTemplates(templatesResponse.results);
-        } else {
-          setProjectTemplates([]);
-        }
-
-        // Load categories (use backend data or fallback to defaults)
+    // Only fetch backend data if authenticated, but do not redirect
+    if (authService.isAuthenticated()) {
+      const loadData = async () => {
         try {
-          const categoriesResponse = await projectsService.getCategories();
+          setLoading(true);
+
+          // Load project templates from ProjectTemplate model
+          const templatesResponse = await projectsService.getProjectTemplates();
 
           // Ensure we have an array
-          if (Array.isArray(categoriesResponse)) {
-            setProjectCategories(categoriesResponse);
+          if (Array.isArray(templatesResponse)) {
+            setProjectTemplates(templatesResponse);
           } else if (
-            categoriesResponse?.results &&
-            Array.isArray(categoriesResponse.results)
+            templatesResponse?.results &&
+            Array.isArray(templatesResponse.results)
           ) {
             // Handle paginated response
-            setProjectCategories(categoriesResponse.results);
+            setProjectTemplates(templatesResponse.results);
           } else {
+            setProjectTemplates([]);
+          }
+
+          // Load categories (use backend data or fallback to defaults)
+          try {
+            const categoriesResponse = await projectsService.getCategories();
+
+            // Ensure we have an array
+            if (Array.isArray(categoriesResponse)) {
+              setProjectCategories(categoriesResponse);
+            } else if (
+              categoriesResponse?.results &&
+              Array.isArray(categoriesResponse.results)
+            ) {
+              // Handle paginated response
+              setProjectCategories(categoriesResponse.results);
+            } else {
+              // Fallback categories if API doesn't exist yet
+              setProjectCategories([
+                { id: 1, name: "Web Development" },
+                { id: 2, name: "Mobile Development" },
+                { id: 3, name: "Desktop Applications" },
+                { id: 4, name: "Database Systems" },
+                { id: 5, name: "E-Commerce" },
+                { id: 6, name: "E-Learning" },
+                { id: 7, name: "Management Systems" },
+                { id: 8, name: "UI/UX Design" },
+                { id: 9, name: "Final Year Projects" },
+                { id: 10, name: "Mini Projects" },
+              ]);
+            }
+          } catch (error) {
             // Fallback categories if API doesn't exist yet
             setProjectCategories([
               { id: 1, name: "Web Development" },
@@ -96,99 +135,110 @@ const ProjectRequestPage = () => {
               { id: 10, name: "Mini Projects" },
             ]);
           }
-        } catch (error) {
-          // Fallback categories if API doesn't exist yet
-          setProjectCategories([
-            { id: 1, name: "Web Development" },
-            { id: 2, name: "Mobile Development" },
-            { id: 3, name: "Desktop Applications" },
-            { id: 4, name: "Database Systems" },
-            { id: 5, name: "E-Commerce" },
-            { id: 6, name: "E-Learning" },
-            { id: 7, name: "Management Systems" },
-            { id: 8, name: "UI/UX Design" },
-            { id: 9, name: "Final Year Projects" },
-            { id: 10, name: "Mini Projects" },
-          ]);
-        }
 
-        // Load service packages from backend
-        try {
-          const servicePackagesResponse =
-            await projectsService.getServicePackages();
+          // Load course categories from backend
+          try {
+            const courseCategoriesResponse =
+              await projectsService.getCourseCategories();
 
-          // Group by user type
-          const groupedPackages = {
-            student: [],
-            business: [],
-            enterprise: [],
-          };
-
-          // Handle paginated response or direct array
-          const servicePackagesArray = Array.isArray(servicePackagesResponse)
-            ? servicePackagesResponse
-            : servicePackagesResponse?.results || [];
-
-          if (Array.isArray(servicePackagesArray)) {
-            servicePackagesArray.forEach((pkg) => {
-              const userType = pkg.user_type?.toLowerCase() || "student";
-
-              if (userType === "student") {
-                groupedPackages.student.push({
-                  id: pkg.id,
-                  name: pkg.name,
-                  description: pkg.description,
-                  price: `TSH ${parseFloat(pkg.price).toLocaleString()}`,
-                  features: pkg.features || [],
-                  isPopular: pkg.is_popular || false,
-                });
-              } else if (
-                userType === "business" ||
-                userType === "individual client"
-              ) {
-                groupedPackages.business.push({
-                  id: pkg.id,
-                  name: pkg.name,
-                  description: pkg.description,
-                  price: `TSH ${parseFloat(pkg.price).toLocaleString()}`,
-                  features: pkg.features || [],
-                  isPopular: pkg.is_popular || false,
-                });
-              } else if (userType === "enterprise") {
-                groupedPackages.enterprise.push({
-                  id: pkg.id,
-                  name: pkg.name,
-                  description: pkg.description,
-                  price: `TSH ${parseFloat(pkg.price).toLocaleString()}`,
-                  features: pkg.features || [],
-                  isPopular: pkg.is_popular || false,
-                });
-              }
-            });
+            // Ensure we have an array
+            if (Array.isArray(courseCategoriesResponse)) {
+              setCourseCategories(courseCategoriesResponse);
+            } else if (
+              courseCategoriesResponse?.results &&
+              Array.isArray(courseCategoriesResponse.results)
+            ) {
+              // Handle paginated response
+              setCourseCategories(courseCategoriesResponse.results);
+            } else {
+              setCourseCategories([]);
+              toast.error("No course categories found from backend.");
+            }
+          } catch (error) {
+            console.error("Error loading course categories:", error);
+            setCourseCategories([]);
+            toast.error("Failed to load course categories from backend.");
           }
 
-          setServicePackages(groupedPackages);
-        } catch (error) {
-          console.error("Error loading service packages:", error);
-          // Use empty arrays instead of fallback data to see the real issue
-          setServicePackages({
-            student: [],
-            business: [],
-            enterprise: [],
-          });
-        }
-      } catch (error) {
-        console.error("Error loading data:", error);
-        toast.error("Failed to load project data");
-        // Fallback to empty arrays
-        setProjectTemplates([]);
-        setProjectCategories([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+          // Load service packages from backend
+          try {
+            const servicePackagesResponse =
+              await projectsService.getServicePackages();
 
-    loadData();
+            // Group by user type
+            const groupedPackages = {
+              student: [],
+              business: [],
+              enterprise: [],
+            };
+
+            // Handle paginated response or direct array
+            const servicePackagesArray = Array.isArray(servicePackagesResponse)
+              ? servicePackagesResponse
+              : servicePackagesResponse?.results || [];
+
+            if (Array.isArray(servicePackagesArray)) {
+              servicePackagesArray.forEach((pkg) => {
+                const userType = pkg.user_type?.toLowerCase() || "student";
+
+                if (userType === "student") {
+                  groupedPackages.student.push({
+                    id: pkg.id,
+                    name: pkg.name,
+                    description: pkg.description,
+                    price: `TSH ${parseFloat(pkg.price).toLocaleString()}`,
+                    features: pkg.features || [],
+                    isPopular: pkg.is_popular || false,
+                  });
+                } else if (
+                  userType === "business" ||
+                  userType === "individual client"
+                ) {
+                  groupedPackages.business.push({
+                    id: pkg.id,
+                    name: pkg.name,
+                    description: pkg.description,
+                    price: `TSH ${parseFloat(pkg.price).toLocaleString()}`,
+                    features: pkg.features || [],
+                    isPopular: pkg.is_popular || false,
+                  });
+                } else if (userType === "enterprise") {
+                  groupedPackages.enterprise.push({
+                    id: pkg.id,
+                    name: pkg.name,
+                    description: pkg.description,
+                    price: `TSH ${parseFloat(pkg.price).toLocaleString()}`,
+                    features: pkg.features || [],
+                    isPopular: pkg.is_popular || false,
+                  });
+                }
+              });
+            }
+
+            setServicePackages(groupedPackages);
+          } catch (error) {
+            console.error("Error loading service packages:", error);
+            // Use empty arrays instead of fallback data to see the real issue
+            setServicePackages({
+              student: [],
+              business: [],
+              enterprise: [],
+            });
+          }
+        } catch (error) {
+          console.error("Error loading data:", error);
+          toast.error("Failed to load project data");
+          // Fallback to empty arrays
+          setProjectTemplates([]);
+          setProjectCategories([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      loadData();
+    }
+    // If not authenticated, still allow access and show form
   }, []);
 
   useEffect(() => {
@@ -243,12 +293,86 @@ const ProjectRequestPage = () => {
   };
 
   const handleNewProjectRequest = () => {
-    navigate("/project-request/new", {
-      state: {
-        userType,
-        requestType: "new",
-      },
-    });
+    setShowForm(true);
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      // Prepare data for backend API (do not submit yet)
+      // Find IDs for select fields
+      const selectedCourseCategory = courseCategories.find(
+        (cat) =>
+          cat.id?.toString() === formData.course_category?.toString() ||
+          cat.name === formData.course_category
+      );
+      const selectedServicePackage = [
+        ...(servicePackages.student || []),
+        ...(servicePackages.business || []),
+        ...(servicePackages.enterprise || []),
+      ].find(
+        (pkg) =>
+          pkg.id?.toString() === formData.service_package?.toString() ||
+          pkg.name === formData.service_package
+      );
+      const selectedTemplate = projectTemplates.find(
+        (tpl) =>
+          tpl.id?.toString() === formData.template?.toString() ||
+          tpl.name === formData.template
+      );
+      // preferred_technologies should be array of IDs
+      const preferredTechIds = Array.isArray(formData.preferred_technologies)
+        ? formData.preferred_technologies.map((tech) =>
+            typeof tech === "object" && tech.id ? tech.id : tech
+          )
+        : [];
+
+      const payload = {
+        title: formData.title,
+        description: formData.description,
+        requirements: formData.requirements || "",
+        request_type: "new",
+        user_type: userType,
+        budget_range: formData.budget_range || "",
+        preferred_deadline: formData.preferred_deadline || null,
+        timeline_flexibility: formData.timeline_flexibility || "flexible",
+        contact_phone: formData.contact_phone || "",
+        contact_email: formData.contact_email || "",
+        client_notes: formData.client_notes || "",
+        course_category: selectedCourseCategory
+          ? selectedCourseCategory.id
+          : null,
+        academic_level: formData.academic_level || "",
+        institution: formData.institution || "",
+        template: selectedTemplate ? selectedTemplate.id : null,
+        customizations: formData.customizations || "",
+        preferred_technologies: preferredTechIds,
+        technology_notes: formData.technology_notes || "",
+        features_required: formData.features_required || "",
+        additional_features: formData.additional_features || "",
+        service_package: selectedServicePackage
+          ? selectedServicePackage.id
+          : null,
+      };
+
+      // Instead of submitting, navigate to confirmation page for review
+      navigate("/project-request/confirmation", {
+        state: {
+          formData: payload,
+          userType: userType,
+        },
+      });
+    } catch (error) {
+      console.error("Form error:", error);
+      toast.error(error.message || "Failed to prepare project request.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const getUserTypeColor = (type) => {
@@ -700,6 +824,287 @@ const ProjectRequestPage = () => {
           )}
         </div>
       </Section>
+
+      {/* Project Request Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-n-8 rounded-2xl border border-n-6 p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-n-1">
+                New Project Request
+              </h2>
+              <button
+                onClick={() => setShowForm(false)}
+                className="p-2 hover:bg-n-7 rounded-lg transition-colors"
+              >
+                <X className="w-6 h-6 text-n-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleFormSubmit} className="space-y-6">
+              {/* Project Title */}
+              <div>
+                <label className="block text-sm font-medium text-n-2 mb-2">
+                  Project Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.title}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
+                  className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none"
+                  placeholder="Enter your project title"
+                />
+              </div>
+
+              {/* Project Description */}
+              <div>
+                <label className="block text-sm font-medium text-n-2 mb-2">
+                  Project Description *
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={formData.description}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
+                  className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none resize-none"
+                  placeholder="Describe what you want to build..."
+                />
+              </div>
+
+              {/* Student-specific fields */}
+              {userType === "student" && (
+                <>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-n-2 mb-2">
+                        Course Category
+                      </label>
+                      <select
+                        value={formData.course_category}
+                        onChange={(e) =>
+                          handleInputChange("course_category", e.target.value)
+                        }
+                        className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 focus:border-color-1 focus:outline-none"
+                      >
+                        <option value="">Select course category</option>
+                        {Array.isArray(courseCategories) &&
+                        courseCategories.length > 0
+                          ? courseCategories.map((category) => (
+                              <option
+                                key={category.id || category.name || category}
+                                value={category.name || category}
+                              >
+                                {category.name || category}
+                              </option>
+                            ))
+                          : null}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-n-2 mb-2">
+                        Academic Level
+                      </label>
+                      <select
+                        value={formData.academic_level}
+                        onChange={(e) =>
+                          handleInputChange("academic_level", e.target.value)
+                        }
+                        className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 focus:border-color-1 focus:outline-none"
+                      >
+                        <option value="">Select academic level</option>
+                        <option value="diploma">Diploma</option>
+                        <option value="undergraduate">Undergraduate</option>
+                        <option value="graduate">Graduate</option>
+                        <option value="phd">PhD</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-n-2 mb-2">
+                      Institution
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.institution}
+                      onChange={(e) =>
+                        handleInputChange("institution", e.target.value)
+                      }
+                      className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none"
+                      placeholder="University of Dar es Salaam, UDSM, etc."
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Requirements */}
+              <div>
+                <label className="block text-sm font-medium text-n-2 mb-2">
+                  Specific Requirements
+                </label>
+                <textarea
+                  rows={3}
+                  value={formData.requirements}
+                  onChange={(e) =>
+                    handleInputChange("requirements", e.target.value)
+                  }
+                  className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none resize-none"
+                  placeholder="Any specific technical requirements or constraints..."
+                />
+              </div>
+
+              {/* Budget Range */}
+              <div>
+                <label className="block text-sm font-medium text-n-2 mb-2">
+                  Budget Range
+                </label>
+                <select
+                  value={formData.budget_range}
+                  onChange={(e) =>
+                    handleInputChange("budget_range", e.target.value)
+                  }
+                  className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 focus:border-color-1 focus:outline-none"
+                >
+                  <option value="">Select budget range</option>
+                  <option value="TSH 50,000 - TSH 100,000">
+                    TSH 50,000 - TSH 100,000
+                  </option>
+                  <option value="TSH 100,000 - TSH 200,000">
+                    TSH 100,000 - TSH 200,000
+                  </option>
+                  <option value="TSH 200,000 - TSH 300,000">
+                    TSH 200,000 - TSH 300,000
+                  </option>
+                  <option value="TSH 300,000 - TSH 400,000">
+                    TSH 300,000 - TSH 400,000
+                  </option>
+                  <option value="TSH 400,000 - TSH 500,000">
+                    TSH 400,000 - TSH 500,000
+                  </option>
+                  <option value="Over TSH 500,000">Over TSH 500,000</option>
+                </select>
+              </div>
+
+              {/* Preferred Deadline */}
+              <div>
+                <label className="block text-sm font-medium text-n-2 mb-2">
+                  Preferred Deadline
+                </label>
+                <input
+                  type="date"
+                  value={formData.preferred_deadline}
+                  onChange={(e) =>
+                    handleInputChange("preferred_deadline", e.target.value)
+                  }
+                  className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 focus:border-color-1 focus:outline-none"
+                />
+              </div>
+
+              {/* Contact Information */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-n-2 mb-2">
+                    Contact Email
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.contact_email}
+                    onChange={(e) =>
+                      handleInputChange("contact_email", e.target.value)
+                    }
+                    className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none"
+                    placeholder="your.email@example.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-n-2 mb-2">
+                    Contact Phone
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.contact_phone}
+                    onChange={(e) =>
+                      handleInputChange("contact_phone", e.target.value)
+                    }
+                    className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none"
+                    placeholder="+255 XXX XXX XXX"
+                  />
+                </div>
+              </div>
+
+              {/* Additional Notes */}
+              <div>
+                <label className="block text-sm font-medium text-n-2 mb-2">
+                  Additional Notes
+                </label>
+                <textarea
+                  rows={3}
+                  value={formData.client_notes}
+                  onChange={(e) =>
+                    handleInputChange("client_notes", e.target.value)
+                  }
+                  className="w-full px-4 py-3 bg-n-7 border border-n-6 rounded-lg text-n-1 placeholder-n-4 focus:border-color-1 focus:outline-none resize-none"
+                  placeholder="Any additional information or questions..."
+                />
+              </div>
+
+              {/* User Type Display */}
+              <div className="bg-n-7 rounded-lg p-4 border border-n-6">
+                <div className="flex items-center">
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${getUserTypeColor(
+                      userType
+                    )}`}
+                  >
+                    {userType.charAt(0).toUpperCase() + userType.slice(1)}{" "}
+                    Project
+                  </span>
+                  <span className="ml-3 text-n-4 text-sm">
+                    {userType === "student" &&
+                      "Student pricing will be applied"}
+                    {userType === "client" && "Individual client rates"}
+                    {userType === "business" && "Enterprise pricing"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex gap-4 pt-4">
+                <SimpleButton
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  variant="secondary"
+                  className="flex-1"
+                >
+                  Cancel
+                </SimpleButton>
+                <SimpleButton
+                  type="submit"
+                  disabled={submitting}
+                  className="bg-color-1 hover:bg-color-1/90 min-w-[150px]"
+                >
+                  {submitting ? (
+                    <div className="flex items-center">
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Preparing...
+                    </div>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Review & Confirm
+                    </>
+                  )}
+                </SimpleButton>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </>
   );

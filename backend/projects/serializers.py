@@ -174,10 +174,10 @@ class ProjectRequestCreateSerializer(serializers.ModelSerializer):
         queryset=CourseCategory.objects.filter(is_active=True), required=False
     )
     template = serializers.PrimaryKeyRelatedField(
-        queryset=ProjectTemplate.objects.filter(status='active'), required=False
+        queryset=ProjectTemplate.objects.filter(status='active'), required=False, allow_null=True
     )
     service_package = serializers.PrimaryKeyRelatedField(
-        queryset=ServicePackage.objects.filter(is_active=True), required=False
+        queryset=ServicePackage.objects.filter(is_active=True), required=False, allow_null=True
     )
     
     class Meta:

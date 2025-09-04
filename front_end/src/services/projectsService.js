@@ -23,6 +23,12 @@ class ProjectsService {
     try {
       const response = await fetch(url, config);
 
+      if (response.status === 401) {
+        toast.error("Unauthorized: Please login to access this resource.");
+        // Do not redirect, just show error
+        throw new Error("Unauthorized");
+      }
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
@@ -33,9 +39,11 @@ class ProjectsService {
       return await response.json();
     } catch (error) {
       console.error(`API request failed: ${endpoint}`, error);
-      toast.error(
-        error.message || "An error occurred while processing your request"
-      );
+      if (error.message !== "Unauthorized") {
+        toast.error(
+          error.message || "An error occurred while processing your request"
+        );
+      }
       throw error;
     }
   }
@@ -106,6 +114,9 @@ class ProjectsService {
   async createProjectRequest(data) {
     return this.request("/api/projects/requests/", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(data),
     });
   }

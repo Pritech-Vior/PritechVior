@@ -25,7 +25,6 @@ import ScholarPage from "./pages/ScholarPage";
 import ContactPage from "./pages/ContactPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProjectRequestPage from "./pages/ProjectRequestPage";
-import NewProjectRequestPage from "./pages/NewProjectRequestPage";
 import ProjectCustomizationPage from "./pages/ProjectCustomizationPage";
 import ProjectConfirmationPage from "./pages/ProjectConfirmationPage";
 import ProjectDetailPage from "./pages/ProjectDetailPage";
@@ -86,10 +85,6 @@ const App = () => {
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/project/:slug" element={<ProjectDetailPage />} />
             <Route path="/project-request" element={<ProjectRequestPage />} />
-            <Route
-              path="/project-request/new"
-              element={<NewProjectRequestPage />}
-            />
             <Route
               path="/project-request/customize"
               element={<ProjectCustomizationPage />}

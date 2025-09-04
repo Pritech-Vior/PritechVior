@@ -2,13 +2,7 @@ import React from "react";
 import Section from "./Section";
 import Heading from "./Heading";
 import Button from "./Button";
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Clock,
-  Send
-} from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
 
 const Contact = () => {
   return (
@@ -25,7 +19,7 @@ const Contact = () => {
           <div className="space-y-8">
             <div>
               <h4 className="h4 mb-6 text-n-1">Contact Information</h4>
-              
+
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-n-6 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -34,7 +28,8 @@ const Contact = () => {
                   <div>
                     <h6 className="h6 text-n-1 mb-1">Address</h6>
                     <p className="body-2 text-n-4">
-                      Mbeya, Tanzania<br />
+                      Mbeya, Tanzania
+                      <br />
                       Southern Highlands Technology Hub
                     </p>
                   </div>
@@ -47,6 +42,7 @@ const Contact = () => {
                   <div>
                     <h6 className="h6 text-n-1 mb-1">Phone</h6>
                     <p className="body-2 text-n-4">+255 627147681</p>
+                    <p className="body-2 text-n-4">+255 752747681</p>
                   </div>
                 </div>
 
@@ -67,7 +63,8 @@ const Contact = () => {
                   <div>
                     <h6 className="h6 text-n-1 mb-1">Working Hours</h6>
                     <p className="body-2 text-n-4">
-                      Mon - Fri: 8:00 AM - 6:00 PM<br />
+                      Mon - Fri: 8:00 AM - 6:00 PM
+                      <br />
                       Sat: 9:00 AM - 2:00 PM
                     </p>
                   </div>
@@ -79,7 +76,7 @@ const Contact = () => {
           {/* Contact Form */}
           <div className="bg-n-7 rounded-3xl p-8">
             <h4 className="h4 mb-6 text-n-1">Send us a Message</h4>
-            
+
             <form className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -126,7 +123,10 @@ const Contact = () => {
                 ></textarea>
               </div>
 
-              <Button className="w-full flex items-center justify-center gap-2" white>
+              <Button
+                className="w-full flex items-center justify-center gap-2"
+                white
+              >
                 <Send size={16} />
                 Send Message
               </Button>

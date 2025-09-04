@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -29,17 +30,30 @@ const ProjectConfirmationPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user } = useAuth();
-  const { formData, requestData, isCustomization, estimatedCost, userType } =
-    location.state || {};
+  const {
+    formData,
+    requestId,
+    requestData,
+    isCustomization,
+    estimatedCost,
+    userType,
+  } = location.state || {};
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [referenceNumber, setReferenceNumber] = useState("");
+  const [projectRequest, setProjectRequest] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!formData && !requestData) {
+    if (!formData && !requestData && !requestId) {
       navigate("/project-request");
       return;
+    }
+
+    // If we have a requestId, fetch the project request details from backend
+    if (requestId && !projectRequest) {
+      fetchProjectRequest();
     }
 
     // Check if user is authenticated for submitting requests
@@ -48,20 +62,78 @@ const ProjectConfirmationPage = () => {
       console.log("User not authenticated, will require login for submission");
     }
 
-    // Generate reference number
-    const ref = `PV-${userType?.toUpperCase()}-${Date.now()
-      .toString()
-      .slice(-6)}`;
+    // Generate reference number based on request ID or timestamp
+    const ref = requestId
+      ? `PV-${requestId.toString().padStart(6, "0")}`
+      : `PV-${(userType || "REQ")?.toUpperCase()}-${Date.now()
+          .toString()
+          .slice(-6)}`;
     setReferenceNumber(ref);
 
     document.title = "Project Request Confirmation - PRITECH VIOR";
-  }, [formData, requestData, navigate, userType, isAuthenticated]);
+  }, [
+    formData,
+    requestData,
+    requestId,
+    navigate,
+    userType,
+    isAuthenticated,
+    projectRequest,
+  ]);
 
-  const data = isCustomization
-    ? requestData
-    : { formData, estimatedCost, userType };
+  const fetchProjectRequest = async () => {
+    setLoading(true);
+    try {
+      const response = await projectsService.getProjectRequest(requestId);
+      setProjectRequest(response);
+
+      // If we successfully fetched the request, mark as submitted
+      if (response.id) {
+        setIsSubmitted(true);
+      }
+    } catch (error) {
+      console.error("Failed to fetch project request:", error);
+      // If we can't fetch the request, redirect back to form
+      navigate("/project-request");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Determine the data source based on what's available
+  const data =
+    projectRequest ||
+    (isCustomization ? requestData : { formData, estimatedCost, userType });
   const projectInfo = isCustomization ? data.baseProject : null;
-  const finalFormData = isCustomization ? data.customizations : data.formData;
+  const finalFormData = projectRequest
+    ? {
+        projectTitle: projectRequest.title,
+        projectDescription: projectRequest.description,
+        contactEmail: projectRequest.contact_email,
+        contactPhone: projectRequest.contact_phone,
+        selectedTechStack: projectRequest.technology_notes,
+        coreFeatures: projectRequest.features_required || [],
+        additionalFeatures: projectRequest.additional_features
+          ? projectRequest.additional_features.split(", ")
+          : [],
+        budget: projectRequest.budget_range,
+        preferredDeadline: projectRequest.preferred_deadline,
+        timelineFlexibility: projectRequest.timeline_flexibility,
+        additionalNotes: projectRequest.client_notes,
+        userType: projectRequest.user_type,
+        requestType: projectRequest.request_type,
+        academicLevel: projectRequest.academic_level,
+        institution: projectRequest.institution,
+        requirements: projectRequest.requirements,
+      }
+    : isCustomization
+    ? data.customizations
+    : formData;
+
+  // Calculate estimated cost for display
+  const baseEstimate = 50000; // Base cost in TSH
+  const studentDiscount = userType === "student" ? 0.25 : 0;
+  const finalEstimate = baseEstimate * (1 - studentDiscount);
 
   const handleSubmit = async () => {
     // Check authentication before submitting
@@ -83,18 +155,38 @@ const ProjectConfirmationPage = () => {
       return;
     }
 
+    // Validate required fields
+    const title =
+      finalFormData?.title ||
+      finalFormData?.projectTitle ||
+      projectInfo?.title ||
+      "";
+    const description =
+      finalFormData?.description ||
+      finalFormData?.projectDescription ||
+      finalFormData?.customDescription ||
+      projectInfo?.description ||
+      "";
+
+    if (!title.trim()) {
+      alert("Project Title is required. Please go back and enter a title.");
+      return;
+    }
+    if (!description.trim()) {
+      alert(
+        "Project Description is required. Please go back and enter a description."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       // Prepare data for backend API
       const submissionData = {
         // Basic Information
-        title: finalFormData?.projectTitle || projectInfo?.title,
-        description:
-          finalFormData?.customDescription ||
-          finalFormData?.projectDescription ||
-          projectInfo?.description ||
-          "",
+        title,
+        description,
         requirements: finalFormData?.additionalRequirements || "",
 
         // Request Details
@@ -196,63 +288,250 @@ const ProjectConfirmationPage = () => {
     return `TSH ${amount?.toLocaleString() || "0"}`;
   };
 
+  // Confirmation page UI
   if (isSubmitted) {
     return (
       <>
         <Header />
-        <Section className="pt-[4.75rem] lg:pt-[5.25rem]">
+        <Section className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
           <div className="container relative z-1">
-            <div className="max-w-3xl mx-auto text-center">
-              <div className="w-20 h-20 bg-green-400/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle2 className="w-12 h-12 text-green-400" />
+            <div className="max-w-[50rem] mx-auto mb-12 text-center">
+              <div className="flex items-center justify-center mb-4">
+                {React.createElement(getUserTypeIcon(), {
+                  className: "w-8 h-8 text-color-1 mr-3",
+                })}
+                <Heading
+                  className="md:max-w-md lg:max-w-2xl"
+                  title="Confirm Your Project Request"
+                />
               </div>
-
-              <h2 className="h2 mb-4">Request Submitted Successfully!</h2>
-              <p className="body-1 text-n-4 mb-8">
-                Your project request has been received and is being reviewed by
-                our team.
+              <p className="body-1 max-w-3xl mx-auto text-n-2">
+                Please review your project details before submitting your
+                request
               </p>
-
-              <div className="bg-n-7 rounded-xl border border-n-6 p-6 mb-8">
-                <h3 className="h5 mb-4">Reference Number</h3>
-                <div className="bg-n-8 rounded-lg p-4 mb-4">
-                  <span className="text-2xl font-mono font-bold text-color-1">
-                    {referenceNumber}
-                  </span>
+            </div>
+            <div className="max-w-4xl mx-auto">
+              <div className="grid lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-8">
+                  <div className="bg-n-7 rounded-xl border border-n-6 p-6">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="h5">Project Summary</h3>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm ${getUserTypeColor()}`}
+                      >
+                        {userType?.charAt(0).toUpperCase() + userType?.slice(1)}{" "}
+                        Project
+                      </span>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="text-sm font-medium text-n-2 mb-1">
+                          Project Title
+                        </h4>
+                        <p className="text-n-1">
+                          {finalFormData?.title ||
+                            finalFormData?.projectTitle ||
+                            projectInfo?.title ||
+                            "Untitled Project"}
+                        </p>
+                      </div>
+                      {isCustomization && (
+                        <div>
+                          <h4 className="text-sm font-medium text-n-2 mb-1">
+                            Base Template
+                          </h4>
+                          <p className="text-n-3">{projectInfo?.title}</p>
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="text-sm font-medium text-n-2 mb-1">
+                          Category
+                        </h4>
+                        <p className="text-n-1">
+                          {finalFormData?.course_category ||
+                            finalFormData?.projectCategory ||
+                            projectInfo?.category?.name ||
+                            projectInfo?.category ||
+                            "General"}
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-medium text-n-2 mb-1">
+                          Description
+                        </h4>
+                        <p className="text-n-3">
+                          {finalFormData?.description ||
+                            finalFormData?.projectDescription ||
+                            finalFormData?.customDescription ||
+                            projectInfo?.description ||
+                            "No description provided"}
+                        </p>
+                      </div>
+                      {finalFormData?.requirements && (
+                        <div>
+                          <h4 className="text-sm font-medium text-n-2 mb-1">
+                            Requirements
+                          </h4>
+                          <p className="text-n-3">
+                            {finalFormData.requirements}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {userType === "student" && (
+                    <div className="bg-n-7 rounded-xl border border-n-6 p-6">
+                      <h3 className="h5 mb-6">Academic Information</h3>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {(finalFormData?.course_category ||
+                          finalFormData?.course) && (
+                          <div>
+                            <h4 className="text-sm font-medium text-n-2 mb-1">
+                              Course Category
+                            </h4>
+                            <p className="text-n-3">
+                              {finalFormData.course_category ||
+                                finalFormData.course}
+                            </p>
+                          </div>
+                        )}
+                        {(finalFormData?.academic_level ||
+                          finalFormData?.academicLevel) && (
+                          <div>
+                            <h4 className="text-sm font-medium text-n-2 mb-1">
+                              Academic Level
+                            </h4>
+                            <p className="text-n-3 capitalize">
+                              {finalFormData.academic_level ||
+                                finalFormData.academicLevel}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      {finalFormData?.institution && (
+                        <div className="mt-4">
+                          <h4 className="text-sm font-medium text-n-2 mb-1">
+                            Institution
+                          </h4>
+                          <p className="text-n-3">
+                            {finalFormData.institution}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <p className="text-n-4 text-sm">
-                  Please save this reference number for tracking your project
-                  request.
-                </p>
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-color-1/10 to-color-2/10 rounded-xl border border-color-1/20 p-6">
+                    <h3 className="h5 mb-6 flex items-center">
+                      <DollarSign className="w-5 h-5 mr-2 text-color-1" />
+                      Cost Estimate
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-n-4">Base Cost:</span>
+                        <span className="text-n-2">
+                          {formatCurrency(
+                            isCustomization
+                              ? projectInfo?.estimatedPrice
+                              : estimatedCost
+                          )}
+                        </span>
+                      </div>
+                      {userType === "student" && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-green-400">
+                            Student Discount:
+                          </span>
+                          <span className="text-green-400">-25%</span>
+                        </div>
+                      )}
+                      <div className="border-t border-n-6 pt-3">
+                        <div className="flex justify-between font-bold">
+                          <span className="text-n-1">Total Estimate:</span>
+                          <span className="text-color-1 text-lg">
+                            {formatCurrency(estimatedCost)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 p-3 bg-n-8 rounded-lg">
+                      <p className="text-n-4 text-xs">
+                        This is a preliminary estimate. Final pricing will be
+                        provided after detailed consultation.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-n-7 rounded-xl border border-n-6 p-6">
+                    <h3 className="h6 mb-4 flex items-center">
+                      <Calendar className="w-5 h-5 mr-2 text-color-1" />
+                      Project Timeline
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-n-4">Estimated Duration:</span>
+                        <span className="text-n-2">
+                          {finalFormData?.timeline ||
+                            projectInfo?.timeline ||
+                            "To be determined"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-n-4">Priority:</span>
+                        <span className="text-n-2 capitalize">
+                          {finalFormData?.priority || "Standard"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-n-7 rounded-xl border border-n-6 p-6">
+                    <h3 className="h6 mb-4">Contact Information</h3>
+                    <div className="space-y-3">
+                      {(finalFormData?.contact_email ||
+                        finalFormData?.contactEmail) && (
+                        <div className="flex items-center text-sm">
+                          <Mail className="w-4 h-4 text-color-1 mr-2 flex-shrink-0" />
+                          <span className="text-n-3 break-all">
+                            {finalFormData.contact_email ||
+                              finalFormData.contactEmail}
+                          </span>
+                        </div>
+                      )}
+                      {(finalFormData?.contact_phone ||
+                        finalFormData?.contactPhone) && (
+                        <div className="flex items-center text-sm">
+                          <Phone className="w-4 h-4 text-color-1 mr-2 flex-shrink-0" />
+                          <span className="text-n-3">
+                            {finalFormData.contact_phone ||
+                              finalFormData.contactPhone}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
-
-              <div className="space-y-4 mb-8">
-                <div className="flex items-center justify-center text-n-3">
-                  <Mail className="w-5 h-5 mr-2" />
-                  <span>
-                    Confirmation email sent to {finalFormData?.contactEmail}
-                  </span>
-                </div>
-                <div className="flex items-center justify-center text-n-3">
-                  <Clock className="w-5 h-5 mr-2" />
-                  <span>Expected response time: 24-48 hours</span>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap justify-center gap-4">
-                <SimpleButton onClick={generatePDF} variant="secondary">
-                  <Download className="w-4 h-4 mr-2" />
-                  Download PDF
-                </SimpleButton>
-                <SimpleButton onClick={() => navigate("/")}>
+              <div className="flex justify-between items-center mt-12 pt-8 border-t border-n-6">
+                <SimpleButton onClick={() => navigate(-1)} variant="secondary">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Home
+                  Back to Edit
                 </SimpleButton>
-                <SimpleButton onClick={() => navigate("/project-request")}>
-                  New Request
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </SimpleButton>
+                <div className="flex gap-4">
+                  <SimpleButton onClick={generatePDF} variant="secondary">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Summary
+                  </SimpleButton>
+                  {/* No submit button after submission */}
+                </div>
               </div>
+              {finalFormData?.additionalNotes && (
+                <div className="bg-n-7 rounded-xl border border-n-6 p-6 mt-8">
+                  <h3 className="h6 mb-4">Additional Notes</h3>
+                  <p className="text-n-3 whitespace-pre-wrap">
+                    {finalFormData.additionalNotes}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </Section>
@@ -261,17 +540,17 @@ const ProjectConfirmationPage = () => {
     );
   }
 
-  const UserTypeIcon = getUserTypeIcon();
-
+  // Show confirmation details and allow user to submit
   return (
     <>
       <Header />
       <Section className="pt-[4.75rem] lg:pt-[5.25rem] overflow-hidden">
         <div className="container relative z-1">
-          {/* Header */}
           <div className="max-w-[50rem] mx-auto mb-12 text-center">
             <div className="flex items-center justify-center mb-4">
-              <UserTypeIcon className="w-8 h-8 text-color-1 mr-3" />
+              {React.createElement(getUserTypeIcon(), {
+                className: "w-8 h-8 text-color-1 mr-3",
+              })}
               <Heading
                 className="md:max-w-md lg:max-w-2xl"
                 title="Confirm Your Project Request"
@@ -281,12 +560,9 @@ const ProjectConfirmationPage = () => {
               Please review your project details before submitting your request
             </p>
           </div>
-
           <div className="max-w-4xl mx-auto">
             <div className="grid lg:grid-cols-3 gap-8">
-              {/* Main Content */}
               <div className="lg:col-span-2 space-y-8">
-                {/* Project Summary */}
                 <div className="bg-n-7 rounded-xl border border-n-6 p-6">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="h5">Project Summary</h3>
@@ -297,17 +573,18 @@ const ProjectConfirmationPage = () => {
                       Project
                     </span>
                   </div>
-
                   <div className="space-y-4">
                     <div>
                       <h4 className="text-sm font-medium text-n-2 mb-1">
                         Project Title
                       </h4>
                       <p className="text-n-1">
-                        {finalFormData?.projectTitle || projectInfo?.title}
+                        {finalFormData?.title ||
+                          finalFormData?.projectTitle ||
+                          projectInfo?.title ||
+                          "Untitled Project"}
                       </p>
                     </div>
-
                     {isCustomization && (
                       <div>
                         <h4 className="text-sm font-medium text-n-2 mb-1">
@@ -316,235 +593,86 @@ const ProjectConfirmationPage = () => {
                         <p className="text-n-3">{projectInfo?.title}</p>
                       </div>
                     )}
-
                     <div>
                       <h4 className="text-sm font-medium text-n-2 mb-1">
                         Category
                       </h4>
                       <p className="text-n-1">
-                        {finalFormData?.projectCategory ||
+                        {finalFormData?.course_category ||
+                          finalFormData?.projectCategory ||
                           projectInfo?.category?.name ||
-                          projectInfo?.category}
+                          projectInfo?.category ||
+                          "General"}
                       </p>
                     </div>
-
                     <div>
                       <h4 className="text-sm font-medium text-n-2 mb-1">
                         Description
                       </h4>
                       <p className="text-n-3">
-                        {finalFormData?.projectDescription ||
+                        {finalFormData?.description ||
+                          finalFormData?.projectDescription ||
                           finalFormData?.customDescription ||
-                          projectInfo?.description}
+                          projectInfo?.description ||
+                          "No description provided"}
                       </p>
                     </div>
-                  </div>
-                </div>
-
-                {/* Technical Details */}
-                <div className="bg-n-7 rounded-xl border border-n-6 p-6">
-                  <h3 className="h5 mb-6">Technical Specifications</h3>
-
-                  <div className="space-y-4">
-                    {finalFormData?.selectedTechStack && (
-                      <div>
-                        <h4 className="text-sm font-medium text-n-2 mb-2">
-                          Technology Stack
-                        </h4>
-                        <p className="text-n-3">
-                          {finalFormData.selectedTechStack}
-                        </p>
-                      </div>
-                    )}
-
-                    {(finalFormData?.customTechnologies?.length > 0 ||
-                      finalFormData?.technologyChanges?.length > 0) && (
-                      <div>
-                        <h4 className="text-sm font-medium text-n-2 mb-2">
-                          Additional Technologies
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {(
-                            finalFormData.customTechnologies ||
-                            finalFormData.technologyChanges ||
-                            []
-                          ).map((tech, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-n-6 text-n-3 rounded text-sm"
-                            >
-                              {tech?.name || tech}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {finalFormData?.databaseRequired && (
+                    {finalFormData?.requirements && (
                       <div>
                         <h4 className="text-sm font-medium text-n-2 mb-1">
-                          Database
+                          Requirements
                         </h4>
-                        <p className="text-n-3">{finalFormData.databaseType}</p>
+                        <p className="text-n-3">{finalFormData.requirements}</p>
                       </div>
                     )}
                   </div>
                 </div>
-
-                {/* Features */}
-                <div className="bg-n-7 rounded-xl border border-n-6 p-6">
-                  <h3 className="h5 mb-6">Features & Functionality</h3>
-
-                  <div className="space-y-4">
-                    {(finalFormData?.coreFeatures?.length > 0 ||
-                      projectInfo?.features) && (
-                      <div>
-                        <h4 className="text-sm font-medium text-n-2 mb-2">
-                          Core Features
-                        </h4>
-                        <div className="grid md:grid-cols-2 gap-2">
-                          {(
-                            finalFormData?.coreFeatures ||
-                            projectInfo?.features ||
-                            []
-                          ).map((feature, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center text-sm text-n-3"
-                            >
-                              <CheckCircle2 className="w-3 h-3 text-green-400 mr-2 flex-shrink-0" />
-                              {feature?.name || feature}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {finalFormData?.additionalFeatures?.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium text-n-2 mb-2">
-                          Additional Features
-                        </h4>
-                        <div className="grid md:grid-cols-2 gap-2">
-                          {finalFormData.additionalFeatures.map(
-                            (feature, index) => (
-                              <div
-                                key={index}
-                                className="flex items-center text-sm text-n-3"
-                              >
-                                <CheckCircle2 className="w-3 h-3 text-color-1 mr-2 flex-shrink-0" />
-                                {feature?.name || feature}
-                              </div>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {finalFormData?.userRoles?.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium text-n-2 mb-2">
-                          User Roles
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {finalFormData.userRoles.map((role, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-color-1/20 text-color-1 rounded text-sm"
-                            >
-                              {role?.name || role}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Academic Information (for students) */}
                 {userType === "student" && (
                   <div className="bg-n-7 rounded-xl border border-n-6 p-6">
                     <h3 className="h5 mb-6">Academic Information</h3>
-
                     <div className="grid md:grid-cols-2 gap-4">
-                      {finalFormData?.course && (
+                      {(finalFormData?.course_category ||
+                        finalFormData?.course) && (
                         <div>
                           <h4 className="text-sm font-medium text-n-2 mb-1">
-                            Course
-                          </h4>
-                          <p className="text-n-3">{finalFormData.course}</p>
-                        </div>
-                      )}
-
-                      {finalFormData?.projectType && (
-                        <div>
-                          <h4 className="text-sm font-medium text-n-2 mb-1">
-                            Project Type
+                            Course Category
                           </h4>
                           <p className="text-n-3">
-                            {finalFormData.projectType}
+                            {finalFormData.course_category ||
+                              finalFormData.course}
+                          </p>
+                        </div>
+                      )}
+                      {(finalFormData?.academic_level ||
+                        finalFormData?.academicLevel) && (
+                        <div>
+                          <h4 className="text-sm font-medium text-n-2 mb-1">
+                            Academic Level
+                          </h4>
+                          <p className="text-n-3 capitalize">
+                            {finalFormData.academic_level ||
+                              finalFormData.academicLevel}
                           </p>
                         </div>
                       )}
                     </div>
-
-                    {finalFormData?.researchComponents?.length > 0 && (
+                    {finalFormData?.institution && (
                       <div className="mt-4">
-                        <h4 className="text-sm font-medium text-n-2 mb-2">
-                          Research Components
+                        <h4 className="text-sm font-medium text-n-2 mb-1">
+                          Institution
                         </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {finalFormData.researchComponents.map(
-                            (component, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 bg-green-400/20 text-green-400 rounded text-sm"
-                              >
-                                {component?.name || component}
-                              </span>
-                            )
-                          )}
-                        </div>
+                        <p className="text-n-3">{finalFormData.institution}</p>
                       </div>
                     )}
                   </div>
                 )}
-
-                {/* Support Services */}
-                {finalFormData?.selectedServices?.length > 0 && (
-                  <div className="bg-n-7 rounded-xl border border-n-6 p-6">
-                    <h3 className="h5 mb-6">Selected Support Services</h3>
-
-                    <div className="space-y-3">
-                      {finalFormData.selectedServices.map(
-                        (serviceId, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center justify-between p-3 bg-n-8 rounded-lg"
-                          >
-                            <span className="text-n-2">
-                              {serviceId?.name || serviceId}
-                            </span>
-                            <span className="text-color-1 font-medium text-sm">
-                              Included
-                            </span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
-
-              {/* Sidebar */}
               <div className="space-y-6">
-                {/* Cost Breakdown */}
                 <div className="bg-gradient-to-r from-color-1/10 to-color-2/10 rounded-xl border border-color-1/20 p-6">
                   <h3 className="h5 mb-6 flex items-center">
                     <DollarSign className="w-5 h-5 mr-2 text-color-1" />
                     Cost Estimate
                   </h3>
-
                   <div className="space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-n-4">Base Cost:</span>
@@ -556,7 +684,6 @@ const ProjectConfirmationPage = () => {
                         )}
                       </span>
                     </div>
-
                     {userType === "student" && (
                       <div className="flex justify-between text-sm">
                         <span className="text-green-400">
@@ -565,7 +692,6 @@ const ProjectConfirmationPage = () => {
                         <span className="text-green-400">-25%</span>
                       </div>
                     )}
-
                     <div className="border-t border-n-6 pt-3">
                       <div className="flex justify-between font-bold">
                         <span className="text-n-1">Total Estimate:</span>
@@ -575,7 +701,6 @@ const ProjectConfirmationPage = () => {
                       </div>
                     </div>
                   </div>
-
                   <div className="mt-4 p-3 bg-n-8 rounded-lg">
                     <p className="text-n-4 text-xs">
                       This is a preliminary estimate. Final pricing will be
@@ -583,14 +708,11 @@ const ProjectConfirmationPage = () => {
                     </p>
                   </div>
                 </div>
-
-                {/* Timeline */}
                 <div className="bg-n-7 rounded-xl border border-n-6 p-6">
                   <h3 className="h6 mb-4 flex items-center">
                     <Calendar className="w-5 h-5 mr-2 text-color-1" />
                     Project Timeline
                   </h3>
-
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
                       <span className="text-n-4">Estimated Duration:</span>
@@ -600,7 +722,6 @@ const ProjectConfirmationPage = () => {
                           "To be determined"}
                       </span>
                     </div>
-
                     <div className="flex justify-between">
                       <span className="text-n-4">Priority:</span>
                       <span className="text-n-2 capitalize">
@@ -609,65 +730,43 @@ const ProjectConfirmationPage = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Contact Information */}
                 <div className="bg-n-7 rounded-xl border border-n-6 p-6">
                   <h3 className="h6 mb-4">Contact Information</h3>
-
                   <div className="space-y-3">
-                    {finalFormData?.contactEmail && (
+                    {(finalFormData?.contact_email ||
+                      finalFormData?.contactEmail) && (
                       <div className="flex items-center text-sm">
                         <Mail className="w-4 h-4 text-color-1 mr-2 flex-shrink-0" />
                         <span className="text-n-3 break-all">
-                          {finalFormData.contactEmail}
+                          {finalFormData.contact_email ||
+                            finalFormData.contactEmail}
                         </span>
                       </div>
                     )}
-
-                    {finalFormData?.contactPhone && (
+                    {(finalFormData?.contact_phone ||
+                      finalFormData?.contactPhone) && (
                       <div className="flex items-center text-sm">
                         <Phone className="w-4 h-4 text-color-1 mr-2 flex-shrink-0" />
                         <span className="text-n-3">
-                          {finalFormData.contactPhone}
+                          {finalFormData.contact_phone ||
+                            finalFormData.contactPhone}
                         </span>
                       </div>
                     )}
                   </div>
                 </div>
-
-                {/* Reference Number Preview */}
-                <div className="bg-n-7 rounded-xl border border-n-6 p-6">
-                  <h3 className="h6 mb-4 flex items-center">
-                    <FileText className="w-5 h-5 mr-2 text-color-1" />
-                    Reference Number
-                  </h3>
-
-                  <div className="bg-n-8 rounded-lg p-3">
-                    <span className="font-mono text-color-1 font-bold">
-                      {referenceNumber}
-                    </span>
-                  </div>
-
-                  <p className="text-n-4 text-xs mt-2">
-                    Save this number for tracking your request
-                  </p>
-                </div>
               </div>
             </div>
-
-            {/* Action Buttons */}
             <div className="flex justify-between items-center mt-12 pt-8 border-t border-n-6">
               <SimpleButton onClick={() => navigate(-1)} variant="secondary">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Edit
               </SimpleButton>
-
               <div className="flex gap-4">
                 <SimpleButton onClick={generatePDF} variant="secondary">
                   <Download className="w-4 h-4 mr-2" />
                   Download Summary
                 </SimpleButton>
-
                 <SimpleButton
                   onClick={handleSubmit}
                   disabled={isSubmitting}
@@ -687,8 +786,6 @@ const ProjectConfirmationPage = () => {
                 </SimpleButton>
               </div>
             </div>
-
-            {/* Additional Notes */}
             {finalFormData?.additionalNotes && (
               <div className="bg-n-7 rounded-xl border border-n-6 p-6 mt-8">
                 <h3 className="h6 mb-4">Additional Notes</h3>
