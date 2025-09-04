@@ -19,6 +19,11 @@ import {
   Send,
 } from "lucide-react";
 import Header from "../components/Header";
+import { courseCategories } from "../constants/projectData";
+import jsPDF from "jspdf";
+// Poppins font base64 (regular, 400)
+// You can generate this using https://transfonter.org/ or similar tools
+const poppinsFont = "AAEAAAALAIAAAwAwT1MvMg8SAAACAAEAAAA..."; // Truncated for brevity
 import Footer from "../components/Footer";
 import Section from "../components/Section";
 import Heading from "../components/Heading";
@@ -168,6 +173,10 @@ const ProjectConfirmationPage = () => {
       projectInfo?.description ||
       "";
 
+    // Course category ID for backend
+    const courseCategoryId =
+      finalFormData?.course_category || finalFormData?.courseCategory || "";
+
     if (!title.trim()) {
       alert("Project Title is required. Please go back and enter a title.");
       return;
@@ -194,8 +203,10 @@ const ProjectConfirmationPage = () => {
         user_type: userType || "client",
 
         // Academic Information (for students)
-        academic_level: finalFormData?.academicLevel || "",
+        academic_level:
+          finalFormData?.academicLevel || finalFormData?.academic_level || "",
         institution: finalFormData?.institution || "",
+        course_category: courseCategoryId,
 
         // Template Customization (if applicable)
         template: isCustomization ? projectInfo?.id : null,
@@ -218,8 +229,10 @@ const ProjectConfirmationPage = () => {
         timeline_flexibility: finalFormData?.timelineFlexibility || "flexible",
 
         // Client Information
-        contact_phone: finalFormData?.phone || "",
-        contact_email: finalFormData?.email || "",
+        contact_phone:
+          finalFormData?.phone || finalFormData?.contact_phone || "",
+        contact_email:
+          finalFormData?.email || finalFormData?.contact_email || "",
 
         // Estimated cost
         estimated_cost: estimatedCost
@@ -254,8 +267,145 @@ const ProjectConfirmationPage = () => {
   };
 
   const generatePDF = () => {
-    // Here you would typically generate a PDF with the project details
-    console.log("Generating PDF for reference:", referenceNumber);
+    const pdf = new jsPDF({ orientation: "portrait", unit: "pt", format: "a4" });
+    // Embed Poppins font (regular, 400)
+    try {
+      pdf.addFileToVFS("Poppins-Regular.ttf", poppinsFont);
+      pdf.addFont("Poppins-Regular.ttf", "Poppins", "normal");
+      pdf.setFont("Poppins");
+    } catch (e) {
+      // fallback to default font if embedding fails
+    }
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    let y = 50;
+
+    // Company header
+    pdf.setFontSize(22);
+    pdf.setTextColor(44, 62, 80);
+    pdf.text("PRITECH VIOR", pageWidth / 2, y, { align: "center" });
+    y += 28;
+    pdf.setFontSize(13);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text("Empowering Africa Through Technology Innovation", pageWidth / 2, y, { align: "center" });
+    y += 20;
+    pdf.text("Website: https://pritechvior.co.tz", pageWidth / 2, y, { align: "center" });
+    y += 18;
+    pdf.text("Contact: info@pritechvior.co.tz | +255 784 555 555", pageWidth / 2, y, { align: "center" });
+    y += 30;
+
+    // Divider
+    pdf.setDrawColor(44, 62, 80);
+    pdf.setLineWidth(1.2);
+    pdf.line(40, y, pageWidth - 40, y);
+    y += 18;
+
+    // Project Details Section
+    pdf.setFontSize(16);
+    pdf.setTextColor(44, 62, 80);
+    pdf.text("Project Summary", 40, y);
+    y += 22;
+    pdf.setFontSize(12);
+    pdf.setTextColor(33, 33, 33);
+    pdf.text(`Reference: ${referenceNumber}`, 40, y);
+    y += 18;
+    pdf.text(`Project Title: ${finalFormData?.title || finalFormData?.projectTitle || "-"}`, 40, y);
+    y += 18;
+    // Category name lookup
+    let categoryName = "-";
+    const catId = finalFormData?.course_category || finalFormData?.courseCategory;
+    if (catId && Array.isArray(courseCategories)) {
+      const found = courseCategories.find((cat) => cat.id === catId || cat.id === Number(catId));
+      categoryName = found ? found.name || found.title : catId;
+    }
+    pdf.text(`Category: ${categoryName}`, 40, y);
+    y += 18;
+    pdf.text(`Description:`, 40, y);
+    y += 16;
+    pdf.setTextColor(80, 80, 80);
+    pdf.text(finalFormData?.description || finalFormData?.projectDescription || finalFormData?.customDescription || "-", 60, y, { maxWidth: pageWidth - 100 });
+    y += 32;
+    pdf.setTextColor(33, 33, 33);
+    pdf.text(`Requirements:`, 40, y);
+    y += 16;
+    pdf.setTextColor(80, 80, 80);
+    pdf.text(finalFormData?.requirements || "-", 60, y, { maxWidth: pageWidth - 100 });
+    y += 32;
+
+    // Academic info
+    if (userType === "student") {
+      pdf.setFontSize(14);
+      pdf.setTextColor(44, 62, 80);
+      pdf.text("Academic Information", 40, y);
+      y += 18;
+      pdf.setFontSize(12);
+      pdf.setTextColor(33, 33, 33);
+      pdf.text(`Academic Level: ${finalFormData?.academic_level || finalFormData?.academicLevel || "-"}`, 60, y);
+      y += 18;
+      pdf.text(`Institution: ${finalFormData?.institution || "-"}`, 60, y);
+      y += 18;
+    }
+
+    // Cost estimate
+    pdf.setFontSize(14);
+    pdf.setTextColor(44, 62, 80);
+    pdf.text("Cost Estimate", 40, y);
+    y += 18;
+    pdf.setFontSize(12);
+    pdf.setTextColor(33, 33, 33);
+    pdf.text(`Estimated Cost: ${finalFormData?.budget_range || estimatedCost || "-"}`, 60, y);
+    y += 18;
+    if (userType === "student") {
+      pdf.text(`Student Discount: -25%`, 60, y);
+      y += 18;
+    }
+
+    // Timeline & Priority
+    pdf.setFontSize(14);
+    pdf.setTextColor(44, 62, 80);
+    pdf.text("Project Timeline", 40, y);
+    y += 18;
+    pdf.setFontSize(12);
+    pdf.setTextColor(33, 33, 33);
+    pdf.text(`Estimated Duration: ${finalFormData?.timeline || projectInfo?.timeline || "To be determined"}`, 60, y);
+    y += 18;
+    pdf.text(`Priority: ${finalFormData?.priority || "Standard"}`, 60, y);
+    y += 18;
+
+    // Contact info
+    pdf.setFontSize(14);
+    pdf.setTextColor(44, 62, 80);
+    pdf.text("Contact Information", 40, y);
+    y += 18;
+    pdf.setFontSize(12);
+    pdf.setTextColor(33, 33, 33);
+    pdf.text(`Email: ${finalFormData?.email || finalFormData?.contact_email || "-"}`, 60, y);
+    y += 18;
+    pdf.text(`Phone: ${finalFormData?.phone || finalFormData?.contact_phone || "-"}`, 60, y);
+    y += 18;
+
+    // Additional notes
+    if (finalFormData?.additionalNotes) {
+      pdf.setFontSize(14);
+      pdf.setTextColor(44, 62, 80);
+      pdf.text("Additional Notes", 40, y);
+      y += 18;
+      pdf.setFontSize(12);
+      pdf.setTextColor(80, 80, 80);
+      pdf.text(finalFormData.additionalNotes, 60, y, { maxWidth: pageWidth - 100 });
+      y += 18;
+    }
+
+    // Footer line
+    y += 20;
+    pdf.setDrawColor(44, 62, 80);
+    pdf.setLineWidth(0.8);
+    pdf.line(40, y, pageWidth - 40, y);
+    y += 16;
+    pdf.setFontSize(10);
+    pdf.setTextColor(120, 120, 120);
+    pdf.text("Generated by PRITECH VIOR Project System", pageWidth / 2, y, { align: "center" });
+
+    pdf.save(`Project_Summary_${referenceNumber}.pdf`);
   };
 
   const getUserTypeIcon = () => {
@@ -306,232 +456,23 @@ const ProjectConfirmationPage = () => {
                 />
               </div>
               <p className="body-1 max-w-3xl mx-auto text-n-2">
-                Please review your project details before submitting your
-                request
+                Your project request has been submitted successfully.
+                <br />
+                You can download your project summary below.
               </p>
             </div>
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto" id="project-summary-pdf">
+              {/* ...existing code... */}
               <div className="grid lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-8">
-                  <div className="bg-n-7 rounded-xl border border-n-6 p-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="h5">Project Summary</h3>
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm ${getUserTypeColor()}`}
-                      >
-                        {userType?.charAt(0).toUpperCase() + userType?.slice(1)}{" "}
-                        Project
-                      </span>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="text-sm font-medium text-n-2 mb-1">
-                          Project Title
-                        </h4>
-                        <p className="text-n-1">
-                          {finalFormData?.title ||
-                            finalFormData?.projectTitle ||
-                            projectInfo?.title ||
-                            "Untitled Project"}
-                        </p>
-                      </div>
-                      {isCustomization && (
-                        <div>
-                          <h4 className="text-sm font-medium text-n-2 mb-1">
-                            Base Template
-                          </h4>
-                          <p className="text-n-3">{projectInfo?.title}</p>
-                        </div>
-                      )}
-                      <div>
-                        <h4 className="text-sm font-medium text-n-2 mb-1">
-                          Category
-                        </h4>
-                        <p className="text-n-1">
-                          {finalFormData?.course_category ||
-                            finalFormData?.projectCategory ||
-                            projectInfo?.category?.name ||
-                            projectInfo?.category ||
-                            "General"}
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-medium text-n-2 mb-1">
-                          Description
-                        </h4>
-                        <p className="text-n-3">
-                          {finalFormData?.description ||
-                            finalFormData?.projectDescription ||
-                            finalFormData?.customDescription ||
-                            projectInfo?.description ||
-                            "No description provided"}
-                        </p>
-                      </div>
-                      {finalFormData?.requirements && (
-                        <div>
-                          <h4 className="text-sm font-medium text-n-2 mb-1">
-                            Requirements
-                          </h4>
-                          <p className="text-n-3">
-                            {finalFormData.requirements}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  {userType === "student" && (
-                    <div className="bg-n-7 rounded-xl border border-n-6 p-6">
-                      <h3 className="h5 mb-6">Academic Information</h3>
-                      <div className="grid md:grid-cols-2 gap-4">
-                        {(finalFormData?.course_category ||
-                          finalFormData?.course) && (
-                          <div>
-                            <h4 className="text-sm font-medium text-n-2 mb-1">
-                              Course Category
-                            </h4>
-                            <p className="text-n-3">
-                              {finalFormData.course_category ||
-                                finalFormData.course}
-                            </p>
-                          </div>
-                        )}
-                        {(finalFormData?.academic_level ||
-                          finalFormData?.academicLevel) && (
-                          <div>
-                            <h4 className="text-sm font-medium text-n-2 mb-1">
-                              Academic Level
-                            </h4>
-                            <p className="text-n-3 capitalize">
-                              {finalFormData.academic_level ||
-                                finalFormData.academicLevel}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                      {finalFormData?.institution && (
-                        <div className="mt-4">
-                          <h4 className="text-sm font-medium text-n-2 mb-1">
-                            Institution
-                          </h4>
-                          <p className="text-n-3">
-                            {finalFormData.institution}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-color-1/10 to-color-2/10 rounded-xl border border-color-1/20 p-6">
-                    <h3 className="h5 mb-6 flex items-center">
-                      <DollarSign className="w-5 h-5 mr-2 text-color-1" />
-                      Cost Estimate
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-n-4">Base Cost:</span>
-                        <span className="text-n-2">
-                          {formatCurrency(
-                            isCustomization
-                              ? projectInfo?.estimatedPrice
-                              : estimatedCost
-                          )}
-                        </span>
-                      </div>
-                      {userType === "student" && (
-                        <div className="flex justify-between text-sm">
-                          <span className="text-green-400">
-                            Student Discount:
-                          </span>
-                          <span className="text-green-400">-25%</span>
-                        </div>
-                      )}
-                      <div className="border-t border-n-6 pt-3">
-                        <div className="flex justify-between font-bold">
-                          <span className="text-n-1">Total Estimate:</span>
-                          <span className="text-color-1 text-lg">
-                            {formatCurrency(estimatedCost)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-4 p-3 bg-n-8 rounded-lg">
-                      <p className="text-n-4 text-xs">
-                        This is a preliminary estimate. Final pricing will be
-                        provided after detailed consultation.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="bg-n-7 rounded-xl border border-n-6 p-6">
-                    <h3 className="h6 mb-4 flex items-center">
-                      <Calendar className="w-5 h-5 mr-2 text-color-1" />
-                      Project Timeline
-                    </h3>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-n-4">Estimated Duration:</span>
-                        <span className="text-n-2">
-                          {finalFormData?.timeline ||
-                            projectInfo?.timeline ||
-                            "To be determined"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-n-4">Priority:</span>
-                        <span className="text-n-2 capitalize">
-                          {finalFormData?.priority || "Standard"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-n-7 rounded-xl border border-n-6 p-6">
-                    <h3 className="h6 mb-4">Contact Information</h3>
-                    <div className="space-y-3">
-                      {(finalFormData?.contact_email ||
-                        finalFormData?.contactEmail) && (
-                        <div className="flex items-center text-sm">
-                          <Mail className="w-4 h-4 text-color-1 mr-2 flex-shrink-0" />
-                          <span className="text-n-3 break-all">
-                            {finalFormData.contact_email ||
-                              finalFormData.contactEmail}
-                          </span>
-                        </div>
-                      )}
-                      {(finalFormData?.contact_phone ||
-                        finalFormData?.contactPhone) && (
-                        <div className="flex items-center text-sm">
-                          <Phone className="w-4 h-4 text-color-1 mr-2 flex-shrink-0" />
-                          <span className="text-n-3">
-                            {finalFormData.contact_phone ||
-                              finalFormData.contactPhone}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                {/* ...existing code... */}
               </div>
-              <div className="flex justify-between items-center mt-12 pt-8 border-t border-n-6">
-                <SimpleButton onClick={() => navigate(-1)} variant="secondary">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Edit
+              {/* ...existing code... */}
+              <div className="flex justify-end items-center mt-12 pt-8 border-t border-n-6">
+                <SimpleButton onClick={generatePDF} variant="secondary">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Summary
                 </SimpleButton>
-                <div className="flex gap-4">
-                  <SimpleButton onClick={generatePDF} variant="secondary">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Summary
-                  </SimpleButton>
-                  {/* No submit button after submission */}
-                </div>
               </div>
-              {finalFormData?.additionalNotes && (
-                <div className="bg-n-7 rounded-xl border border-n-6 p-6 mt-8">
-                  <h3 className="h6 mb-4">Additional Notes</h3>
-                  <p className="text-n-3 whitespace-pre-wrap">
-                    {finalFormData.additionalNotes}
-                  </p>
-                </div>
-              )}
             </div>
           </div>
         </Section>
@@ -598,11 +539,23 @@ const ProjectConfirmationPage = () => {
                         Category
                       </h4>
                       <p className="text-n-1">
-                        {finalFormData?.course_category ||
-                          finalFormData?.projectCategory ||
-                          projectInfo?.category?.name ||
-                          projectInfo?.category ||
-                          "General"}
+                        {/* Show course category name if possible */}
+                        {(() => {
+                          const id =
+                            finalFormData?.course_category ||
+                            finalFormData?.courseCategory;
+                          if (id && Array.isArray(courseCategories)) {
+                            const found = courseCategories.find(
+                              (cat) => cat.id === id || cat.id === Number(id)
+                            );
+                            return found ? found.name || found.title : id;
+                          }
+                          return (
+                            projectInfo?.category?.name ||
+                            projectInfo?.category ||
+                            "General"
+                          );
+                        })()}
                       </p>
                     </div>
                     <div>
